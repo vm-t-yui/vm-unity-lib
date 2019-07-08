@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 public sealed class GUIListBox
 {
-	public List<KeyValuePair<string, GUIStyle>> DrawList { get; private set; }
+    public List<KeyValuePair<string, GUIStyle>> DrawList { get; private set; }
     public Rect                         DrawRect { get; private set; }
     public int                          CurrentPage { get; private set; }
     public int                          PageMax     { get; private set; }

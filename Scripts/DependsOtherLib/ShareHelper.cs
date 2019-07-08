@@ -37,7 +37,7 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
         // キャプチャのために広告を非表示.
         AdMobManager.Inst.AllHide();
 #endif
-#if ENABLE_NENDAD
+#if USE_NEND
         bool isShowTopBanner = NendAdController.Inst.IsShowTopBanner;
         bool isShowBottomBanner = NendAdController.Inst.IsShowBottomBanner;
         if(isShowTopBanner)
@@ -62,7 +62,7 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
         // インジケーター表示
 #if !DISABLE_SHARE_HELP
     #if UNITY_IPHONE
-		    Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.ActivityIndicatorStyle.White);
+            Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.ActivityIndicatorStyle.White);
     #elif UNITY_ANDROID
             Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Small);
     #endif
@@ -114,7 +114,7 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
 #if ENABLE_ADMOB
         AdMobManager.Inst.RevertFromAllHide();
 #endif
-#if ENABLE_NENDAD
+#if USE_NEND
         if(isShowTopBanner)
             NendAdController.Inst.ShowTopBanner(isShowTopBanner);
         if(isShowBottomBanner)

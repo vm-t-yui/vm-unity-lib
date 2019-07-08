@@ -56,33 +56,33 @@ namespace VMUnityLib
 
             StringBuilder text = new StringBuilder();
 
-            text.Append("Currently allocated	");
+            text.Append("Currently allocated    ");
             text.Append((allocMem / 1000000F).ToString("0"));
             text.Append("mb\n");
 
-            text.Append("Peak allocated	");
+            text.Append("Peak allocated    ");
             text.Append((peakAlloc / 1000000F).ToString("0"));
             text.Append("mb (last collect ");
             text.Append((collectAlloc / 1000000F).ToString("0"));
             text.Append(" mb)\n");
 
 
-            text.Append("Allocation rate		");
+            text.Append("Allocation rate        ");
             text.Append((allocRate / 1000000F).ToString("0.0"));
             text.Append("mb\n");
 
-            text.Append("Collection frequency		");
+            text.Append("Collection frequency        ");
             text.Append(delta.ToString("0.00"));
             text.Append("s\n");
 
-            text.Append("Last collect delta		");
+            text.Append("Last collect delta        ");
             text.Append(lastDeltaTime.ToString("0.000"));
             text.Append("s (");
             text.Append((1F / lastDeltaTime).ToString("0.0"));
 
             text.Append(" fps)\n");
 
-            text.Append("SystemMemorySize		");
+            text.Append("SystemMemorySize        ");
             text.Append(SystemInfo.systemMemorySize.ToString());
             text.Append("mb");
 
@@ -104,12 +104,12 @@ namespace VMUnityLib
             GUI.Box(GUIHelper.GetScaledRectWithoutSpace((LibBridgeInfo.FIXED_SCREEN_WI - boxW - 5), 5, boxW, boxH), "");
             GUI.Label(GUIHelper.GetScaledRectWithoutSpace((LibBridgeInfo.FIXED_SCREEN_WI - boxW + 10), 5, 1000, 600), text.ToString());
             /*GUI.Label (new Rect (5,5,1000,200),
-                "Currently allocated			"+(allocMem/1000000F).ToString ("0")+"mb\n"+
-                "Peak allocated				"+(peakAlloc/1000000F).ToString ("0")+"mb "+
-                ("(last	collect"+(collectAlloc/1000000F).ToString ("0")+" mb)" : "")+"\n"+
-                "Allocation rate				"+(allocRate/1000000F).ToString ("0.0")+"mb\n"+
-                "Collection space			"+delta.ToString ("0.00")+"s\n"+
-                "Last collect delta			"+lastDeltaTime.ToString ("0.000") + " ("+(1F/lastDeltaTime).ToString ("0.0")+")");*/
+                "Currently allocated            "+(allocMem/1000000F).ToString ("0")+"mb\n"+
+                "Peak allocated                "+(peakAlloc/1000000F).ToString ("0")+"mb "+
+                ("(last    collect"+(collectAlloc/1000000F).ToString ("0")+" mb)" : "")+"\n"+
+                "Allocation rate                "+(allocRate/1000000F).ToString ("0.0")+"mb\n"+
+                "Collection space            "+delta.ToString ("0.00")+"s\n"+
+                "Last collect delta            "+lastDeltaTime.ToString ("0.000") + " ("+(1F/lastDeltaTime).ToString ("0.0")+")");*/
         }
 
         private float lastCollect = 0;

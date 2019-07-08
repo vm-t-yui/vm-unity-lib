@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
+#if USE_POOL_MANAGER
 using PathologicalGames;
+#endif
 namespace VMUnityLib
 {
     public class ParticleAutoDel : MonoBehaviour
     {
+#if USE_POOL_MANAGER
         // a simple script to scale the size, speed and lifetime of a particle system
 
         public float multiplier = 1;
@@ -41,5 +44,6 @@ namespace VMUnityLib
                 PoolManager.Pools[PoolName.Effect].Despawn(transform);
             }
         }
+#endif
     }
 }

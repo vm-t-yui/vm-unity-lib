@@ -46,7 +46,7 @@ namespace VMUnityLib
         void Start () 
         {
             // NULLに設定されている場合は、外部から設定する.
-		    if (owner != null)
+            if (owner != null)
             {
                 damage.Owner = owner;
             }

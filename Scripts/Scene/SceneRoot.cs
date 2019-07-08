@@ -65,27 +65,27 @@ namespace VMUnityLib
             gameObject.BroadcastMessage(CmnMonoBehaviour.FADE_END_NAME, 0, SendMessageOptions.DontRequireReceiver);
         }
 
-	    public string GetSceneName()
-	    {
-		    return gameObject.name.Remove(0, SceneManager.SCENE_ROOT_NAME_HEADER.Length);
-	    }
+        public string GetSceneName()
+        {
+            return gameObject.name.Remove(0, SceneManager.SCENE_ROOT_NAME_HEADER.Length);
+        }
 
-	    /// <summary>
-	    /// Sets the scene active.
-	    /// </summary>
-	    public void SetSceneActive()
-	    {
-		    gameObject.SetActive (true);
-		    gameObject.BroadcastMessage (CmnMonoBehaviour.INIT_SCENCE_CHANGE_NAME, 0, SendMessageOptions.DontRequireReceiver);
-	    }
+        /// <summary>
+        /// Sets the scene active.
+        /// </summary>
+        public void SetSceneActive()
+        {
+            gameObject.SetActive (true);
+            gameObject.BroadcastMessage (CmnMonoBehaviour.INIT_SCENCE_CHANGE_NAME, 0, SendMessageOptions.DontRequireReceiver);
+        }
 
-	    /// <summary>
-	    /// Sets the scene deactive.
-	    /// </summary>
-	    public void SetSceneDeactive()
-	    {
+        /// <summary>
+        /// Sets the scene deactive.
+        /// </summary>
+        public void SetSceneDeactive()
+        {
             gameObject.BroadcastMessage(CmnMonoBehaviour.SCENCE_DEACTIVE_NAME, 0, SendMessageOptions.DontRequireReceiver);
-		    gameObject.SetActive (false);
-	    }
+            gameObject.SetActive (false);
+        }
     }
 }

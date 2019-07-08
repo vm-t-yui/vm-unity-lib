@@ -16,10 +16,10 @@ namespace VMUnityLib
         };
 
         //----------------------------------//
-        //	関数名	：PolygonNormal
-        //	引数	：三つの位置ベクトル
-        //	戻り値	：引数のベクトルで出来た三角形の法線
-        //	役割	：引数のベクトルで出来た三角形の法線を返す
+        //    関数名    ：PolygonNormal
+        //    引数    ：三つの位置ベクトル
+        //    戻り値    ：引数のベクトルで出来た三角形の法線
+        //    役割    ：引数のベクトルで出来た三角形の法線を返す
         //----------------------------------//
         public static Vector3 PolygonNormal(Vector3 v1, Vector3 v2, Vector3 v3)
         {
@@ -27,13 +27,13 @@ namespace VMUnityLib
         }
 
         //----------------------------------//
-        //	関数名	：CollisionSpherePolygon
-        //	引数	：球の位置　半径
-        //		　ポリゴンを形成する三つの点
-        //		　ポリゴンの法線
-        //	戻り値	：当たっている　true
-        //			当たっていない false
-        //	役割	：球とポリゴンの当たり判定
+        //    関数名    ：CollisionSpherePolygon
+        //    引数    ：球の位置　半径
+        //        　ポリゴンを形成する三つの点
+        //        　ポリゴンの法線
+        //    戻り値    ：当たっている　true
+        //            当たっていない false
+        //    役割    ：球とポリゴンの当たり判定
         //----------------------------------//
         public static bool CollisionSpherePolygon(Vector3 pos, float radius, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 node)
         {
@@ -51,14 +51,14 @@ namespace VMUnityLib
         }
 
         //----------------------------------//
-        //	関数名	：CollisionSpherePlane
-        //	引数	：球の位置　半径
-        //		　平面上の点一つ
-        //		　平面の法線
-        //	戻り値	：当たっている　CollisionState.HIT
-        //			平面の表にある CollisionState.SURFACE
-        //			平面の裏にある CollisionState.BACK
-        //	役割	：平面と球の当たり判定
+        //    関数名    ：CollisionSpherePlane
+        //    引数    ：球の位置　半径
+        //        　平面上の点一つ
+        //        　平面の法線
+        //    戻り値    ：当たっている　CollisionState.HIT
+        //            平面の表にある CollisionState.SURFACE
+        //            平面の裏にある CollisionState.BACK
+        //    役割    ：平面と球の当たり判定
         //----------------------------------//
         public static CollisionState CollisionSpherePlane(Vector3 pos, float radius, Vector3 v, Vector3 normal)
         {
@@ -83,13 +83,13 @@ namespace VMUnityLib
         }
 
         //----------------------------------//
-        //	関数名	：CollisionSegmentPolygon
-        //	引数	：線分の始点　終点
-        //		　ポリゴンを形成する三つの点
-        //		　ポリゴンの法線
-        //	戻り値	：当たっている　true
-        //			当たっていない false
-        //	役割	：線分とポリゴンの当たり判定
+        //    関数名    ：CollisionSegmentPolygon
+        //    引数    ：線分の始点　終点
+        //        　ポリゴンを形成する三つの点
+        //        　ポリゴンの法線
+        //    戻り値    ：当たっている　true
+        //            当たっていない false
+        //    役割    ：線分とポリゴンの当たり判定
         //----------------------------------//
         public static bool CollisionSegmentPolygon(Vector3 st, Vector3 en, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 normal, Vector3 node)
         {
@@ -144,13 +144,13 @@ namespace VMUnityLib
         }
 
         //----------------------------------//
-        //	関数名	：CollisionPolygonCapsuleColumn
-        //	引数	：連続球線分の始点　終点　半径
-        //		　ポリゴンの三点
-        //	戻り値	：当たっている　true
-        //			当たっていない false
-        //	役割	：カプセル型円柱（連続球）とポリゴンの当たり判定
-        //		　当たっていたら交点もセット
+        //    関数名    ：CollisionPolygonCapsuleColumn
+        //    引数    ：連続球線分の始点　終点　半径
+        //        　ポリゴンの三点
+        //    戻り値    ：当たっている　true
+        //            当たっていない false
+        //    役割    ：カプセル型円柱（連続球）とポリゴンの当たり判定
+        //        　当たっていたら交点もセット
         //----------------------------------//
         public static bool CollisionPolygonCapsuleColumn(Vector3 st, Vector3 en, float col_radius, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 normal, Vector3 node)
         {
@@ -181,12 +181,12 @@ namespace VMUnityLib
         }
 
         //----------------------------------//
-        //	関数名	：CollisionSphereCapsuleColumn
-        //	引数	：連続球線分の始点　終点　半径
-        //		　調べたい球の位置　半径
-        //	戻り値	：当たっている　true
-        //			当たっていない false
-        //	役割	：カプセル型円柱（連続球）と球の当たり判定
+        //    関数名    ：CollisionSphereCapsuleColumn
+        //    引数    ：連続球線分の始点　終点　半径
+        //        　調べたい球の位置　半径
+        //    戻り値    ：当たっている　true
+        //            当たっていない false
+        //    役割    ：カプセル型円柱（連続球）と球の当たり判定
         //----------------------------------//
         public static bool CollisionSphereCapsuleColumn(Vector3 st, Vector3 en, Vector3 pos, float col_radius, float sph_radius, Vector3 node)
         {
@@ -209,12 +209,12 @@ namespace VMUnityLib
         }
 
         //----------------------------------//
-        //	関数名	：CollisionSphereColumn
-        //	引数	：円柱線分の始点　終点　半径
-        //		　調べたい球の位置　半径
-        //	戻り値	：当たっている　true
-        //			当たっていない false
-        //	役割	：円柱と球の当たり判定
+        //    関数名    ：CollisionSphereColumn
+        //    引数    ：円柱線分の始点　終点　半径
+        //        　調べたい球の位置　半径
+        //    戻り値    ：当たっている　true
+        //            当たっていない false
+        //    役割    ：円柱と球の当たり判定
         //----------------------------------//
         public static bool CollisionSphereColumn(Vector3 st, Vector3 en, Vector3 pos, float col_radius, float sph_radius, Vector3 node)
         {
@@ -238,13 +238,13 @@ namespace VMUnityLib
         }
 
         //----------------------------------//
-        //	関数名	：CollisionSphereFanColumn
-        //	引数	：円柱線分の始点　終点　半径
-        //			　調べたい球の位置　半径
-        //			　扇の始点、終点(クリップする平面の一点)
-        //	戻り値	：当たっている　true
-        //			当たっていない false
-        //	役割	：扇形円柱と球の当たり判定
+        //    関数名    ：CollisionSphereFanColumn
+        //    引数    ：円柱線分の始点　終点　半径
+        //            　調べたい球の位置　半径
+        //            　扇の始点、終点(クリップする平面の一点)
+        //    戻り値    ：当たっている　true
+        //            当たっていない false
+        //    役割    ：扇形円柱と球の当たり判定
         //----------------------------------//
         public static bool CollisionSphereFanColumn(Vector3 st, Vector3 en, Vector3 pos, float col_radius, float sph_radius, Vector3 node,
                                       Vector3 fanst, Vector3 fanen)
@@ -302,13 +302,13 @@ namespace VMUnityLib
 
 
         //----------------------------------//
-        //	関数名	：IsInPolygon
-        //	引数	：点の位置
-        //		　ポリゴンを形成する三つの点
-        //		　ポリゴンの法線
-        //	戻り値	：ポリゴン内　true
-        //			ポリゴン外 false
-        //	役割	：三角形の内外判定
+        //    関数名    ：IsInPolygon
+        //    引数    ：点の位置
+        //        　ポリゴンを形成する三つの点
+        //        　ポリゴンの法線
+        //    戻り値    ：ポリゴン内　true
+        //            ポリゴン外 false
+        //    役割    ：三角形の内外判定
         //----------------------------------//
         public static bool IsInPolygon(Vector3 P, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 normal)
         {
@@ -350,12 +350,12 @@ namespace VMUnityLib
 
 
         //----------------------------------//
-        //	関数名	：PointPolyDistance
-        //	引数	：点の位置
-        //		　ポリゴンを形成する一点
-        //		　ポリゴンの法線
-        //	戻り値	：点とポリゴンの距離
-        //	役割	：点とポリゴンの距離を返す
+        //    関数名    ：PointPolyDistance
+        //    引数    ：点の位置
+        //        　ポリゴンを形成する一点
+        //        　ポリゴンの法線
+        //    戻り値    ：点とポリゴンの距離
+        //    役割    ：点とポリゴンの距離を返す
         //----------------------------------//
         public static float PointPolyDistance(Vector3 point, Vector3 plane, Vector3 normal)
         {
@@ -370,12 +370,12 @@ namespace VMUnityLib
 
 
         //----------------------------------//
-        //	関数名	：ClosestPtSegmentSegment
-        //	引数	：線分二つの始点終点
-        //		　sとtをセットする変数
-        //		　最近接点をセットするベクトル
-        //	戻り値	：関数(S1(s) = P1 + s*(Q1 - P1) と S2(t) = P2 + t*(Q2-P2))のsとt
-        //	役割	：二つの線分の最近接点をc1、c2にセット
+        //    関数名    ：ClosestPtSegmentSegment
+        //    引数    ：線分二つの始点終点
+        //        　sとtをセットする変数
+        //        　最近接点をセットするベクトル
+        //    戻り値    ：関数(S1(s) = P1 + s*(Q1 - P1) と S2(t) = P2 + t*(Q2-P2))のsとt
+        //    役割    ：二つの線分の最近接点をc1、c2にセット
         //----------------------------------//
         public static float ClosestPtSegmentSegment(Vector3 st1, Vector3 en1, Vector3 st2 , Vector3 en2,
                                       out float s, out float t, out Vector3 closestPt1, out Vector3 closestPt2)
@@ -441,11 +441,11 @@ namespace VMUnityLib
 
 
         //----------------------------------//
-        //	関数名	：ClosestPtPointPolygon
-        //	引数	：近接点を求めたい点
-        //		　ポリゴンの三点
-        //	戻り値	：引数の点とポリゴンの最近接点
-        //	役割	：点とポリゴンの最近接点を返す
+        //    関数名    ：ClosestPtPointPolygon
+        //    引数    ：近接点を求めたい点
+        //        　ポリゴンの三点
+        //    戻り値    ：引数の点とポリゴンの最近接点
+        //    役割    ：点とポリゴンの最近接点を返す
         //----------------------------------//
         public static Vector3 ClosestPtPointPolygon(Vector3 p, Vector3 a , Vector3 b, Vector3 c)
         {
@@ -506,11 +506,11 @@ namespace VMUnityLib
 
 
         //----------------------------------//
-        //	関数名	：ClosestPtSegmentPolygon
-        //	引数	：線分の始点終点
-        //		　ポリゴンの三点
-        //	戻り値	：なし
-        //	役割	：線分とポリゴンの最近接点をpt_poly、pt_segにセット
+        //    関数名    ：ClosestPtSegmentPolygon
+        //    引数    ：線分の始点終点
+        //        　ポリゴンの三点
+        //    戻り値    ：なし
+        //    役割    ：線分とポリゴンの最近接点をpt_poly、pt_segにセット
         //----------------------------------//
         public static void ClosestPtSegmentPolygon(Vector3 st, Vector3 en, Vector3 a , Vector3 b, Vector3 c,
                                       out Vector3 pt_poly, out Vector3 pt_seg)
@@ -614,11 +614,11 @@ namespace VMUnityLib
         }
 
         //----------------------------------//
-        //	関数名	：ClosestPtPointsSegment
-        //	引数	：線分の始点終点　求めたい点
-        //	戻り値	：なし
-        //	役割	：線分abおよび点ｃに対してab上の最近接点dを計算
-        //		　d(t) = a + t*(b - a)により表されるdの位置に対するパラメータtも返す
+        //    関数名    ：ClosestPtPointsSegment
+        //    引数    ：線分の始点終点　求めたい点
+        //    戻り値    ：なし
+        //    役割    ：線分abおよび点ｃに対してab上の最近接点dを計算
+        //        　d(t) = a + t*(b - a)により表されるdの位置に対するパラメータtも返す
         //----------------------------------//
         public static void ClosestPtPointsSegment(Vector3 p, Vector3 st, Vector3 en, out float t, out Vector3 closestPt)
         {

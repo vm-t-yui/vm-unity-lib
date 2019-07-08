@@ -6,14 +6,14 @@ using UnityEditor;
 /// </summary>
 public class AnimationAutoSettings
 {
-	public static void OnAnimationProcess(ModelImporterClipAnimation clip)
-	{
-		clip.lockRootHeightY = true;
-		clip.lockRootPositionXZ = true;
-		clip.lockRootRotation = true;
-		clip.keepOriginalOrientation = true;
-		clip.keepOriginalPositionXZ = true;
-		clip.keepOriginalPositionY = true;
-	}
+    public static void OnAnimationProcess(ModelImporterClipAnimation clip)
+    {
+        clip.lockRootHeightY = true;
+        clip.lockRootPositionXZ = true;
+        clip.lockRootRotation = true;
+        clip.keepOriginalOrientation = true;
+        clip.keepOriginalPositionXZ = true;
+        clip.keepOriginalPositionY = true;
+    }
 }
 #endif

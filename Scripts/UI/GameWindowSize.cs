@@ -36,19 +36,19 @@ namespace VMUnityLib
         private float spaceW;           // 画面サイズに対してのw余白.
         private float spaceH;           // 画面サイズに対してのh余白.
 
-	    public GameWindowSize (
-		    int fixWidth, 
-		    int fixHeight
-		    )
-	    {
-		    Calc (fixWidth, fixHeight);
-	    }
+        public GameWindowSize (
+            int fixWidth, 
+            int fixHeight
+            )
+        {
+            Calc (fixWidth, fixHeight);
+        }
     
         /// <summary>
         /// ウインドウサイズを取得.
         /// </summary>
-	    private void Calc (int w, int h)
-	    {
+        private void Calc (int w, int h)
+        {
             float fixSizeScale = 1.0f;
     #if UNITY_WEBPLAYER && (!UNITY_EDITOR)
             scaleW = 1.0f;
@@ -77,7 +77,7 @@ namespace VMUnityLib
             {
                 gameScreenScale = gameScreenH / h;
             }
-	    }
+        }
     
 
         //---------------------------------------------------------------------------//
@@ -114,27 +114,27 @@ namespace VMUnityLib
         /// <summary>
         /// ゲームスクリーン上での矩形を取得する.
         /// </summary>
-	    public static Rect GetRect (float x, float y, float width, float height)
-	    { 
-		    Rect rect 
-			    = new Rect 
-				    (
+        public static Rect GetRect (float x, float y, float width, float height)
+        { 
+            Rect rect 
+                = new Rect 
+                    (
                         (Inst.spaceW + x) * Inst.gameScreenScale,
                         (Inst.spaceH + y) * Inst.gameScreenScale, 
                         width * Inst.gameScreenScale, 
                         height * Inst.gameScreenScale
-					    );
-		
-		    return rect;
-		
-	    }
+                        );
+        
+            return rect;
+        
+        }
 
         /// <summary>
         /// ゲームスクリーン上での矩形を取得する.
         /// </summary>
-	    public static Rect GetRect (Rect rect)
-	    {
-		    return GetRect (rect.x, rect.y, rect.width, rect.height);
+        public static Rect GetRect (Rect rect)
+        {
+            return GetRect (rect.x, rect.y, rect.width, rect.height);
         }
 
         /// <summary>

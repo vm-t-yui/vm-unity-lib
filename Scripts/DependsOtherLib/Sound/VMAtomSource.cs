@@ -6,14 +6,14 @@ using UnityEngine;
 /// </summary>
 public class VMAtomSource : CriAtomSource
 {
-	[SerializeField]
-	private bool _enableAudioSyncedTimer = false;
+    [SerializeField]
+    private bool _enableAudioSyncedTimer = false;
 
-	override protected void InternalInitialize()
-	{
-		CriAtomPlugin.InitializeLibrary();
-		player = new CriAtomExPlayer(_enableAudioSyncedTimer);
-		source = new CriAtomEx3dSource();
-	}
+    override protected void InternalInitialize()
+    {
+        CriAtomPlugin.InitializeLibrary();
+        player = new CriAtomExPlayer(_enableAudioSyncedTimer);
+        source = new CriAtomEx3dSource();
+    }
 }
 #endif

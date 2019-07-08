@@ -3,7 +3,9 @@
 *******************************************************************************/
 
 using UnityEngine;
+#if USE_POOL_MANAGER
 using PathologicalGames;
+#endif
 
 namespace VMUnityLib
 {
@@ -27,15 +29,25 @@ namespace VMUnityLib
         }
         public static Transform Spawn(EffectData effectData, Vector3 pos, Quaternion rot)
         {
+#if USE_POOL_MANAGER
             SpawnPool pool = PoolManager.Pools[PoolName.Effect];
             Transform trans = pool.Spawn(effectData.Prefab.transform, pos, rot);
             return trans;
+#else
+            Debug.LogError("you need include Pool Manager.");
+            return null;
+#endif
         }
         public static Transform Spawn(EffectData effectData, Vector3 pos)
         {
+#if USE_POOL_MANAGER
             SpawnPool pool = PoolManager.Pools[PoolName.Effect];
             Transform trans = pool.Spawn(effectData.Prefab.transform, pos, effectData.Prefab.transform.rotation);
             return trans;
+#else
+            Debug.LogError("you need include Pool Manager.");
+            return null;
+#endif
         }
     }
 }

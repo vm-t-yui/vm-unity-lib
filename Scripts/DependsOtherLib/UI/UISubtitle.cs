@@ -6,57 +6,70 @@ using UnityEngine;
 using System;
 using VMUnityLib;
 using TMPro;
+#if USE_L2_LOCALIZATION
 using I2.Loc;
+#endif
 
-public sealed class UISubtitle : SingletonMonoBehaviour<UISubtitle>
+namespace VMUnityLib
 {
-    float showedTime;
-    float showTime;
-    TextMeshProUGUI uiText;
-    bool started = false;
-    Action onEndPlayVoice;
+    public sealed class UISubtitle : SingletonMonoBehaviour<UISubtitle>
+    {
+        float showedTime;
+        float showTime;
+        TextMeshProUGUI uiText;
+        bool started = false;
+        Action onEndPlayVoice;
+#if USE_L2_LOCALIZATION
     Localize localize;
-    TextMeshFader fadeColor = new TextMeshFader();
+#endif
+        TextMeshFader fadeColor = new TextMeshFader();
 
-    /// <summary>
-    /// 初期化.
-    /// </summary>
-    private void Start()
-    {
-        uiText = GetComponent<TextMeshProUGUI>();
-        localize   = GetComponent<Localize>();
-    }
-    
-    /// <summary>
-    /// 更新.
-    /// </summary>
-    private void Update()
-    {
-        fadeColor.UpdateFade();
-        if (started && Time.unscaledTime - showedTime > showTime)
+        /// <summary>
+        /// 初期化.
+        /// </summary>
+        private void Start()
         {
-            started = false;
-            fadeColor.FadeOut(uiText, fadeColor.FadeSpeedBase);
-            if(onEndPlayVoice != null)
+            uiText = GetComponent<TextMeshProUGUI>();
+#if USE_L2_LOCALIZATION
+        localize   = GetComponent<Localize>();
+#endif
+        }
+
+        /// <summary>
+        /// 更新.
+        /// </summary>
+        private void Update()
+        {
+            fadeColor.UpdateFade();
+            if (started && Time.unscaledTime - showedTime > showTime)
             {
-                onEndPlayVoice();
+                started = false;
+                fadeColor.FadeOut(uiText, fadeColor.FadeSpeedBase);
+                if (onEndPlayVoice != null)
+                {
+                    onEndPlayVoice();
+                }
             }
         }
-    }
 
-    /// <summary>
-    /// サブタイトル表示開始.
-    /// </summary>
-    public void SetSubtiltle(string str, float time, Action in_onEndPlayVoice)
-    {
-        showTime = time;
-        showedTime = Time.unscaledTime;
-        onEndPlayVoice = in_onEndPlayVoice;
-        localize.Term = "subTitle/" + str;
-        if (!started)
+        /// <summary>
+        /// サブタイトル表示開始.
+        /// </summary>
+        public void SetSubtiltle(string str, float time, Action in_onEndPlayVoice)
         {
-            fadeColor.FadeIn(uiText, fadeColor.FadeSpeedBase);
+            showTime = time;
+            showedTime = Time.unscaledTime;
+            onEndPlayVoice = in_onEndPlayVoice;
+#if USE_L2_LOCALIZATION
+        localize.Term = "subTitle/" + str;
+#else
+            uiText.text = str;
+#endif
+            if (!started)
+            {
+                fadeColor.FadeIn(uiText, fadeColor.FadeSpeedBase);
+            }
+            started = true;
         }
-        started = true;
     }
 }
