@@ -3,9 +3,8 @@
 *******************************************************************************/
 
 using UnityEngine;
-using VMUnityLib;
 #if USE_NEND
-using NendUnityPlugin.AD.Native.Utils;
+using NendUnityPlugin.Common;
 using NendUnityPlugin.AD;
 #endif
 namespace VMUnityLib
@@ -14,13 +13,13 @@ namespace VMUnityLib
     {
 #if USE_NEND
         [SerializeField]
-        NendAdBanner topBanner;
+        NendAdBanner topBanner = default;
 
         [SerializeField]
-        NendAdBanner bottomBanner;
+        NendAdBanner bottomBanner = default;
 
         [SerializeField]
-        NendAdInterstitial inter;
+        NendAdInterstitial inter = default;
 
         public bool IsShowTopBanner { get; set; }
         public bool IsShowBottomBanner { get; set; }

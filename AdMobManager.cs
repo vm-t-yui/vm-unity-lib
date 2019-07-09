@@ -1,4 +1,5 @@
 #if ENABLE_ADMOB
+#pragma warning disable 0414
 /******************************************************************************/
 /*!    \brief  広告の表示非表示
 *******************************************************************************/
@@ -44,26 +45,25 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
         MAX
     }
     [SerializeField]
-    public string[] Android_Banner;
+    public string[] Android_Banner = default;
     [SerializeField]
-    public string   Android_Interstitial;
+    public string Android_Interstitial = default;
     [SerializeField]
-    public string   Android_NativeExpress;
+    public string Android_NativeExpress = default;
     [SerializeField]
-    public string[] ios_Banner;
+    public string[] ios_Banner = default;
     [SerializeField]
-    public string   ios_Interstitial;
+    public string ios_Interstitial = default;
     [SerializeField]
-    public string   ios_NativeExpress;
+    public string ios_NativeExpress = default;
     [SerializeField]
-    Action rewardAction;
+    Action rewardAction = default;
     [SerializeField]
-    MyNendNative myNendNative;
+    MyNendNative myNendNative = default;
 
     InterstitialAd interstitial;
     BannerView[]   banner = new BannerView[(int)BANNER.MAX];
     bool[]         beforeBanner = new bool[(int)BANNER.MAX];
-    NativeExpressAdView    nativeAd;
     AdRequest          request;
     RewardBasedVideoAd rewardBasedVideo;
 
@@ -142,19 +142,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     }
     public void RequestNativeExpress()
     {
-
-#if UNITY_ANDROID
-        string adUnitId = Android_NativeExpress;
-#elif UNITY_IPHONE
-        string adUnitId = ios_NativeExpress;
-#else
-        string adUnitId = "unexpected_platform";
-#endif
-
-        nativeAd = new NativeExpressAdView(adUnitId, AdSize.MediumRectangle, AdPosition.Center);
         request  = new AdRequest.Builder().Build();
-        nativeAd.LoadAd(request);
-        nativeAd.Hide();
     }
 
     public void RequestInterstitial()
@@ -263,13 +251,11 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     {
         if (inIsShow)
         {
-            //nativeAd.Show();
             myNendNative.Show(true);
         }
         else
         {
             myNendNative.Show(false);
-            nativeAd.Hide();
         }
     }
     /// <summary>
@@ -378,7 +364,6 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     {
         // この関数でのみ
         // Show～関数での非表示を行わない
-        nativeAd.Hide();
         myNendNative.Show(false);
         for (int i = 0; i < (int)BANNER.MAX; i++)
         {

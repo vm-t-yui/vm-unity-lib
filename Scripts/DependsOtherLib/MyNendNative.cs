@@ -1,6 +1,9 @@
 /******************************************************************************/
 /*!    \brief  nendのネイティブのみの表示
 *******************************************************************************/
+// エディタでは使わないけど保存しておきたい
+#pragma warning disable 0414
+
 using UnityEngine;
 #if USE_NEND
 using NendUnityPlugin.AD.Native;
@@ -12,9 +15,10 @@ namespace VMUnityLib
     {
 #if USE_NEND
         [SerializeField]
-        NendAdNativeView nativeView;
+        NendAdNativeView nativeView = default;
+
         [SerializeField]
-        NendAdNative native;
+        NendAdNative native = default;
 
         /// <summary>
         /// 開始時処理
@@ -31,7 +35,7 @@ namespace VMUnityLib
         public void Show(bool isShow)
         {
 #if !UNITY_EDITOR
-        nativeView.gameObject.SetActive(isShow);
+            nativeView.gameObject.SetActive(isShow);
 #endif
         }
 #endif
