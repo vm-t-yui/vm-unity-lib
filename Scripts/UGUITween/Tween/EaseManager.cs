@@ -67,11 +67,11 @@ namespace VMUnityLib {
 		public delegate float EaseDelegate(float start, float end, float t);
 
 		#region ease function	
-		private static float linear(float start, float end, float value){
+		static float linear(float start, float end, float value){
 			return Mathf.Lerp(start, end, value);
 		}
 		
-		private static float clerp(float start, float end, float value){
+		static float clerp(float start, float end, float value){
 			float min = 0.0f;
 			float max = 360.0f;
 			float half = Mathf.Abs((max - min) / 2.0f);
@@ -87,23 +87,23 @@ namespace VMUnityLib {
 			return retval;
 		}
 		
-		private static float spring(float start, float end, float value){
+		static float spring(float start, float end, float value){
 			value = Mathf.Clamp01(value);
 			value = (Mathf.Sin(value * Mathf.PI * (0.2f + 2.5f * value * value * value)) * Mathf.Pow(1f - value, 2.2f) + value) * (1f + (1.2f * (1f - value)));
 			return start + (end - start) * value;
 		}
 		
-		private static float easeInQuad(float start, float end, float value){
+		static float easeInQuad(float start, float end, float value){
 			end -= start;
 			return end * value * value + start;
 		}
 		
-		private static float easeOutQuad(float start, float end, float value){
+		static float easeOutQuad(float start, float end, float value){
 			end -= start;
 			return -end * value * (value - 2) + start;
 		}
 		
-		private static float easeInOutQuad(float start, float end, float value){
+		static float easeInOutQuad(float start, float end, float value){
 			value /= .5f;
 			end -= start;
 			if (value < 1) return end / 2 * value * value + start;
@@ -111,18 +111,18 @@ namespace VMUnityLib {
 			return -end / 2 * (value * (value - 2) - 1) + start;
 		}
 		
-		private static float easeInCubic(float start, float end, float value){
+		static float easeInCubic(float start, float end, float value){
 			end -= start;
 			return end * value * value * value + start;
 		}
 		
-		private static float easeOutCubic(float start, float end, float value){
+		static float easeOutCubic(float start, float end, float value){
 			value--;
 			end -= start;
 			return end * (value * value * value + 1) + start;
 		}
 		
-		private static float easeInOutCubic(float start, float end, float value){
+		static float easeInOutCubic(float start, float end, float value){
 			value /= .5f;
 			end -= start;
 			if (value < 1) return end / 2 * value * value * value + start;
@@ -130,18 +130,18 @@ namespace VMUnityLib {
 			return end / 2 * (value * value * value + 2) + start;
 		}
 		
-		private static float easeInQuart(float start, float end, float value){
+		static float easeInQuart(float start, float end, float value){
 			end -= start;
 			return end * value * value * value * value + start;
 		}
 		
-		private static float easeOutQuart(float start, float end, float value){
+		static float easeOutQuart(float start, float end, float value){
 			value--;
 			end -= start;
 			return -end * (value * value * value * value - 1) + start;
 		}
 		
-		private static float easeInOutQuart(float start, float end, float value){
+		static float easeInOutQuart(float start, float end, float value){
 			value /= .5f;
 			end -= start;
 			if (value < 1) return end / 2 * value * value * value * value + start;
@@ -149,18 +149,18 @@ namespace VMUnityLib {
 			return -end / 2 * (value * value * value * value - 2) + start;
 		}
 		
-		private static float easeInQuint(float start, float end, float value){
+		static float easeInQuint(float start, float end, float value){
 			end -= start;
 			return end * value * value * value * value * value + start;
 		}
 		
-		private static float easeOutQuint(float start, float end, float value){
+		static float easeOutQuint(float start, float end, float value){
 			value--;
 			end -= start;
 			return end * (value * value * value * value * value + 1) + start;
 		}
 		
-		private static float easeInOutQuint(float start, float end, float value){
+		static float easeInOutQuint(float start, float end, float value){
 			value /= .5f;
 			end -= start;
 			if (value < 1) return end / 2 * value * value * value * value * value + start;
@@ -168,32 +168,32 @@ namespace VMUnityLib {
 			return end / 2 * (value * value * value * value * value + 2) + start;
 		}
 		
-		private static float easeInSine(float start, float end, float value){
+		static float easeInSine(float start, float end, float value){
 			end -= start;
 			return -end * Mathf.Cos(value / 1 * (Mathf.PI / 2)) + end + start;
 		}
 		
-		private static float easeOutSine(float start, float end, float value){
+		static float easeOutSine(float start, float end, float value){
 			end -= start;
 			return end * Mathf.Sin(value / 1 * (Mathf.PI / 2)) + start;
 		}
 		
-		private static float easeInOutSine(float start, float end, float value){
+		static float easeInOutSine(float start, float end, float value){
 			end -= start;
 			return -end / 2 * (Mathf.Cos(Mathf.PI * value / 1) - 1) + start;
 		}
 		
-		private static float easeInExpo(float start, float end, float value){
+		static float easeInExpo(float start, float end, float value){
 			end -= start;
 			return end * Mathf.Pow(2, 10 * (value / 1 - 1)) + start;
 		}
 		
-		private static float easeOutExpo(float start, float end, float value){
+		static float easeOutExpo(float start, float end, float value){
 			end -= start;
 			return end * (-Mathf.Pow(2, -10 * value / 1) + 1) + start;
 		}
 		
-		private static float easeInOutExpo(float start, float end, float value){
+		static float easeInOutExpo(float start, float end, float value){
 			value /= .5f;
 			end -= start;
 			if (value < 1) return end / 2 * Mathf.Pow(2, 10 * (value - 1)) + start;
@@ -201,18 +201,18 @@ namespace VMUnityLib {
 			return end / 2 * (-Mathf.Pow(2, -10 * value) + 2) + start;
 		}
 		
-		private static float easeInCirc(float start, float end, float value){
+		static float easeInCirc(float start, float end, float value){
 			end -= start;
 			return -end * (Mathf.Sqrt(1 - value * value) - 1) + start;
 		}
 		
-		private static float easeOutCirc(float start, float end, float value){
+		static float easeOutCirc(float start, float end, float value){
 			value--;
 			end -= start;
 			return end * Mathf.Sqrt(1 - value * value) + start;
 		}
 		
-		private static float easeInOutCirc(float start, float end, float value){
+		static float easeInOutCirc(float start, float end, float value){
 			value /= .5f;
 			end -= start;
 			if (value < 1) return -end / 2 * (Mathf.Sqrt(1 - value * value) - 1) + start;
@@ -221,7 +221,7 @@ namespace VMUnityLib {
 		}
 		
 		/* GFX47 MOD START */
-		private static float easeInBounce(float start, float end, float value){
+		static float easeInBounce(float start, float end, float value){
 			end -= start;
 			float d = 1f;
 			return end - easeOutBounce(0, end, d-value) + start;
@@ -229,8 +229,8 @@ namespace VMUnityLib {
 		/* GFX47 MOD END */
 		
 		/* GFX47 MOD START */
-		//private static float bounce(float start, float end, float value){
-		private static float easeOutBounce(float start, float end, float value){
+		//static float bounce(float start, float end, float value){
+		static float easeOutBounce(float start, float end, float value){
 			value /= 1f;
 			end -= start;
 			if (value < (1 / 2.75f)){
@@ -249,7 +249,7 @@ namespace VMUnityLib {
 		/* GFX47 MOD END */
 		
 		/* GFX47 MOD START */
-		private static float easeInOutBounce(float start, float end, float value){
+		static float easeInOutBounce(float start, float end, float value){
 			end -= start;
 			float d = 1f;
 			if (value < d/2) return easeInBounce(0, end, value*2) * 0.5f + start;
@@ -257,21 +257,21 @@ namespace VMUnityLib {
 		}
 		/* GFX47 MOD END */
 		
-		private static float easeInBack(float start, float end, float value){
+		static float easeInBack(float start, float end, float value){
 			end -= start;
 			value /= 1;
 			float s = 1.70158f;
 			return end * (value) * value * ((s + 1) * value - s) + start;
 		}
 		
-		private static float easeOutBack(float start, float end, float value){
+		static float easeOutBack(float start, float end, float value){
 			float s = 1.70158f;
 			end -= start;
 			value = (value / 1) - 1;
 			return end * ((value) * value * ((s + 1) * value + s) + 1) + start;
 		}
 		
-		private static float easeInOutBack(float start, float end, float value){
+		static float easeInOutBack(float start, float end, float value){
 			float s = 1.70158f;
 			end -= start;
 			value /= .5f;
@@ -284,7 +284,7 @@ namespace VMUnityLib {
 			return end / 2 * ((value) * value * (((s) + 1) * value + s) + 2) + start;
 		}
 		
-		private static float punch(float amplitude, float value){
+		static float punch(float amplitude, float value){
 			float s = 9;
 			if (value == 0){
 				return 0;
@@ -298,7 +298,7 @@ namespace VMUnityLib {
 		}
 		
 		/* GFX47 MOD START */
-		private static float easeInElastic(float start, float end, float value){
+		static float easeInElastic(float start, float end, float value){
 			end -= start;
 			
 			float d = 1f;
@@ -322,8 +322,8 @@ namespace VMUnityLib {
 		/* GFX47 MOD END */
 		
 		/* GFX47 MOD START */
-		//private static float elastic(float start, float end, float value){
-		private static float easeOutElastic(float start, float end, float value){
+		//static float elastic(float start, float end, float value){
+		static float easeOutElastic(float start, float end, float value){
 			/* GFX47 MOD END */
 			//Thank you to rafael.marteleto for fixing this as a port over from Pedro's UnityTween
 			end -= start;
@@ -348,7 +348,7 @@ namespace VMUnityLib {
 		}		
 		
 		/* GFX47 MOD START */
-		private static float easeInOutElastic(float start, float end, float value){
+		static float easeInOutElastic(float start, float end, float value){
 			end -= start;
 			
 			float d = 1f;

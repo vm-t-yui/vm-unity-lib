@@ -11,11 +11,11 @@ namespace VMUnityLib
         /// <summary>
         /// ステート.
         /// </summary>
-        private class State
+        class State
         {
-            private readonly Action EnterAct;  // 開始時に呼び出されるデリゲート.
-            private readonly Action UpdateAct; // 更新時に呼び出されるデリゲート.
-            private readonly Action ExitAct;   // 終了時に呼び出されるデリゲート.
+            readonly Action EnterAct;  // 開始時に呼び出されるデリゲート.
+            readonly Action UpdateAct; // 更新時に呼び出されるデリゲート.
+            readonly Action ExitAct;   // 終了時に呼び出されるデリゲート.
 
             /// <summary>
             /// コンストラクタ.
@@ -52,9 +52,9 @@ namespace VMUnityLib
             }
         }
 
-        private Dictionary<T, State> StateTable = new Dictionary<T, State>();   // ステートのテーブル.
-        private State CurrentState;                                             // 現在のステート.
-        private T CurrentStateKey;                                              // 現在のステートキー.
+        Dictionary<T, State> StateTable = new Dictionary<T, State>();   // ステートのテーブル.
+        State CurrentState;                                             // 現在のステート.
+        T CurrentStateKey;                                              // 現在のステートキー.
 
         /// <summary>
         /// ステートを追加します.

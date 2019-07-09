@@ -11,8 +11,8 @@ namespace VMUnityLib
 {
     public sealed class GameWindowSize
     {
-        private static GameWindowSize inst = null; 
-        private static GameWindowSize Inst 
+        static GameWindowSize inst = null; 
+        static GameWindowSize Inst 
         { 
             get
             {
@@ -28,13 +28,13 @@ namespace VMUnityLib
             set { inst = value; }
         }
     
-        private float scaleW;           // 画面サイズのスケール比(幅）.
-        private float scaleH;           // 画面サイズのスケール比（高さ）.
-        private float gameScreenScale;  // ゲーム表示領域のFixedSizeに対するスケール値.
-        private float gameScreenW;      // ゲーム表示領域のW.
-        private float gameScreenH;      // ゲーム表示領域のH.
-        private float spaceW;           // 画面サイズに対してのw余白.
-        private float spaceH;           // 画面サイズに対してのh余白.
+        float scaleW;           // 画面サイズのスケール比(幅）.
+        float scaleH;           // 画面サイズのスケール比（高さ）.
+        float gameScreenScale;  // ゲーム表示領域のFixedSizeに対するスケール値.
+        float gameScreenW;      // ゲーム表示領域のW.
+        float gameScreenH;      // ゲーム表示領域のH.
+        float spaceW;           // 画面サイズに対してのw余白.
+        float spaceH;           // 画面サイズに対してのh余白.
 
         public GameWindowSize (
             int fixWidth, 
@@ -47,7 +47,7 @@ namespace VMUnityLib
         /// <summary>
         /// ウインドウサイズを取得.
         /// </summary>
-        private void Calc (int w, int h)
+        void Calc (int w, int h)
         {
             float fixSizeScale = 1.0f;
     #if UNITY_WEBPLAYER && (!UNITY_EDITOR)

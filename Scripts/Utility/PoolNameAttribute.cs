@@ -26,7 +26,7 @@ namespace VMUnityLib
     [CustomPropertyDrawer(typeof(PoolNameAttribute))]
     public class PoolNameDrawer : PropertyDrawer
     {
-        private PoolNameAttribute poolNameAttribute
+        PoolNameAttribute poolNameAttribute
         {
             get
             {

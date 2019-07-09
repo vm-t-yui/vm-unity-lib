@@ -112,16 +112,16 @@ namespace VMUnityLib
                 "Last collect delta            "+lastDeltaTime.ToString ("0.000") + " ("+(1F/lastDeltaTime).ToString ("0.0")+")");*/
         }
 
-        private float lastCollect = 0;
-        private float lastCollectNum = 0;
-        private float delta = 0;
-        private float lastDeltaTime = 0;
-        private int allocRate = 0;
-        private int lastAllocMemory = 0;
-        private float lastAllocSet = -9999;
-        private int allocMem = 0;
-        private int collectAlloc = 0;
-        private int peakAlloc = 0;
+        float lastCollect = 0;
+        float lastCollectNum = 0;
+        float delta = 0;
+        float lastDeltaTime = 0;
+        int allocRate = 0;
+        int lastAllocMemory = 0;
+        float lastAllocSet = -9999;
+        int allocMem = 0;
+        int collectAlloc = 0;
+        int peakAlloc = 0;
 
     }
 }

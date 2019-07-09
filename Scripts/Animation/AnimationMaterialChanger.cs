@@ -8,18 +8,18 @@ using System.Collections.Generic;
 public sealed class AnimationMaterialChanger : MonoBehaviour
 {
     [System.Serializable]
-    struct ChangeMaterialData
+    class ChangeMaterialData
     {
-        public Material mat;
+        public Material mat = default;
 #if UNITY_EDITOR
-        public string comment;
+        public string comment = default;
 #endif
     }
     [SerializeField]
-    List<ChangeMaterialData> matChangeDataList;
+    List<ChangeMaterialData> matChangeDataList = default;
 
     [SerializeField]
-    new Renderer renderer;
+    new Renderer renderer = default;
 
     /// <summary>
     /// アニメーションからマテリアルチェンジ.

@@ -12,13 +12,13 @@ namespace VMUnityLib
     public sealed class CommonProgramObj : MonoBehaviour
     {
 #if UNITY_EDITOR
-        private int prevScreenW;
-        private int prevScreenH;
+        int prevScreenW;
+        int prevScreenH;
         EditorWindow gameview;
 #endif
 
         // 音声の遅延フレーム数.
-        static public int SoundLatency { private set; get; }
+        static public int SoundLatency { set; get; }
         
         /// <summary>
         /// 自身の生成前に呼ばれる関数。生成するしない関係なしに呼ばれる.
@@ -40,7 +40,7 @@ namespace VMUnityLib
         /// <summary>
         /// 初期化.
         /// </summary>
-        private void Start()
+        void Start()
         {
 #if UNITY_EDITOR
             gameview = EditorWindow.GetWindow(typeof(EditorWindow).Assembly.GetType("UnityEditor.GameView"));
@@ -61,7 +61,7 @@ namespace VMUnityLib
         /// <summary>
         /// GUI.
         /// </summary>
-        private void OnGUI()
+        void OnGUI()
         {
 #if UNITY_EDITOR
         if (prevScreenW != Screen.width || prevScreenH != Screen.height)

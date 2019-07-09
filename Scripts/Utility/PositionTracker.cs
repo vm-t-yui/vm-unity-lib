@@ -26,7 +26,7 @@ public sealed class PositionTracker : MonoBehaviour
     /// <summary>
     /// 更新.
     /// </summary>
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         if (target != null)
         {

@@ -16,11 +16,11 @@ namespace VMUnityLib
         }
 
         [SerializeField]
-        private CmnFadeNormal normalFade;
+        CmnFadeNormal normalFade = default;
         [SerializeField]
-        private CmnFadeTimeOnly timeFade;
+        CmnFadeTimeOnly timeFade = default;
         [SerializeField]
-        private CmnFadeNormal colorFade;
+        CmnFadeNormal colorFade = default;
 
         /// <summary>
         /// フェードイン開始.

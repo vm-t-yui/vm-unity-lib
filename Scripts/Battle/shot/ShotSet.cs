@@ -20,10 +20,10 @@ namespace VMUnityLib
         public bool            isShotCreateDirect = true; // 直接ショットを生成するか.
         public OnShotEvent    onShotEvent;
 
-        private float        prevShotTime;        // 直前に撃ったショット時間.
+        float        prevShotTime;        // 直前に撃ったショット時間.
 
-        public        bool        IsShotNow    { get; private set; }
-        protected    SpawnPool    Pool         { get; private set; }
+        public        bool        IsShotNow    { get; set; }
+        protected    SpawnPool    Pool         { get; set; }
     
         /// <summary>
         /// プールを設定.
@@ -61,7 +61,7 @@ namespace VMUnityLib
         /// <summary>
         /// ショット生成イベント（直接生成せず、モーションで生成する場合があるため）.
         /// </summary>
-        private void CreateShotEvent ()
+        void CreateShotEvent ()
         {
             if(isShotCreateDirect)
             {

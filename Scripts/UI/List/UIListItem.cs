@@ -7,26 +7,26 @@ using UnityEngine.UI;
 
 public class UIListItem : MonoBehaviour 
 {
-    [SerializeField] protected Text label;             
-    [SerializeField] protected Toggle editToggle;      
-    [SerializeField] protected Toggle checkToggle; 
-    [SerializeField] private bool enableEdit;           // Editの表示が行われるかどうか.
-    [SerializeField] private bool selectCheckSync;      // 選択とチェックマークの同期がされるかどうか.
+    [SerializeField] protected Text label = default;             
+    [SerializeField] protected Toggle editToggle = default;      
+    [SerializeField] protected Toggle checkToggle = default; 
+    [SerializeField] bool enableEdit = default;           // Editの表示が行われるかどうか.
+    [SerializeField] bool selectCheckSync = default;      // 選択とチェックマークの同期がされるかどうか.
 
-    private Toggle myToggle;
+    Toggle myToggle;
 
-    public UIList Owner { get; private set; }
-    public bool IsChecked { get; private set; }
-    public bool IsSelected { get; private set; }
+    public UIList Owner { get; set; }
+    public bool IsChecked { get; set; }
+    public bool IsSelected { get; set; }
     public bool ToggleSelectEventLock { get; set; }
     public bool ToggleEditEventLock { get; set; }
 
-    public string Text { get; private set; }
+    public string Text { get; set; }
 
     /// <summary>
     /// 生成時.
     /// </summary>
-    private void Awake()
+    void Awake()
     {
         myToggle = GetComponent<Toggle>();
     }
@@ -62,7 +62,7 @@ public class UIListItem : MonoBehaviour
     /// <summary>
     /// テキストアップデート.
     /// </summary>
-    private void UpdateLabel()
+    void UpdateLabel()
     {
         label.text = Text;
         //if (IsSelected)

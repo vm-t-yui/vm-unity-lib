@@ -9,17 +9,17 @@ using VMUnityLib;
 public sealed class AnimationEffectSpawner : MonoBehaviour 
 {
     [System.Serializable]
-    struct EffectSpawnData
+    class EffectSpawnData
     {
-        public Transform   baseBone;
-        public EffectData  effectData;
-        public Vector3     posOffset;
+        public Transform   baseBone = default;
+        public EffectData  effectData = default;
+        public Vector3     posOffset = default;
 #if UNITY_EDITOR
-        public string      comment;
+        public string      comment = default;
 #endif
     }
     [SerializeField]
-    List<EffectSpawnData> spawnDataList;
+    List<EffectSpawnData> spawnDataList = new List<EffectSpawnData>();
 
     /// <summary>
     /// アニメーションからエフェクトを生成.

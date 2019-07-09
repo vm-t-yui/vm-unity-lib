@@ -11,8 +11,8 @@ namespace VMUnityLib
     /// </summary>
     public struct DamageInfo
     {
-        public Damage       Damage      { get; private set; }
-        public Vector3      ContactPos  { get; private set; }
+        public Damage       Damage      { get; set; }
+        public Vector3      ContactPos  { get; set; }
         public DamageInfo(Damage damage, Vector3 contactPos)
             : this()
         {

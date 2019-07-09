@@ -14,20 +14,20 @@ namespace VMUnityLib
     {
         // シーンUIとして何を表示するか.
         [SerializeField]
-        private CommonSceneUI.CommonSceneUIParam sceneUiParam;
+        CommonSceneUI.CommonSceneUIParam sceneUiParam = default;
         public CommonSceneUI.CommonSceneUIParam SceneUiParam { get { return sceneUiParam; } }
 
         // シーン背景の種別.
         [SerializeField]
-        private UISceneBG.SceneBgKind sceneBgKind;
+        UISceneBG.SceneBgKind sceneBgKind = default;
         public UISceneBG.SceneBgKind SceneBgKind { get { return sceneBgKind; } }
 
         // シーン名表示用のローカライズID.
         [SerializeField]
-        private string sceneNameLocalizeID;
+        string sceneNameLocalizeID = default;
         public string SceneNameLocalizeID { get { return sceneNameLocalizeID; } }
 
-        private bool isDebug = false;
+        bool isDebug = false;
 
         /// <summary>
         /// 生成時.

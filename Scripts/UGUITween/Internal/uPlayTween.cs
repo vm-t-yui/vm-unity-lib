@@ -37,7 +37,7 @@ namespace VMUnityLib {
 			TriggerPlay (Trigger.OnPointerExit);
 		}
 
-		private void TriggerPlay(Trigger _trigger) {
+		void TriggerPlay(Trigger _trigger) {
 			if (_trigger == trigger) {
 				Play();
 			}
@@ -46,7 +46,7 @@ namespace VMUnityLib {
 		/// <summary>
 		/// Play this instance.
 		/// </summary>
-		private void Play() {
+		void Play() {
 			if (playDirection == PlayDirection.Toggle) {
 				tweenTarget.Toggle();
 			}

@@ -7,7 +7,7 @@ using UnityEngine;
 public class VMAtomSource : CriAtomSource
 {
     [SerializeField]
-    private bool _enableAudioSyncedTimer = false;
+    bool _enableAudioSyncedTimer = false;
 
     override protected void InternalInitialize()
     {

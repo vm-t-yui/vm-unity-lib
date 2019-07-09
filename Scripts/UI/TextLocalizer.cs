@@ -14,9 +14,9 @@ public class TextLocalizer : MonoBehaviour
     public FontStyle fontStyle = FontStyle.Normal;
     public Vector3 posAdjust = Vector3.zero;
 
-    private Vector3 defaultPos;
-    private bool bFirst = true;
-    private Text text;
+    Vector3 defaultPos;
+    bool bFirst = true;
+    Text text;
 
     void Start()
     {

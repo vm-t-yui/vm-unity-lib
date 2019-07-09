@@ -15,11 +15,11 @@ namespace VMUnityLib
         public int            hp;                // 耐久力.
         public float        lifeTime;        // 寿命.
 
-        private float         startTime;
+        float         startTime;
 
         public    SpawnPool    Pool         { get; set; }
         public    float        DamageRate     { get; set; }
-        public    DamageField DamageField { get; private set; }
+        public    DamageField DamageField { get; set; }
 
         /// <summary>
         /// Update is called once per frame.

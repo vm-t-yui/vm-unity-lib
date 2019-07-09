@@ -10,7 +10,7 @@ using SWorker;
 
 public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper> 
 {
-    private const string fileName = "screenshot.png";
+    const string fileName = "screenshot.png";
 
     bool capturing = false;
     string captureFilePath;

@@ -13,7 +13,7 @@ namespace VMUnityLib
     public static class SceneNameCreator
     {
         // 無効な文字を管理する配列
-        private static readonly string[] INVALUD_CHARS =
+        static readonly string[] INVALUD_CHARS =
         {
             " ", "!", "\"", "#", "$",
             "%", "&", "\'", "(", ")",
@@ -24,11 +24,11 @@ namespace VMUnityLib
             ",", "<"
         };
     
-        private const string ITEM_NAME  = "Tools/Create/Scene Name";    // コマンド名
-        private const string PATH       = "Assets/MyGameAssets/LibBridge/Scripts/Names/SceneName.cs";        // ファイルパス
+        const string ITEM_NAME  = "Tools/Create/Scene Name";    // コマンド名
+        const string PATH       = "Assets/MyGameAssets/LibBridge/Scripts/Names/SceneName.cs";        // ファイルパス
     
-        private static readonly string FILENAME                     = Path.GetFileName(PATH);                   // ファイル名(拡張子あり)
-        private static readonly string FILENAME_WITHOUT_EXTENSION   = Path.GetFileNameWithoutExtension(PATH);   // ファイル名(拡張子なし)
+        static readonly string FILENAME                     = Path.GetFileName(PATH);                   // ファイル名(拡張子あり)
+        static readonly string FILENAME_WITHOUT_EXTENSION   = Path.GetFileNameWithoutExtension(PATH);   // ファイル名(拡張子なし)
     
         /// <summary>
         /// シーン名を定数で管理するクラスを作成します

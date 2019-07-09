@@ -8,7 +8,7 @@ namespace VMUnityLib
 {
     public class IdentifiedObjectManager<T>
     {
-        private Dictionary<string, T> objectDictionary = new Dictionary<string, T>();
+        Dictionary<string, T> objectDictionary = new Dictionary<string, T>();
 
         /// <summary>
         /// オブジェクトを追加する.

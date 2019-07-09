@@ -9,7 +9,7 @@ namespace VMUnityLib
 {
     public class IdentifiedDataManager<T> : IdentifiedObjectManager<T> where T : BaseData
     {
-        public string DataPath { get; private set; }
+        public string DataPath { get; set; }
 
         /// <summary>
         /// コンストラクタ.

@@ -20,7 +20,7 @@ public class SceneNameAttribute : PropertyAttribute
 [CustomPropertyDrawer(typeof(SceneNameAttribute))]
 public class SceneNameDrawer : PropertyDrawer
 {
-    private SceneNameAttribute sceneNameAttribute
+    SceneNameAttribute sceneNameAttribute
     {
         get
         {

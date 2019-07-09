@@ -14,8 +14,8 @@ namespace VMUnityLib
         [SerializeField] float playPercent = 100.0f;                         // 再生する確率.
         [SerializeField] float overrideEnableTime = 0.05f;                   // 再生上書きが有効になる経過時間.
 
-        private AudioSource audioSource;
-        private float defaultPitch;
+        AudioSource audioSource;
+        float defaultPitch;
 
         float lastPlayTime = 0;
 

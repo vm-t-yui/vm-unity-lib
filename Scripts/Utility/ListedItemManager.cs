@@ -8,7 +8,7 @@ namespace VMUnityLib
 {
     public class ListedItemManager<T>
     {
-        private List<T> itemList = new List<T>();
+        List<T> itemList = new List<T>();
 
         /// <summary>
         /// 個数を返す.

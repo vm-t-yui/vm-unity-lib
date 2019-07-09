@@ -10,7 +10,7 @@ namespace VMUnityLib
     public sealed class CmnFadeNormal : ICmnFade
     {
         public  Color Color { get; set; }             // フェードするオブジェクトのカラー.
-        private Image overlay;                        // フェード用の上に重ねるオブジェクト.
+        Image overlay;                        // フェード用の上に重ねるオブジェクト.
 
         /// <summary>
         /// 初期化.

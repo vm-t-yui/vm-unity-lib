@@ -27,7 +27,7 @@ namespace VMUnityLib
         /// <summary>
         /// 初期化.
         /// </summary>
-        private void Start()
+        void Start()
         {
             uiText = GetComponent<TextMeshProUGUI>();
 #if USE_I2_LOCALIZATION
@@ -38,7 +38,7 @@ namespace VMUnityLib
         /// <summary>
         /// 更新.
         /// </summary>
-        private void Update()
+        void Update()
         {
             fadeColor.UpdateFade();
             if (started && Time.unscaledTime - showedTime > showTime)

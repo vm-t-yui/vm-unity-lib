@@ -7,7 +7,7 @@ using UnityEngine;
 public sealed class TransformTracker : MonoBehaviour 
 {
     [SerializeField]
-    Transform target;
+    Transform target = default;
 
     public void Update()
     {

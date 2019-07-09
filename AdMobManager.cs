@@ -60,12 +60,12 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     [SerializeField]
     MyNendNative myNendNative;
 
-    private InterstitialAd interstitial;
-    private BannerView[]   banner = new BannerView[(int)BANNER.MAX];
-    private bool[]         beforeBanner = new bool[(int)BANNER.MAX];
-    private NativeExpressAdView    nativeAd;
-    private AdRequest          request;
-    private RewardBasedVideoAd rewardBasedVideo;
+    InterstitialAd interstitial;
+    BannerView[]   banner = new BannerView[(int)BANNER.MAX];
+    bool[]         beforeBanner = new bool[(int)BANNER.MAX];
+    NativeExpressAdView    nativeAd;
+    AdRequest          request;
+    RewardBasedVideoAd rewardBasedVideo;
 
     bool is_close_interstitial = false;
     bool isMovieReward;
@@ -84,7 +84,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
         RequestRewardBasedVideo();
     }
 
-    private void RequestRewardBasedVideo()
+    void RequestRewardBasedVideo()
     {
 #if UNITY_ANDROID
         string adUnitId = "ca-app-pub-7073050807259252/1483640786";
@@ -406,7 +406,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// <summary>
     /// 動画広告視聴完了時処理
     /// </summary>
-    private void OnAdRewarded(object inObject, Reward inReward)
+    void OnAdRewarded(object inObject, Reward inReward)
     {
         Debug.Log("AdRewarded!!!");
         if (inReward != null)
@@ -419,7 +419,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// <summary>
     /// 動画広告を閉じた際の処理
     /// </summary>
-    private void OnAdClosed(object inObject, System.EventArgs inArgs)
+    void OnAdClosed(object inObject, System.EventArgs inArgs)
     {
         Debug.Log("AdClosed");
         if(isMovieReward)

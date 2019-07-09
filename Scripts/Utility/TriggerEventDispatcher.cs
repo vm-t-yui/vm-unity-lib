@@ -32,7 +32,7 @@ namespace VMUnityLib
         /// <summary>
         /// 物理的な当たり判定検知.
         /// </summary>
-        private void OnTriggerEnter(Collider collider)
+        void OnTriggerEnter(Collider collider)
         {
             if (TriggerEventEnter != null)
             {

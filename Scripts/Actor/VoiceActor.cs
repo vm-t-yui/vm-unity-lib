@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 public sealed class VoiceActor : MonoBehaviour 
 {
-    private List<string> reserveActionVoiceIdList;
+    List<string> reserveActionVoiceIdList;
 
     /// <summary>
     /// 初期化.
@@ -32,7 +32,7 @@ public sealed class VoiceActor : MonoBehaviour
     /// <summary>
     /// 予約されたアクションボイスを再生する.
     /// </summary>
-    private void PlayReservedActionVoiceList()
+    void PlayReservedActionVoiceList()
     {
         if (reserveActionVoiceIdList.Count != 0)
         {

@@ -11,9 +11,9 @@ namespace VMUnityLib
     {
         public AllocationStats alocationStat;
 
-        private bool isDebugWindowOpen = false;
-        private List<DebugMenuPage> pages = new List<DebugMenuPage>();
-        private int nowPageIndex = 0;
+        bool isDebugWindowOpen = false;
+        List<DebugMenuPage> pages = new List<DebugMenuPage>();
+        int nowPageIndex = 0;
 
         /// <summary>
         /// Awake this instance.

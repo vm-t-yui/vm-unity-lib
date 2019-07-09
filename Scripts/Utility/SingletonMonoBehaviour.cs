@@ -7,7 +7,7 @@ namespace VMUnityLib
 {
     public class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
-        private static T instance;
+        static T instance;
         public static T Inst
         {
             get

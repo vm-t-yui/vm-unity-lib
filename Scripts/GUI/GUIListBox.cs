@@ -7,19 +7,19 @@ using System.Collections.Generic;
 
 public sealed class GUIListBox
 {
-    public List<KeyValuePair<string, GUIStyle>> DrawList { get; private set; }
-    public Rect                         DrawRect { get; private set; }
-    public int                          CurrentPage { get; private set; }
-    public int                          PageMax     { get; private set; }
+    public List<KeyValuePair<string, GUIStyle>> DrawList { get; set; }
+    public Rect                         DrawRect { get; set; }
+    public int                          CurrentPage { get; set; }
+    public int                          PageMax     { get; set; }
 
-    private int onePageItemRowNum = 0;
-    private int onePageItemColNum = 1;
+    int onePageItemRowNum = 0;
+    int onePageItemColNum = 1;
 
-    private const float INFO_H = 30.0f;
-    private const float INFO_LABEL_S = 5.0f;
-    private const float INFO_BUTTON_W = 120.0f;
-    private const float LABEL_H = 30.0f;
-    private const float LABEL_S = 2.0f;
+    const float INFO_H = 30.0f;
+    const float INFO_LABEL_S = 5.0f;
+    const float INFO_BUTTON_W = 120.0f;
+    const float LABEL_H = 30.0f;
+    const float LABEL_S = 2.0f;
 
     /// <summary>
     /// コンストラクタ.
@@ -137,7 +137,7 @@ public sealed class GUIListBox
     /// <summary>
     /// 1ページに描画できるアイテム数を更新.
     /// </summary>
-    private void UpdateOnePageItemNum()
+    void UpdateOnePageItemNum()
     {
         float remH = DrawRect.height - INFO_H - INFO_LABEL_S;
         if (remH < 0)
@@ -154,7 +154,7 @@ public sealed class GUIListBox
     /// <summary>
     /// ページの最大数を更新.
     /// </summary>
-    private void UpdatePageMax()
+    void UpdatePageMax()
     {
         if (onePageItemRowNum != 0)
         {

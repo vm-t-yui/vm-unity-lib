@@ -10,13 +10,13 @@ using UnityEngine.UI;
 public class UIList : ListedInHierarchyBehaviourManager<UIListItem>
 {
     [SerializeField]
-    UIListItem listItemPrefab;
+    UIListItem listItemPrefab = default;
 
     [SerializeField]
-    VerticalLayoutGroup Content;
+    VerticalLayoutGroup Content = default;
 
     // 追加的に選択するかどうかのフラグ（trueならCtrl押しながら選択するのと同じ効果）.
-    public bool AddiveSelect { get; private set; }
+    public bool AddiveSelect { get; set; }
 
     /// <summary>
     /// 初期化.

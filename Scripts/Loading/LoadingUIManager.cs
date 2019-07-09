@@ -12,16 +12,16 @@ namespace VMUnityLib
     public sealed class LoadingUIManager : SingletonMonoBehaviour<LoadingUIManager>
     {
         [System.Serializable]
-        struct UiTypeSet
+        class UiTypeSet
         {
-            public LibBridgeInfo.LoadingType type;
+            public LibBridgeInfo.LoadingType type = default;
 #if USE_TWEEN
-            public uTweenAlpha tweenAlpha;
+            public uTweenAlpha tweenAlpha = default;
 #endif
         }
         // ロード画面マップ.
         [SerializeField]
-        List<UiTypeSet> loadingUiList;
+        List<UiTypeSet> loadingUiList = default;
 
 #if USE_TWEEN
         Dictionary<LibBridgeInfo.LoadingType, uTweenAlpha> loadingUiDict;

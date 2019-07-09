@@ -10,8 +10,8 @@ namespace VMUnityLib
 
     public abstract class ICmnFade : MonoBehaviour
     {
-        public bool IsStartedFade { get; private set; }
-        public bool IsFadeIn { get; private set; }
+        public bool IsStartedFade { get; set; }
+        public bool IsFadeIn { get; set; }
 
         /// <summary>
         /// フェードイン開始.
@@ -23,14 +23,14 @@ namespace VMUnityLib
         /// </summary>
         public abstract void StartFadeOut(EndFadeCallBack callBack, float time);
 
-        protected float Amount { get; private set; }    // フェード進行度.
+        protected float Amount { get; set; }    // フェード進行度.
 
         protected abstract void Start();
         protected abstract void FixedUpdate();
 
-        private float fadeTime;                       // フェード所要時間.
-        private float fadeStartTime;                  // フェード開始時間.
-        private EndFadeCallBack endFadeCallBack;                // 終了時のコールバック.
+        float fadeTime;                       // フェード所要時間.
+        float fadeStartTime;                  // フェード開始時間.
+        EndFadeCallBack endFadeCallBack;                // 終了時のコールバック.
 
         public void OnDisable()
         {

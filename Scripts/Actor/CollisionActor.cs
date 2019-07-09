@@ -7,7 +7,7 @@ using UnityEngine;
 public sealed class CollisionActor : MonoBehaviour 
 {
     [SerializeField]
-    private SphereCollider sphere;
+    SphereCollider sphere = default;
 
     /// <summary>
     /// スフィアコライダの半径を変える.

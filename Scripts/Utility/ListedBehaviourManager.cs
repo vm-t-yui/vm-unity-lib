@@ -9,7 +9,7 @@ namespace VMUnityLib
 {
     public class ListedBehaviourManager<T> : MonoBehaviour
     {
-        private List<T> itemList = new List<T>();
+        List<T> itemList = new List<T>();
 
         /// <summary>
         /// 個数を返す.

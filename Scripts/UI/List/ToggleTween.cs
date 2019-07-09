@@ -34,18 +34,18 @@ namespace VMUnityLib
         }
 
         [SerializeField]
-        private MasterTweenKind masterTweenKind;    // Tweenが終了したことを判定するためのtween種別.
+        MasterTweenKind masterTweenKind = default;   // Tweenが終了したことを判定するためのtween種別.
 
         [SerializeField]
-        private bool autoClose;          // 自動で閉じるかどうか.
+        bool autoClose = default;                    // 自動で閉じるかどうか.
 
         [SerializeField]
-        private float autoCloseTime;      // 自動でとじるのであれば閉じるまでの時間.
+        float autoCloseTime = default;               // 自動でとじるのであれば閉じるまでの時間.
 
         [SerializeField]
-        private UnityEvent onFinishAutoClose;   // 自動で閉じるイベントが終了したとき.
+        UnityEvent onFinishAutoClose = default;      // 自動で閉じるイベントが終了したとき.
 
-        uTweener masterTween;        // Tweenが終了したことを判定するためのtween.
+        uTweener masterTween;                                 // Tweenが終了したことを判定するためのtween.
         List<uTweener> tweens;
         float tweenStartTime;
         AutoCloseState autoCloseState;

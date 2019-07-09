@@ -7,7 +7,7 @@ namespace VMUnityLib {
 	
 	public class uTweenText : uTweenValue {
 
-		private Text mText;
+		Text mText;
 		public Text cacheText {
 			get {
 				mText = GetComponent<Text>();

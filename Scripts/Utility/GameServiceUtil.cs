@@ -35,7 +35,7 @@ public class GameServiceUtil
     }
     // 認証が完了した時に呼び出される
     // 認証が成功した場合、サーバーからのデータがSocial.localUserにセットされている
-    private static void ProcessAuthentication(bool success)
+    static void ProcessAuthentication(bool success)
     {
         if (success)
         {

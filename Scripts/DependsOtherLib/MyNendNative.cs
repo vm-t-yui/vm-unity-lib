@@ -19,7 +19,7 @@ namespace VMUnityLib
         /// <summary>
         /// 開始時処理
         /// </summary>
-        private void Start()
+        void Start()
         {
             native.LoadAd();
         }

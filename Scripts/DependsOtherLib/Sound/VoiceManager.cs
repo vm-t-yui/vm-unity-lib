@@ -9,7 +9,7 @@ using VMUnityLib;
 public class VoiceManager : SingletonMonoBehaviour<VoiceManager>
 {
     [SerializeField]
-    SePlayer sePlayer;
+    SePlayer sePlayer = default;
 
     /// <summary>
     /// ボイス再生.

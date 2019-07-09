@@ -9,23 +9,23 @@ using VMUnityLib;
 public sealed class AnimationSoundPlayer : MonoBehaviour 
 {
     [SerializeField]
-    private RandomSoundSelecter soundSelecter;
+    RandomSoundSelecter soundSelecter = default;
 
     public RandomSoundSelecter SoundSelecter { get { return soundSelecter; } }
 
     [System.Serializable]
-    struct SoundData
+    class SoundData
     {
-        public List<AudioClip>      clip;
-        public float                pitchBand;
-        public float                playPercent;
+        public List<AudioClip>      clip = default;
+        public float                pitchBand = default;
+        public float                playPercent = default;
 #if UNITY_EDITOR
-        public string comment;
+        public string comment = default;
 #endif
     }
 
     [SerializeField]
-    List<SoundData> dataList;
+    List<SoundData> dataList = default;
 
     /// <summary>
     /// アニメーションからサウンドを再生.

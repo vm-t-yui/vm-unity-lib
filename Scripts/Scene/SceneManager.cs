@@ -18,23 +18,23 @@ namespace VMUnityLib
     public class SceneManager : MonoBehaviour
     {
         public const string SCENE_ROOT_NAME_HEADER = "SceneRoot_";
-        private const float DEBGUG_DUMMY_LOAD_TIME = 0.5f;
-        private const float DUMMY_LOAD_TIME = 2.0f;
+        const float DEBGUG_DUMMY_LOAD_TIME = 0.5f;
+        const float DUMMY_LOAD_TIME = 2.0f;
 
-        private SceneRoot          currentSceneRoot = null;                            // 現在アクティブなシーンルート.
-        private List<SceneRoot>    loadedSceneRootList = new List<SceneRoot>();        // ロード済みのシーンルート.
-        private Stack<string>   sceneHistory = new Stack<string>();                 // シーンの遷移ヒストリ.
+        SceneRoot          currentSceneRoot = null;                            // 現在アクティブなシーンルート.
+        List<SceneRoot>    loadedSceneRootList = new List<SceneRoot>();        // ロード済みのシーンルート.
+        Stack<string>   sceneHistory = new Stack<string>();                 // シーンの遷移ヒストリ.
 
-        private Stack<KeyValuePair<string, int>> sceneAnchor = new Stack<KeyValuePair<string, int>>();    // シーンのアンカー.
+        Stack<KeyValuePair<string, int>> sceneAnchor = new Stack<KeyValuePair<string, int>>();    // シーンのアンカー.
 
-        private bool            isFadeWaiting = false;
-        private CommonSceneUI   sceneUI = null;
+        bool            isFadeWaiting = false;
+        CommonSceneUI   sceneUI = null;
 
-        [SceneNameAttribute, SerializeField] private string firstSceneName;
-        [SceneNameAttribute, SerializeField] private string debugFirstSceneName;
-        [SerializeField] private bool isDebug = true;
+        [SceneNameAttribute, SerializeField] string firstSceneName = default;
+        [SceneNameAttribute, SerializeField] string debugFirstSceneName = default;
+        [SerializeField] bool isDebug = true;
 
-        public static SceneManager Instance { get; private set; }
+        public static SceneManager Instance { get; set; }
 
         // シーンチェンジ時のフェードのパラメータ.
         public struct SceneChangeFadeParam
@@ -128,7 +128,7 @@ namespace VMUnityLib
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(PushSceneInternal(SceneName, fadeParam, afterSceneControlDelegate, pushAnchor));
         }
-        private IEnumerator PushSceneInternal(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, string pushAnchor)
+        IEnumerator PushSceneInternal(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, string pushAnchor)
         {
             while (isFadeWaiting)
             {
@@ -175,7 +175,7 @@ namespace VMUnityLib
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(ChangeSceneInternal(SceneName, fadeParam, afterSceneControlDelegate));
         }
-        private IEnumerator ChangeSceneInternal(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
+        IEnumerator ChangeSceneInternal(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
             while (isFadeWaiting)
             {
@@ -204,7 +204,7 @@ namespace VMUnityLib
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate));
         }
-        private IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
+        IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
             while (isFadeWaiting)
             {
@@ -249,7 +249,7 @@ namespace VMUnityLib
                 Logger.Warn("Anchor not found.:" + anchorName);
             }
         }
-        private IEnumerator PopSceneToAnchorInternal(string anchorName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
+        IEnumerator PopSceneToAnchorInternal(string anchorName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
             while (isFadeWaiting)
             {
@@ -330,7 +330,7 @@ namespace VMUnityLib
         /// <summary>
         /// フェードアウト終了時のコールバック.
         /// </summary>
-        private void EndFadeOutCallBack()
+        void EndFadeOutCallBack()
         {
             isFadeWaiting = false;
         }
@@ -338,7 +338,7 @@ namespace VMUnityLib
         /// <summary>
         /// フェードイン終了時のコールバック.
         /// </summary>
-        private void EndFadeInCallBack()
+        void EndFadeInCallBack()
         {
             // フェード終了メッセージを流す.
             if (currentSceneRoot)
@@ -350,7 +350,7 @@ namespace VMUnityLib
         /// <summary>
         /// シーンのアクティブ状態を変更する.
         /// </summary>
-        private IEnumerator ChangeSceneActivation(string SceneName)
+        IEnumerator ChangeSceneActivation(string SceneName)
         {
             // 現在のシーンをディアクティブにする.
             if (currentSceneRoot) 
@@ -457,7 +457,7 @@ namespace VMUnityLib
         /// <summary>
         /// シーン切り替え後のクリーンアップ（フェードイン等）.
         /// </summary>
-        private void CleaneUpAfterChangeSceneActivation(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
+        void CleaneUpAfterChangeSceneActivation(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
             LoadingUIManager.Inst.HideLoadingUI(fadeParam.loadingType);
             CmnFadeManager.Inst.StartFadeIn(EndFadeInCallBack, fadeParam.fadeInTime, fadeParam.fadeType, fadeParam.fadeColor);
@@ -473,7 +473,7 @@ namespace VMUnityLib
         /// ロードが終了しているシーンルートを取得する.
         /// </summary>
         /// <returns></returns>
-        private GameObject GetLoadedSceneRoot(string rootName)
+        GameObject GetLoadedSceneRoot(string rootName)
         {
             foreach(SceneRoot root in loadedSceneRootList)
             {
@@ -488,7 +488,7 @@ namespace VMUnityLib
         /// <summary>
         /// ロード済シーンルートをダンプ.
         /// </summary>
-        private void DumpLoadedSceneRoot()
+        void DumpLoadedSceneRoot()
         {
             Debug.Log("---- loaded scene ---");
             foreach (SceneRoot root in loadedSceneRootList)

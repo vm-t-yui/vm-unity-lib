@@ -25,7 +25,7 @@ namespace VMUnityLib
     [CustomPropertyDrawer(typeof(TagNameAttribute))]
     public class TagNameDrawer : PropertyDrawer
     {
-        private TagNameAttribute tagNameAttribute
+        TagNameAttribute tagNameAttribute
         {
             get
             {

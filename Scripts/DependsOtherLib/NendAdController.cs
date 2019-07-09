@@ -14,16 +14,16 @@ namespace VMUnityLib
     {
 #if USE_NEND
         [SerializeField]
-        private NendAdBanner topBanner;
+        NendAdBanner topBanner;
 
         [SerializeField]
-        private NendAdBanner bottomBanner;
+        NendAdBanner bottomBanner;
 
         [SerializeField]
-        private NendAdInterstitial inter;
+        NendAdInterstitial inter;
 
-        public bool IsShowTopBanner { get; private set; }
-        public bool IsShowBottomBanner { get; private set; }
+        public bool IsShowTopBanner { get; set; }
+        public bool IsShowBottomBanner { get; set; }
 
         /// <summary>
         /// スタート.

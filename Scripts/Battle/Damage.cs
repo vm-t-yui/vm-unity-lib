@@ -12,8 +12,8 @@ namespace VMUnityLib
     /// </summary>
     public struct DamageResult
     {
-        public DamageInfo   TookDamage  { get; private set; }
-        public GameObject   Target      { get; private set; }
+        public DamageInfo   TookDamage  { get; set; }
+        public GameObject   Target      { get; set; }
         public DamageResult(DamageInfo tookDamage, GameObject target)
             : this()
         {
@@ -40,11 +40,11 @@ namespace VMUnityLib
         public const string OnTakeDamageEventName    = "OnTakeDamage";
         public const string OnProvideDamageEventName = "OnProvideDamage";
 
-        [SerializeField] private DamageKind             kind;           // ダメージ種別.
-        [SerializeField] private List<DamageAttribute>  attribute;      // ダメージ属性.
-        [SerializeField] private int                    pureDamage;     // ダメージ量.
-        [SerializeField] private string                 damageEffectId; // ダメージエフェクトId.
-        [SerializeField] private DamageEtcEffect        etcEffect;      // ゲームごとの特殊エフェクト.
+        [SerializeField] DamageKind             kind;           // ダメージ種別.
+        [SerializeField] List<DamageAttribute>  attribute;      // ダメージ属性.
+        [SerializeField] int                    pureDamage;     // ダメージ量.
+        [SerializeField] string                 damageEffectId; // ダメージエフェクトId.
+        [SerializeField] DamageEtcEffect        etcEffect;      // ゲームごとの特殊エフェクト.
 
         public GameObject       Owner       { get; set; }               // 持ち主.
         public float            DamageRate  { get; set; }

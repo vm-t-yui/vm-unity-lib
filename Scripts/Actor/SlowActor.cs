@@ -11,7 +11,7 @@ public sealed class SlowActor : MonoBehaviour
     /// <summary>
     ///  スロー開始.
     /// </summary>
-    private void SlowStart(float t)
+    void SlowStart(float t)
     {
         beforeSlow = Time.timeScale;
         Time.timeScale = t;
@@ -20,7 +20,7 @@ public sealed class SlowActor : MonoBehaviour
     /// <summary>
     /// スロー終了.
     /// </summary>
-    private void SlowEnd()
+    void SlowEnd()
     {
         Time.timeScale = beforeSlow;
     }

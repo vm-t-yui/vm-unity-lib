@@ -28,7 +28,7 @@ namespace VMUnityLib
             }
         }
 
-        private void CorrectMyName()
+        void CorrectMyName()
         {
             SceneRoot obj = target as SceneRoot;
             //string sceneName = EditorApplication.currentScene;

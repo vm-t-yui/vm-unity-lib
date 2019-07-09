@@ -10,7 +10,7 @@ namespace VMUnityLib
         /// <summary>
         /// 計算後Update.
         /// </summary>
-        private void LateUpdate()
+        void LateUpdate()
         {
             Quaternion inv = transform.parent.rotation;
 

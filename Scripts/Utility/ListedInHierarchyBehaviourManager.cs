@@ -57,7 +57,7 @@ namespace VMUnityLib
         /// <summary>
         /// ヒエラルキー上の順序を変える.
         /// </summary>
-        private void SortSiblingIndex()
+        void SortSiblingIndex()
         {
             int i = 0;
             foreach (MonoBehaviour item in GetAllItem())

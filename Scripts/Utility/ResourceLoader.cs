@@ -18,30 +18,30 @@ public sealed class ResourceLoader : SingletonMonoBehaviour<ResourceLoader>
     //        LocalData   // ローカルデータ上.
     //    }
 
-    //    private const string LANG_PATH_JP             = "/jpn";                   // 言語パス：日本語.
-    //    private const string REGION_PATH_JP           = "/JP";                    // リージョンパス：日本.
+    //    const string LANG_PATH_JP             = "/jpn";                   // 言語パス：日本語.
+    //    const string REGION_PATH_JP           = "/JP";                    // リージョンパス：日本.
 
-    //    private const string PLATFORM_PATH_WEB        = "/web";                   // プラットフォームパス：Web.
+    //    const string PLATFORM_PATH_WEB        = "/web";                   // プラットフォームパス：Web.
 
     //#if UNITY_IOS
-    //    private const string PLATFORM_PATH_IOS        = "/iOS";                   // プラットフォームパス：iOS.
+    //    const string PLATFORM_PATH_IOS        = "/iOS";                   // プラットフォームパス：iOS.
     //#elif UNITY_ANDROID && !UNITY_EDITOR
-    //    private const string PLATFORM_PATH_ANDROID    = "/android";               // プラットフォームパス：Android.
+    //    const string PLATFORM_PATH_ANDROID    = "/android";               // プラットフォームパス：Android.
     //#endif
 
-    //    //private static string RESOURCES_PATH = "file://" + Application.dataPath + "/Resources";        // 埋め込みResourcesのパス.
+    //    //static string RESOURCES_PATH = "file://" + Application.dataPath + "/Resources";        // 埋め込みResourcesのパス.
 
-    //    private const string ASSETBUNDLE_GROBALPATH = "http://" + LibBridgeInfo.GAME_SERVER_URL;         // アセットバンドルのオンラインファイル時の先頭パス.
+    //    const string ASSETBUNDLE_GROBALPATH = "http://" + LibBridgeInfo.GAME_SERVER_URL;         // アセットバンドルのオンラインファイル時の先頭パス.
 
-    //    private static string ASSETBUNDLE_DEF_LOCALPATH; // アセットバンドルのローカルファイル時の先頭パス（デフォルト）.
-    //    private static string ASSETBUNDLE_LOCALPATH;     // アセットバンドルのローカルファイル時の先頭パス.
+    //    static string ASSETBUNDLE_DEF_LOCALPATH; // アセットバンドルのローカルファイル時の先頭パス（デフォルト）.
+    //    static string ASSETBUNDLE_LOCALPATH;     // アセットバンドルのローカルファイル時の先頭パス.
 
-    //    private string PLATFORM;            // プラットフォームパス.
-    //    private string LANG;                // 言語パス.
-    //    private string REGION;              // リージョンパス.
+    //    string PLATFORM;            // プラットフォームパス.
+    //    string LANG;                // 言語パス.
+    //    string REGION;              // リージョンパス.
 
-    //    //private string resourcesHeadPath;   // リソースの先頭パス.
-    //    private string assetBundleHeadPath; // アセットバンドルの先頭パス.
+    //    //string resourcesHeadPath;   // リソースの先頭パス.
+    //    string assetBundleHeadPath; // アセットバンドルの先頭パス.
 
     //    /// <summary>
     //    /// Awake.
@@ -101,7 +101,7 @@ public sealed class ResourceLoader : SingletonMonoBehaviour<ResourceLoader>
     //    /// <summary>
     //    /// リソースファイルロード内部処理.
     //    /// </summary>
-    //    private IEnumerator LoadResourcesInternal(string path, EndLoadResourcesCallback callback)
+    //    IEnumerator LoadResourcesInternal(string path, EndLoadResourcesCallback callback)
     //    {
     //        Logger.Log("Load called:" + path);
     //        ResourceRequest resReq = Resources.LoadAsync(resourcesHeadPath + PLATFORM + REGION + LANG + path);
@@ -125,7 +125,7 @@ public sealed class ResourceLoader : SingletonMonoBehaviour<ResourceLoader>
     //    /// <summary>
     //    /// アセットバンドルロード内部処理.
     //    /// </summary>
-    //    private IEnumerator LoadAssetBundleInternal(string path, EndLoadAssetBundleCallback callback)
+    //    IEnumerator LoadAssetBundleInternal(string path, EndLoadAssetBundleCallback callback)
     //    {
     //        string loadPath = assetBundleHeadPath + PLATFORM + REGION + LANG + path;
     //        Logger.Log("Load called:" + loadPath);
@@ -173,7 +173,7 @@ public sealed class ResourceLoader : SingletonMonoBehaviour<ResourceLoader>
     //    /// <summary>
     //    /// 各リソースのパスのマウントを行う.
     //    /// </summary>
-    //    private void MountPath()
+    //    void MountPath()
     //    {
     //        ASSETBUNDLE_DEF_LOCALPATH = "file:///" + Application.streamingAssetsPath; // アセットバンドルのローカルファイル時の先頭パス（デフォルト）.
 

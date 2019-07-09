@@ -7,27 +7,27 @@ using UnityEngine;
 public sealed class LightIntensityController : MonoBehaviour 
 {
     [SerializeField]
-    private float intensityMax;
+    float intensityMax = default;
 
     [SerializeField]
-    private float intensityMin;
+    float intensityMin = default;
 
     [SerializeField]
-    private Light targetLight;
+    Light targetLight = default;
 
     [SerializeField]
-    private bool FadeOutOnActive = false;
+    bool FadeOutOnActive = default;
 
     [SerializeField]
-    private float FadeOutLerpT;
+    float FadeOutLerpT = default;
 
-    private bool isFading = false;
-    private float random;
+    bool isFading = false;
+    float random;
 
     /// <summary>
     /// アクティブ時.
     /// </summary>
-    private void OnEnable()
+    void OnEnable()
     {
         if(FadeOutOnActive)
         {
@@ -38,7 +38,7 @@ public sealed class LightIntensityController : MonoBehaviour
     /// <summary>
     /// 更新.
     /// </summary>
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         if(isFading == false)
         {

@@ -6,7 +6,7 @@ namespace VMUnityLib {
 	[AddComponentMenu("uTools/Tween/Tween Slider(uTools)")]	
 	public class uTweenSlider : uTweenValue {
 
-		private Slider mSlider;
+		Slider mSlider;
 		public Slider cacheSlider {
 			get {
 				mSlider = GetComponent<Slider>();

@@ -27,10 +27,10 @@ namespace VMUnityLib
             }
         }
 
-        [SerializeField] private float                slipInterbal;                             // スリップダメージ間隔（秒）.
-        [SerializeField] private Damage               damage;                                   // 基本ダメージ.
-        [SerializeField] private ContactPointKind     contactPointKind;                         // 通知する接触ポイント.
-        [SerializeField] private GameObject           owner;                                    // オーナー.
+        [SerializeField] float                slipInterbal      = default;              // スリップダメージ間隔（秒）.
+        [SerializeField] Damage               damage            = default;              // 基本ダメージ.
+        [SerializeField] ContactPointKind     contactPointKind  = default;              // 通知する接触ポイント.
+        [SerializeField] GameObject           owner             = default;              // オーナー.
 
         [TagNameAttribute, SerializeField] 
         public List<string>                           targetTags;                               // ダメージ対象タグ.
@@ -38,7 +38,7 @@ namespace VMUnityLib
         public GameObject                             Target { get; set; }                      // ターゲット。特定の対象を指定する場合に使用。PENETRATIONより優先度高.
         public Damage                                 Damage { get { return damage; } }
 
-        private List<SlippingObjectData>    slippingObjects = new List<SlippingObjectData>();   // スリップダメージを通しているオブジェクトの情報リスト.
+        List<SlippingObjectData>    slippingObjects = new List<SlippingObjectData>();   // スリップダメージを通しているオブジェクトの情報リスト.
     
         /// <summary>
         /// Use this for initialization.
@@ -66,7 +66,7 @@ namespace VMUnityLib
         /// <summary>
         /// 当たり判定検知.
         /// </summary>
-        private void OnTriggerEnter(Collider collider)
+        void OnTriggerEnter(Collider collider)
         {
             if(damage.Owner.activeSelf == false) return;
             if(gameObject.activeSelf == false) return;
@@ -98,7 +98,7 @@ namespace VMUnityLib
         /// <summary>
         /// Raises the trigger stay event.
         /// </summary>
-        private void OnTriggerStay(Collider collider)
+        void OnTriggerStay(Collider collider)
         {
             if(damage.Owner.activeSelf == false) return;
             if(gameObject.activeSelf == false) return;
@@ -121,7 +121,7 @@ namespace VMUnityLib
         /// Raises the trigger exit event.
         /// </summary>
         /// <param name="other">Other.</param>
-        private void OnTriggerExit(Collider other)
+        void OnTriggerExit(Collider other)
         {
             GameObject obj = CheckIsTargetObject((GetComponent<Collider>().gameObject));
             if(obj)
@@ -133,7 +133,7 @@ namespace VMUnityLib
         /// <summary>
         /// スリップダメージを与える.
         /// </summary>
-        private void TakeSlipDamage(GameObject target, Vector3 effectPos)
+        void TakeSlipDamage(GameObject target, Vector3 effectPos)
         {
             foreach (SlippingObjectData objdata in slippingObjects)
             {
@@ -153,7 +153,7 @@ namespace VMUnityLib
         /// ターゲットかどうか調べる.
         /// </summary>
         /// <returns>The target objects.</returns>
-        private GameObject CheckIsTargetObject(GameObject target)
+        GameObject CheckIsTargetObject(GameObject target)
         {
             GameObject ret = null;
             if (Target == null)
@@ -181,7 +181,7 @@ namespace VMUnityLib
         /// <summary>
         /// 接触ポジションを種別ごとに取得する.
         /// </summary>
-        private Vector3 GetContactPos(GameObject target)
+        Vector3 GetContactPos(GameObject target)
         {
             Vector3 ret = Vector3.zero;
             switch(contactPointKind)

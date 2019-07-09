@@ -12,19 +12,19 @@ namespace VMUnityLib
     {
 #if USE_TWEEN
         [System.Serializable]
-        struct ChangeColorData
+        class ChangeColorData
         {
-            public Color color;
-            public float time;
-            public iTween.EaseType easeType;
-            public List<Renderer> etcTargets; // 追加で同じ効果を発生させるレンダラー.
+            public Color color = default;
+            public float time = default;
+            public iTween.EaseType easeType = default;
+            public List<Renderer> etcTargets = default; // 追加で同じ効果を発生させるレンダラー.
 
 #if UNITY_EDITOR
-            public string comment;
+            public string comment = default;
 #endif
         }
         [SerializeField]
-        List<ChangeColorData> colorChangeDataList;
+        List<ChangeColorData> colorChangeDataList = default;
 
         /// <summary>
         /// アニメーションからカラーチェンジ.

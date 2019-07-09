@@ -13,9 +13,9 @@ namespace VMUnityLib
         public List<ShotSet>    shotSetPrefabs;
         public bool                shootOnStart = false;
 
-        public bool IsShotStarted { get; private set; }
+        public bool IsShotStarted { get; set; }
 
-        public List<ShotSet>    ShotSetList { get; private set; }
+        public List<ShotSet>    ShotSetList { get; set; }
     
         /// <summary>
         /// Use this for initialization.
