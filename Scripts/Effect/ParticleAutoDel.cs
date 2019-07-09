@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 #if USE_POOL_MANAGER
 using PathologicalGames;
 #endif

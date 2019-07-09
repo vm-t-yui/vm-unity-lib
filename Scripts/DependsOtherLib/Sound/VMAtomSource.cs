@@ -1,4 +1,4 @@
-﻿#if ENABLE_CRI
+#if ENABLE_CRI
 using UnityEngine;
 
 /// <summary>
