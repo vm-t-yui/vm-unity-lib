@@ -6,7 +6,7 @@ using UnityEngine;
 using System;
 using VMUnityLib;
 using TMPro;
-#if USE_L2_LOCALIZATION
+#if USE_I2_LOCALIZATION
 using I2.Loc;
 #endif
 
@@ -19,7 +19,7 @@ namespace VMUnityLib
         TextMeshProUGUI uiText;
         bool started = false;
         Action onEndPlayVoice;
-#if USE_L2_LOCALIZATION
+#if USE_I2_LOCALIZATION
     Localize localize;
 #endif
         TextMeshFader fadeColor = new TextMeshFader();
@@ -30,7 +30,7 @@ namespace VMUnityLib
         private void Start()
         {
             uiText = GetComponent<TextMeshProUGUI>();
-#if USE_L2_LOCALIZATION
+#if USE_I2_LOCALIZATION
         localize   = GetComponent<Localize>();
 #endif
         }
@@ -60,7 +60,7 @@ namespace VMUnityLib
             showTime = time;
             showedTime = Time.unscaledTime;
             onEndPlayVoice = in_onEndPlayVoice;
-#if USE_L2_LOCALIZATION
+#if USE_I2_LOCALIZATION
         localize.Term = "subTitle/" + str;
 #else
             uiText.text = str;
