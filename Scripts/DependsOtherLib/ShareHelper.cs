@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using VMUnityLib;
-using SWorker;
+using SocialConnector;
 
 public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper> 
 {
@@ -123,97 +123,28 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
     }
 
     /// <summary>
-    /// ツイッターでシェア.
+    /// シェア
     /// </summary>
-    public void ShareOnTwitter(string text, string url)
+    /// <param name="shareText">シェアするテキスト</param>
+    /// <param name="shareURL">シェアするURL</param>
+    public void Share(string shareText, string shareURL)
     {
-#if !DISABLE_SHARE_HELP
-        StartCoroutine(ShareOnTwitterCoroutine(text, url));
-#endif
+        StartCoroutine(_Share(shareText, shareURL));
     }
-    IEnumerator ShareOnTwitterCoroutine(string text, string url)
+    public IEnumerator _Share(string shareText, string shareURL)
     {
-        if (capturing)
-            yield return LibBridgeInfo.WaitForEndOfFrame;
+        // スクリーンショットがない場合は撮影
+        if (!File.Exists(captureFilePath))
+        {
+            // スクリーンショットを撮影
+            CaptureScreenShot();
 
-        SocialWorker.PostTwitter(text, url, captureFilePath);
-    }
+            // 撮影画像の保存が完了するまで処理を待機
+            if (capturing)
+                yield return LibBridgeInfo.WaitForEndOfFrame;
+        }
 
-    /// <summary>
-    /// フェイスブックでシェア.
-    /// </summary>
-    public void ShareOnFaceBook()
-    {
-#if !DISABLE_SHARE_HELP
-        StartCoroutine(ShareOnFaceBookCoroutine());
-#endif
-    }
-    IEnumerator ShareOnFaceBookCoroutine()
-    {
-        if (capturing)
-            yield return LibBridgeInfo.WaitForEndOfFrame;
-
-        SocialWorker.PostFacebook(captureFilePath);
-    }
-
-    /// <summary>
-    /// LINEでシェア.
-    /// </summary>
-    public void ShareOnLine(string text)
-    {
-#if !DISABLE_SHARE_HELP
-        SocialWorker.PostLine(text, string.Empty);
-#endif
-    }
-
-    /// <summary>
-    /// LINEでシェア.
-    /// </summary>
-    public void ShareOnLine()
-    {
-#if !DISABLE_SHARE_HELP
-        StartCoroutine(ShareOnLineCoroutine());
-#endif
-    }
-    IEnumerator ShareOnLineCoroutine()
-    {
-        if (capturing)
-            yield return LibBridgeInfo.WaitForEndOfFrame;
-
-        SocialWorker.PostLine(string.Empty, captureFilePath);
-    }
-
-    /// <summary>
-    /// インスタグラムでシェア.
-    /// </summary>
-    public void ShareOnInstagram()
-    {
-#if !DISABLE_SHARE_HELP
-        StartCoroutine(ShareOnInstagramCoroutine());
-#endif
-    }
-    IEnumerator ShareOnInstagramCoroutine()
-    {
-        if (capturing)
-            yield return LibBridgeInfo.WaitForEndOfFrame;
-
-        SocialWorker.PostInstagram(captureFilePath);
-    }
-
-    /// <summary>
-    /// 投稿可能な全てのアプリを選択式に表示.
-    /// </summary>
-    public void ShareOnChooser(string inText)
-    {
-#if !DISABLE_SHARE_HELP
-        StartCoroutine(ShareOnChooserCoroutine(inText));
-#endif
-    }
-    IEnumerator ShareOnChooserCoroutine(string inText)
-    {
-        if (capturing)
-            yield return LibBridgeInfo.WaitForEndOfFrame;
-
-        SocialWorker.CreateChooser(inText, captureFilePath);
+        // 投稿する
+        SocialConnector.SocialConnector.Share(shareText, shareURL, captureFilePath);
     }
 }
