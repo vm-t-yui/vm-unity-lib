@@ -7,7 +7,7 @@ using System.IO;
 
 namespace VMUnityLib
 {
-    public static class DataSaver
+    public static class JsonDataSaver
     {
         /// <summary>
         /// セーブ
