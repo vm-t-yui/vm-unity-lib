@@ -16,6 +16,7 @@ namespace VMUnityLib
         public static void Save<T>(T saveData)
             where T : class
         {
+            // 文字コードを指定してテキストファイルに書き込むクラスをインスタンス化
             StreamWriter writer;
 
             // データをJSON形式に変換
@@ -23,7 +24,7 @@ namespace VMUnityLib
             string dataName = saveData.ToString();
 
             // JSONファイルを作成し、書き込み（クラスの名前のJSONファイルを作成）
-            writer = new StreamWriter(Application.dataPath + "/SaveData/" + dataName + ".json", false);
+            writer = new StreamWriter(Application.dataPath + "/MyGameAssets/SaveData/" + dataName + ".json", false);
             writer.Write(jsonStr);
             writer.Flush();
             writer.Close();
@@ -36,13 +37,15 @@ namespace VMUnityLib
         public static T Load<T>(T loadData)
             where T : class
         {
+            // テキストファイルを読み込むクラスをインスタンス化
             StreamReader reader;
 
+            // 読み込んだJSONファイルを保存する変数を用意
             string dataStr = "";
             string dataName = loadData.ToString();
 
             // JSONファイルを読み込み、string型で保存
-            reader = new StreamReader(Application.dataPath + "/SaveData/" + dataName + ".json");
+            reader = new StreamReader(Application.dataPath + "/MyGameAssets/SaveData/" + dataName + ".json");
             dataStr = reader.ReadToEnd();
             reader.Close();
 
