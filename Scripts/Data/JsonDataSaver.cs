@@ -9,6 +9,8 @@ namespace VMUnityLib
 {
     public static class JsonDataSaver
     {
+        const string DataFolderPath = "/MyGameAssets/SaveData/";    // セーブデータ保存先パス
+
         /// <summary>
         /// セーブ
         /// </summary>
@@ -21,10 +23,10 @@ namespace VMUnityLib
 
             // データをJSON形式に変換
             string jsonStr = JsonUtility.ToJson(saveData);
-            string dataName = saveData.ToString();
+            string dataName = saveData.ToString() + ".json";
 
             // JSONファイルを作成し、書き込み（クラスの名前のJSONファイルを作成）
-            writer = new StreamWriter(Application.dataPath + "/MyGameAssets/SaveData/" + dataName + ".json", false);
+            writer = new StreamWriter(Application.dataPath + DataFolderPath + dataName, false);
             writer.Write(jsonStr);
             writer.Flush();
             writer.Close();
@@ -42,15 +44,35 @@ namespace VMUnityLib
 
             // 読み込んだJSONファイルを保存する変数を用意
             string dataStr = "";
-            string dataName = loadData.ToString();
+            string dataName = loadData.ToString() + ".json";
 
             // JSONファイルを読み込み、string型で保存
-            reader = new StreamReader(Application.dataPath + "/MyGameAssets/SaveData/" + dataName + ".json");
+            reader = new StreamReader(Application.dataPath + DataFolderPath + dataName);
             dataStr = reader.ReadToEnd();
             reader.Close();
 
             // JSON形式からオブジェクトに変換して返す
             return JsonUtility.FromJson<T>(dataStr);
+        }
+
+        /// <summary>
+        /// ファイルが存在するか
+        /// </summary>
+        /// <param name="checkData">調べるデータ（クラス）</param>
+        /// <returns></returns>
+        public static bool FileExists<T>(T checkData)
+            where T : class
+        {
+            string dataName = checkData.ToString() + ".json";
+            string dataPath = Application.dataPath + DataFolderPath + dataName;
+            if (File.Exists(dataPath))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
