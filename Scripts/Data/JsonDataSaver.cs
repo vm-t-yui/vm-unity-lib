@@ -63,8 +63,11 @@ namespace VMUnityLib
         public static bool FileExists<T>(T checkData)
             where T : class
         {
+            // クラス名からファイルパスを作成
             string dataName = checkData.ToString() + ".json";
             string dataPath = Application.dataPath + DataFolderPath + dataName;
+
+            // 指定したファイルがあればtrueを返す
             if (File.Exists(dataPath))
             {
                 return true;
