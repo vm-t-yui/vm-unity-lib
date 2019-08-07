@@ -27,8 +27,8 @@ namespace VMUnityLib
 
         Stack<KeyValuePair<string, int>> sceneAnchor = new Stack<KeyValuePair<string, int>>();    // シーンのアンカー.
 
-        bool            isFadeWaiting = false;
-        bool            isFadeEnd  = false;      // フェード終了フラグ
+        bool isFadeWaiting = false;
+        public bool isFadeEnd { get; private set; } = false;      // フェード終了フラグ
         CommonSceneUI   sceneUI = null;
 
         [SceneNameAttribute, SerializeField] string firstSceneName = default;
@@ -353,18 +353,6 @@ namespace VMUnityLib
 
             // フェード終了フラグを立てる
             isFadeEnd = true;
-        }
-
-        /// <summary>
-        /// フェード終了フラグの受け渡し関数
-        /// </summary>
-        /// <returns>フェード終了フラグの値</returns>
-        public bool GetIsFadeEnd()
-        {
-            bool returnflg = isFadeEnd;
-            isFadeEnd = false;
-
-            return returnflg;
         }
 
         /// <summary>
