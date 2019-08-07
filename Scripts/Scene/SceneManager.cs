@@ -28,6 +28,7 @@ namespace VMUnityLib
         Stack<KeyValuePair<string, int>> sceneAnchor = new Stack<KeyValuePair<string, int>>();    // シーンのアンカー.
 
         bool            isFadeWaiting = false;
+        bool            isFadeEnd  = false;      // フェード終了フラグ
         CommonSceneUI   sceneUI = null;
 
         [SceneNameAttribute, SerializeField] string firstSceneName = default;
@@ -124,6 +125,7 @@ namespace VMUnityLib
         /// <param name="pushAnchor">シーンまでのアンカー.</param>
         public void PushScene(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, string pushAnchor = null)
         {
+            isFadeEnd = false;
             isFadeWaiting = true;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(PushSceneInternal(SceneName, fadeParam, afterSceneControlDelegate, pushAnchor));
@@ -171,6 +173,7 @@ namespace VMUnityLib
         /// <param name="fadeTime">フェードパラメータ.</param>
         public void ChangeScene(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
+            isFadeEnd = false;
             isFadeWaiting = true;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(ChangeSceneInternal(SceneName, fadeParam, afterSceneControlDelegate));
@@ -200,6 +203,7 @@ namespace VMUnityLib
         /// <param name="fadeTime">フェードパラメータ.</param>
         public void PopScene(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
+            isFadeEnd = false;
             isFadeWaiting = true;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate));
@@ -230,6 +234,7 @@ namespace VMUnityLib
         /// <param name="fadeTime">フェードパラメータ.</param>
         public void PopSceneToAnchor(string anchorName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
+            isFadeEnd = false;
             isFadeWaiting = true;
 
             // アンカーが無ければ警告出して無視
@@ -345,6 +350,21 @@ namespace VMUnityLib
             {
                 currentSceneRoot.BroadcastMessage(CmnMonoBehaviour.FADE_END_NAME, SendMessageOptions.DontRequireReceiver);
             }
+
+            // フェード終了フラグを立てる
+            isFadeEnd = true;
+        }
+
+        /// <summary>
+        /// フェード終了フラグの受け渡し関数
+        /// </summary>
+        /// <returns></returns>
+        public bool GetIsFadeEnd()
+        {
+            bool returnflg = isFadeEnd;
+            isFadeEnd = false;
+
+            return returnflg;
         }
 
         /// <summary>
