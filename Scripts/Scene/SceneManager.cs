@@ -358,7 +358,7 @@ namespace VMUnityLib
         /// <summary>
         /// フェード終了フラグの受け渡し関数
         /// </summary>
-        /// <returns></returns>
+        /// <returns>フェード終了フラグの値</returns>
         public bool GetIsFadeEnd()
         {
             bool returnflg = isFadeEnd;
