@@ -333,6 +333,12 @@ namespace VMUnityLib
         void EndFadeOutCallBack()
         {
             isFadeWaiting = false;
+
+            // フェード終了メッセージを流す.
+            if (currentSceneRoot)
+            {
+                currentSceneRoot.BroadcastMessage(CmnMonoBehaviour.FADE_OUT_END_NAME, SendMessageOptions.DontRequireReceiver);
+            }
         }
 
         /// <summary>

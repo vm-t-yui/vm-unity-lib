@@ -10,6 +10,7 @@ namespace VMUnityLib
     {
         public const string INIT_SCENCE_CHANGE_NAME   = "InitSceneChange";
         public const string FADE_END_NAME             = "OnFadeInEnd";
+        public const string FADE_OUT_END_NAME         = "OnFadeOutEnd";
         public const string SCENCE_DEACTIVE_NAME      = "OnSceneDeactive";
 
         /// <summary>
@@ -31,6 +32,11 @@ namespace VMUnityLib
         /// フェードイン終了後の処理.
         /// </summary>
         protected abstract void OnFadeInEnd();
+
+        /// <summary>
+        /// フェードアウト終了後の処理.
+        /// </summary>
+        protected abstract void OnFadeOutEnd();
 
         /// <summary>
         /// 更新.
