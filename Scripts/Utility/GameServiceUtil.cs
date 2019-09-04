@@ -9,6 +9,7 @@ using GooglePlayGames.BasicApi;
 
 public class GameServiceUtil
 {
+    // NOTE: m.tanaka 下の各IDはLibBridgeファイル内にスクリプトを作成しています。
     // 各実績ID
     static string[] ACHIEVEMENT_IDs =
     {
