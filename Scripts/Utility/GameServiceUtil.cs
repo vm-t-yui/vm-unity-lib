@@ -10,7 +10,7 @@ using GooglePlayGames.BasicApi;
 public class GameServiceUtil
 {
     // 各実績ID
-    static string[] AchievementIDs =
+    static string[] ACHIEVEMENT_IDs =
     {
         GameServiceID.ACHIEVEMENT_1,
         GameServiceID.ACHIEVEMENT_2,
@@ -19,7 +19,7 @@ public class GameServiceUtil
     };
 
     // 各リーダーボードID
-    static string[] LeaderboardIDs =
+    static string[] LEADERBOARD_IDs =
     {
         GameServiceID.LEADERBOARD_1,
         GameServiceID.LEADERBOARD_2
@@ -78,12 +78,12 @@ public class GameServiceUtil
     /// </summary>
     public static void ReportScore(long score, int leaderboardNum)
     {
-#if !UNITY_EDITOR
-        Social.ReportScore(score, LeaderboardIDs[leaderboardNum], success => 
+#if UNITY_EDITOR
+        Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success => 
         {
             if(!success)
             {
-                Debug.LogWarning("スコア報告に失敗しました。id:" + LeaderboardIDs[leaderboardNum]);
+                Debug.LogWarning("スコア報告に失敗しました。id:" + LEADERBOARD_IDs[leaderboardNum]);
             }
         });
 #endif
@@ -94,12 +94,12 @@ public class GameServiceUtil
     /// </summary>
     public static void ReportProgress(int achievementNum)
     {
-#if !UNITY_EDITOR
-        Social.ReportProgress(AchievementIDs[achievementNum], 100, (bool success) =>
+#if UNITY_EDITOR
+        Social.ReportProgress(ACHIEVEMENT_IDs[achievementNum], 100, (bool success) =>
         {
             if (!success)
             {
-                Debug.LogWarning("実績解除に失敗しました。id:" + AchievementIDs[achievementNum]);
+                Debug.LogWarning("実績解除に失敗しました。id:" + ACHIEVEMENT_IDs[achievementNum]);
             }
         });
 #endif
