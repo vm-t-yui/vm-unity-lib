@@ -9,11 +9,21 @@ using GooglePlayGames.BasicApi;
 
 public class GameServiceUtil
 {
-#if UNITY_ANDROID
-    public const string LEADERBOARD_ID = GPGSIds.leaderboard_extirpation_ranking;
-#else
-    public const string  LEADERBOARD_ID = "btmankick.rank";
-#endif
+    // 各実績ID
+    static string[] AchievementIDs =
+    {
+        GameServiceID.ACHIEVEMENT_1,
+        GameServiceID.ACHIEVEMENT_2,
+        GameServiceID.ACHIEVEMENT_3,
+        GameServiceID.ACHIEVEMENT_4
+    };
+
+    // 各リーダーボードID
+    static string[] LeaderboardIDs =
+    {
+        GameServiceID.LEADERBOARD_1,
+        GameServiceID.LEADERBOARD_2
+    };
 
     /// <summary>
     /// ユーザー認証.
@@ -66,14 +76,30 @@ public class GameServiceUtil
     /// <summary>
     /// リーダーボードにスコアを送信する.
     /// </summary>
-    public static void ReportScore(long score)
+    public static void ReportScore(long score, int leaderboardNum)
     {
 #if !UNITY_EDITOR
-        Social.ReportScore(score, LEADERBOARD_ID, success => 
+        Social.ReportScore(score, LeaderboardIDs[leaderboardNum], success => 
         {
             if(!success)
             {
-                Debug.LogWarning("スコア報告に失敗しました。id:"+LEADERBOARD_ID);
+                Debug.LogWarning("スコア報告に失敗しました。id:" + LeaderboardIDs[leaderboardNum]);
+            }
+        });
+#endif
+    }
+
+    /// <summary>
+    /// 実績を解除する
+    /// </summary>
+    public static void ReportProgress(int achievementNum)
+    {
+#if !UNITY_EDITOR
+        Social.ReportProgress(AchievementIDs[achievementNum], 100, (bool success) =>
+        {
+            if (!success)
+            {
+                Debug.LogWarning("実績解除に失敗しました。id:" + AchievementIDs[achievementNum]);
             }
         });
 #endif
