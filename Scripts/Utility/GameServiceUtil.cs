@@ -102,6 +102,11 @@ public class GameServiceUtil
             {
                 Debug.LogWarning("実績解除に失敗しました。id:" + ACHIEVEMENT_IDs[achievementNum]);
             }
+            else
+            {
+                // UI用の新規実績解除フラグをオン
+                GameDataManager.Inst.PlayData.IsNewReleasedAchieve = true;
+            }
         });
 #endif
     }
