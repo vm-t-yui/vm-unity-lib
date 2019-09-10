@@ -57,7 +57,7 @@ public class GameServiceUtil
             Debug.Log("Failed to authenticate");
         }
     }
-    // 
+
     /// <summary>
     /// リーダーボードを表示する.
     /// </summary>
@@ -79,7 +79,7 @@ public class GameServiceUtil
     /// </summary>
     public static void ReportScore(long score, int leaderboardNum)
     {
-#if UNITY_EDITOR
+#if !UNITY_EDITOR
         Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success => 
         {
             if(!success)
@@ -95,7 +95,7 @@ public class GameServiceUtil
     /// </summary>
     public static void ReportProgress(int achievementNum)
     {
-#if UNITY_EDITOR
+#if !UNITY_EDITOR
         Social.ReportProgress(ACHIEVEMENT_IDs[achievementNum], 100, (bool success) =>
         {
             if (!success)
