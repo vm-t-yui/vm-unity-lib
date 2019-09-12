@@ -15,11 +15,11 @@ namespace VMUnityLib
         static string CreateDataPath<T>(T data)
             where T : class
         {
-            string dataName = data.ToString() + ".json";
+            string dataName = "/" + data.ToString() + ".json";
 
             string dataPath =
 #if UNITY_EDITOR
-            Application.dataPath + "/SaveData/" + dataName;
+            Application.dataPath + "/SaveData" + dataName;
 #else
             Application.persistentDataPath + dataName;
 #endif
