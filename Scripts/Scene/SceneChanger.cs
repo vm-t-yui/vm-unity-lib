@@ -8,13 +8,13 @@ namespace VMUnityLib
     public class SceneChanger : MonoBehaviour
     {
         [SceneNameAttribute]
-        public string SceneName;
+        public string SceneName = default;        // シーンの名前
 
-        public CmnFadeManager.FadeType  FadeType;
-        public Color                    FadeColor = Color.white;
+        public CmnFadeManager.FadeType  FadeType = default;         // フェードのタイプ
+        public Color                    FadeColor = Color.white;    // フェードの色
 
         /// <summary>
-        /// Changes the scene.
+        /// シーンの変更
         /// </summary>
         public void ChangeScene()
         {
@@ -25,7 +25,7 @@ namespace VMUnityLib
         }
 
         /// <summary>
-        /// Push the scene.
+        /// シーンのプッシュ
         /// </summary>
         public void PushScene()
         {
@@ -36,7 +36,7 @@ namespace VMUnityLib
         }
 
         /// <summary>
-        /// Pop the scene.
+        /// シーンのポップ
         /// </summary>
         public void PopScene()
         {
