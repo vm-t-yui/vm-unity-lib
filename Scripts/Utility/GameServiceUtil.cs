@@ -9,11 +9,22 @@ using GooglePlayGames.BasicApi;
 
 public class GameServiceUtil
 {
-#if UNITY_ANDROID
-    public const string LEADERBOARD_ID = GPGSIds.leaderboard_extirpation_ranking;
-#else
-    public const string  LEADERBOARD_ID = "btmankick.rank";
-#endif
+    // NOTE: m.tanaka 下の各IDはLibBridgeファイル内にスクリプトを作成しています。
+    // 各実績ID
+    static string[] ACHIEVEMENT_IDs =
+    {
+        GameServiceID.ACHIEVEMENT_1,
+        GameServiceID.ACHIEVEMENT_2,
+        GameServiceID.ACHIEVEMENT_3,
+        GameServiceID.ACHIEVEMENT_4
+    };
+
+    // 各リーダーボードID
+    static string[] LEADERBOARD_IDs =
+    {
+        GameServiceID.LEADERBOARD_1,
+        GameServiceID.LEADERBOARD_2
+    };
 
     /// <summary>
     /// ユーザー認証.
@@ -46,7 +57,7 @@ public class GameServiceUtil
             Debug.Log("Failed to authenticate");
         }
     }
-    // 
+
     /// <summary>
     /// リーダーボードを表示する.
     /// </summary>
@@ -66,14 +77,35 @@ public class GameServiceUtil
     /// <summary>
     /// リーダーボードにスコアを送信する.
     /// </summary>
-    public static void ReportScore(long score)
+    public static void ReportScore(long score, int leaderboardNum)
     {
 #if !UNITY_EDITOR
-        Social.ReportScore(score, LEADERBOARD_ID, success => 
+        Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success => 
         {
             if(!success)
             {
-                Debug.LogWarning("スコア報告に失敗しました。id:"+LEADERBOARD_ID);
+                Debug.LogWarning("スコア報告に失敗しました。id:" + LEADERBOARD_IDs[leaderboardNum]);
+            }
+        });
+#endif
+    }
+
+    /// <summary>
+    /// 実績を解除する
+    /// </summary>
+    public static void ReportProgress(int achievementNum)
+    {
+#if !UNITY_EDITOR
+        Social.ReportProgress(ACHIEVEMENT_IDs[achievementNum], 100, (bool success) =>
+        {
+            if (!success)
+            {
+                Debug.LogWarning("実績解除に失敗しました。id:" + ACHIEVEMENT_IDs[achievementNum]);
+            }
+            else
+            {
+                // UI用の新規実績解除フラグをオン
+                GameDataManager.Inst.PlayData.IsNewReleasedAchieve = true;
             }
         });
 #endif
