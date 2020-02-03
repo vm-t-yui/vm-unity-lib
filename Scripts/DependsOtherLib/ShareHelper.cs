@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*!    \brief  シェア機能を統合するユーティリティ.
 *******************************************************************************/
-
+#if !UNITY_EDITOR
 using UnityEngine;
 using System.Collections;
 using System.IO;
@@ -148,3 +148,4 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
         SocialConnector.SocialConnector.Share(shareText, shareURL, captureFilePath);
     }
 }
+#endif

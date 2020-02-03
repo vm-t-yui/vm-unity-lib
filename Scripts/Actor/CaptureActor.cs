@@ -1,6 +1,7 @@
 /******************************************************************************/
 /*!    \brief  キャプチャイベントを走らせるだけのアクタ.
 *******************************************************************************/
+#if !UNITY_EDITOR
 using UnityEngine;
 
 public sealed class CaptureActor : MonoBehaviour 
@@ -15,3 +16,4 @@ public sealed class CaptureActor : MonoBehaviour
 #endif
     }
 }
+#endif
