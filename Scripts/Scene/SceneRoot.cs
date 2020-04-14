@@ -4,6 +4,8 @@
 
 using UnityEngine;
 using System.Collections;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
+using UnityScene = UnityEngine.SceneManagement.Scene;
 
 namespace VMUnityLib
 {
@@ -15,17 +17,20 @@ namespace VMUnityLib
         // シーンUIとして何を表示するか.
         [SerializeField]
         CommonSceneUI.CommonSceneUIParam sceneUiParam = default;
-        public CommonSceneUI.CommonSceneUIParam SceneUiParam { get { return sceneUiParam; } }
+        public CommonSceneUI.CommonSceneUIParam SceneUiParam => sceneUiParam;
 
         // シーン背景の種別.
         [SerializeField]
         UISceneBG.SceneBgKind sceneBgKind = default;
-        public UISceneBG.SceneBgKind SceneBgKind { get { return sceneBgKind; } }
+        public UISceneBG.SceneBgKind SceneBgKind => sceneBgKind;
 
         // シーン名表示用のローカライズID.
         [SerializeField]
         string sceneNameLocalizeID = default;
-        public string SceneNameLocalizeID { get { return sceneNameLocalizeID; } }
+        public string SceneNameLocalizeID => sceneNameLocalizeID;
+
+        // Unityシーン情報
+        public UnityScene UnityScene { get; private set; }
 
         bool isDebug = false;
 
@@ -34,6 +39,9 @@ namespace VMUnityLib
         /// </summary>
         protected void Awake()
         {
+            // Awake呼ばれるのは初回ロードのアクティブ状態の時なので
+            UnityScene = UnitySceneManager.GetActiveScene();
+
             if (SceneManager.Instance != null)
             {
                 // 自身がロード済だと自己申告.
@@ -63,6 +71,11 @@ namespace VMUnityLib
             gameObject.BroadcastMessage(CmnMonoBehaviour.INIT_SCENCE_CHANGE_NAME, 0, SendMessageOptions.DontRequireReceiver);
             yield return new WaitForEndOfFrame();
             gameObject.BroadcastMessage(CmnMonoBehaviour.FADE_END_NAME, 0, SendMessageOptions.DontRequireReceiver);
+            while(SceneManager.Instance == null)
+            {
+                // 自身がロード済だと自己申告.
+                SceneManager.Instance.AddLoadedSceneRoot(this);
+            }
         }
 
         public string GetSceneName()

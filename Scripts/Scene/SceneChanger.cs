@@ -7,7 +7,7 @@ namespace VMUnityLib
 {
     public class SceneChanger : MonoBehaviour
     {
-        [SceneNameAttribute]
+        [SceneName]
         public string SceneName;
 
         public CmnFadeManager.FadeType  FadeType;

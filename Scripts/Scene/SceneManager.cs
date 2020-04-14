@@ -5,6 +5,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 #if USE_POOL_MANAGER
 using PathologicalGames;
 #endif
@@ -21,19 +22,16 @@ namespace VMUnityLib
         const float DEBGUG_DUMMY_LOAD_TIME = 0.5f;
         const float DUMMY_LOAD_TIME = 2.0f;
 
-        SceneRoot          currentSceneRoot = null;                            // 現在アクティブなシーンルート.
-        List<SceneRoot>    loadedSceneRootList = new List<SceneRoot>();        // ロード済みのシーンルート.
-        Stack<string>   sceneHistory = new Stack<string>();                 // シーンの遷移ヒストリ.
+        SceneRoot           currentSceneRoot = null;                            // 現在アクティブなシーンルート.
+        List<SceneRoot>     loadedSceneRootList = new List<SceneRoot>();        // ロード済みのシーンルート.
+        Stack<string>       sceneHistory = new Stack<string>();                 // シーンの遷移ヒストリ.
+        bool                isFadeWaiting = false;
+        CommonSceneUI       sceneUI = null;
+        bool                isDirectBoot;                                       // 直接起動かどうか
 
-        Stack<KeyValuePair<string, int>> sceneAnchor = new Stack<KeyValuePair<string, int>>();    // シーンのアンカー.
-
-        bool            isFadeWaiting = false;
-        CommonSceneUI   sceneUI = null;
-
-        [SceneNameAttribute, SerializeField] string firstSceneName = default;
-        [SceneNameAttribute, SerializeField] string debugFirstSceneName = default;
+        [SceneName, SerializeField] string firstSceneName = default;
+        [SceneName, SerializeField] string debugFirstSceneName = default;
         [SerializeField] bool isDebug = true;
-
         public static SceneManager Instance { get; set; }
 
         // シーンチェンジ時のフェードのパラメータ.
@@ -69,14 +67,19 @@ namespace VMUnityLib
             //　準備が整うまでシーン開始は遅延.
             yield return LibBridgeInfo.WaitForEndOfFrame;
             yield return LibBridgeInfo.WaitForEndOfFrame;
-            if (!isDebug)
+
+            // 直接シーン起動でない場合のみデフォルトシーンの読み込みを開始
+            if (!isDirectBoot)
             {
-                PushScene(firstSceneName, noTimeFade);
-            }
-            else
-            {
-                // デバッグの場合はデバッグシーンをアンカーとして埋め込んでおく.
-                PushScene(debugFirstSceneName, noTimeFade, null, debugFirstSceneName);
+                if (!isDebug)
+                {
+                    PushScene(firstSceneName, noTimeFade);
+                }
+                else
+                {
+                    // デバッグの場合はデバッグシーンをアンカーとして埋め込んでおく.
+                    PushScene(debugFirstSceneName, noTimeFade);
+                }
             }
         }
 
@@ -85,7 +88,12 @@ namespace VMUnityLib
         /// </summary>
         void Awake()
         {
-            if(Instance == null)
+            // アクティブなシーン名が"root"でない場合は直接起動フラグをたてる
+            if (UnitySceneManager.GetActiveScene().name != "root")
+            {
+                isDirectBoot = true;
+            }
+            if (Instance == null)
             {
                 Instance = this;
             }
@@ -115,20 +123,20 @@ namespace VMUnityLib
         ・ゲームをポーズした時にアクティブでないキャッシュ済シーンを破棄してメモリを確保
     　    （バックグラウンドに回った時に落とされる対策）
          */
-    
+
         /// <summary>
         /// シーンプッシュ.
         /// </summary>
-        /// <param name="SceneName">シーン名.</param>
+        /// <param name="sceneName">シーン名.</param>
         /// <param name="fadeTime">フェードパラメータ.</param>
         /// <param name="pushAnchor">シーンまでのアンカー.</param>
-        public void PushScene(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, string pushAnchor = null)
+        public void PushScene(string sceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
             isFadeWaiting = true;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-            StartCoroutine(PushSceneInternal(SceneName, fadeParam, afterSceneControlDelegate, pushAnchor));
+            StartCoroutine(PushSceneInternal(sceneName, fadeParam, afterSceneControlDelegate));
         }
-        IEnumerator PushSceneInternal(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, string pushAnchor)
+        IEnumerator PushSceneInternal(string sceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
             while (isFadeWaiting)
             {
@@ -138,29 +146,9 @@ namespace VMUnityLib
             LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType);
             yield return null;  // 表示のために１フレ待つ.
 
-            yield return StartCoroutine(ChangeSceneActivation(SceneName));
+            yield return StartCoroutine(ChangeSceneActivation(sceneName));
 
-            sceneHistory.Push(SceneName);
-            if (pushAnchor != null)
-            {
-                bool find = false;
-                foreach (KeyValuePair<string, int> pair in sceneAnchor)
-                {
-                    if (pair.Key == pushAnchor)
-                    {
-                        find = true;
-                        break;
-                    }
-                }
-                if (find == false)
-                {
-                    sceneAnchor.Push(new KeyValuePair<string, int>(pushAnchor, sceneHistory.Count - 1));
-                }
-                else
-                {
-                    Logger.Error("same name anchor found");
-                }
-            }
+            sceneHistory.Push(sceneName);
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
     
@@ -224,32 +212,32 @@ namespace VMUnityLib
         }
 
         /// <summary>
-        /// 指定アンカーまでシーンポップ.
+        /// 指定シーンまでシーンポップ.
         /// </summary>
-        /// <param name="SceneName">ポップ先のアンカー名.</param>
+        /// <param name="sceneName">ポップ先のシーン名.</param>
         /// <param name="fadeTime">フェードパラメータ.</param>
-        public void PopSceneToAnchor(string anchorName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
+        public void PopSceneTo(string sceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
             isFadeWaiting = true;
 
             // アンカーが無ければ警告出して無視
             bool bFound = false;
-            foreach (KeyValuePair<string, int> pair in sceneAnchor)
+            foreach (var item in sceneHistory)
             {
-                if (pair.Key == anchorName)
+                if (item == sceneName)
                 {
                     CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-                    StartCoroutine(PopSceneToAnchorInternal(anchorName, fadeParam, afterSceneControlDelegate));
+                    StartCoroutine(PopSceneToInternal(sceneName, fadeParam, afterSceneControlDelegate));
                     bFound = true;
                     break;
                 }
             }
             if(bFound == false)
             {
-                Logger.Warn("Anchor not found.:" + anchorName);
+                Debug.LogWarning("Anchor not found.:" + sceneName);
             }
         }
-        IEnumerator PopSceneToAnchorInternal(string anchorName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
+        IEnumerator PopSceneToInternal(string sceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
             while (isFadeWaiting)
             {
@@ -259,28 +247,34 @@ namespace VMUnityLib
             LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType);
             yield return null;  // 表示のために１フレ待つ.
 
-            // 最初に見つかった同名アンカーまでポップ.
-            int popAnchorCount = -1;
-            foreach (KeyValuePair<string, int> pair in sceneAnchor)
+            // 最初に見つかった同名シーンまでポップ.
+            Stack<string> sceneHistoryCopy = new Stack<string>(sceneHistory);
+            sceneHistoryCopy.Pop(); // 現在のシーンが最初に入っているので削除
+            int popCount = 0;
+            while (sceneHistoryCopy.Count > 0)
             {
-                if (pair.Key == anchorName)
+                ++popCount;
+                if(sceneName != sceneHistoryCopy.Peek())
                 {
-                    popAnchorCount = pair.Value;
+                    sceneHistoryCopy.Pop();
+                }
+                else
+                {
                     break;
                 }
             }
-            if (popAnchorCount >= 0)
+            if (popCount >= sceneHistory.Count)
             {
-                while (sceneHistory.Count - 1 > popAnchorCount)
+                Debug.LogError("invalid scene name:" + sceneName);
+            }
+            else
+            {
+                for (int i = 0; i < popCount; i++)
                 {
                     sceneHistory.Pop();
                 }
                 string nextSceneName = sceneHistory.Peek();
                 yield return StartCoroutine(ChangeSceneActivation(nextSceneName));
-            }
-            else
-            {
-                Logger.Error("invalid anchor name:" + anchorName);
             }
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
@@ -297,9 +291,9 @@ namespace VMUnityLib
                 if(root != currentSceneRoot)
                 {
 #if UNITY_5_5_OR_NEWER
-                    UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(root.GetSceneName());
+                    UnitySceneManager.UnloadSceneAsync(root.GetSceneName());
 #else
-                    UnityEngine.SceneManagement.SceneManager.UnloadScene(root.GetSceneName());
+                    UnitySceneManager.UnloadScene(root.GetSceneName());
 #endif
                     GameObject.Destroy(root.gameObject);
                 }
@@ -317,14 +311,13 @@ namespace VMUnityLib
             foreach (SceneRoot root in loadedSceneRootList)
             {
 #if UNITY_5_5_OR_NEWER
-                UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(root.GetSceneName());
+                UnitySceneManager.UnloadSceneAsync(root.GetSceneName());
 #else
-                UnityEngine.SceneManagement.SceneManager.UnloadScene(root.GetSceneName());
+                UnitySceneManager.UnloadScene(root.GetSceneName());
 #endif
                 GameObject.Destroy(root.gameObject);
             }
             loadedSceneRootList = new List<SceneRoot>();
-            sceneAnchor = new Stack<KeyValuePair<string, int>>();
         }
 
         /// <summary>
@@ -401,7 +394,7 @@ namespace VMUnityLib
             //ロードされていなかったらAddiveLoadする.
             if(isLoaded == false)
             {
-                AsyncOperation async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(SceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                AsyncOperation async = UnitySceneManager.LoadSceneAsync(SceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 async.allowSceneActivation = true;
                 while(async.isDone == false || async.progress < 1.0f)
@@ -410,6 +403,8 @@ namespace VMUnityLib
                 }
 
                 GameObject sceneRootObj = GetLoadedSceneRoot(SCENE_ROOT_NAME_HEADER + SceneName);
+
+                // 120フレーム待ってもアクティブなルートが取れない場合は原因不明のエラーとしてassert
                 int waitCnt = 0;
                 while (sceneRootObj == null && waitCnt < 120)
                 {
@@ -419,25 +414,27 @@ namespace VMUnityLib
                 }
                 if (sceneRootObj == null)
                 {
-                    Debug.LogError("Scene root not found:" + SCENE_ROOT_NAME_HEADER + SceneName + " waited" + waitCnt + "frame.");
+                    Debug.LogAssertion("Scene root not found:" + SCENE_ROOT_NAME_HEADER + SceneName + " waited" + waitCnt + "frame.");
                     DumpLoadedSceneRoot();
 
-                    UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(SceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
+                    UnitySceneManager.LoadSceneAsync(SceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
                     sceneRootObj = GetLoadedSceneRoot(SCENE_ROOT_NAME_HEADER + SceneName);
                     if (sceneRootObj == null)
                     {
-                        Debug.LogError("no sync load but Scene root not found:" + SCENE_ROOT_NAME_HEADER + SceneName);
+                        Debug.LogAssertion("no sync load but Scene root not found:" + SCENE_ROOT_NAME_HEADER + SceneName);
                         DumpLoadedSceneRoot();
                     }
                 }
-                sceneRootObj.transform.parent = gameObject.transform;
+
+                // UNITYのバージョンアップにともない、マルチシーン機能が実装されたため親子関係による変更は廃止
+                //sceneRootObj.transform.parent = gameObject.transform;
                 SceneRoot root = sceneRootObj.GetComponent<SceneRoot>();
                 currentSceneRoot = root;
                 currentSceneRoot.SetSceneActive();
             }
 
             // unityシーンをアクティブにする.
-            if (UnityEngine.SceneManagement.SceneManager.SetActiveScene(UnityEngine.SceneManagement.SceneManager.GetSceneByName(SceneName)) == false)
+            if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(SceneName)) == false)
             {
                 Debug.Log("active scene fail");
             }
@@ -451,6 +448,13 @@ namespace VMUnityLib
             if(loadedSceneRootList.Contains(sceneRoot) == false)
             {
                 loadedSceneRootList.Add(sceneRoot);
+            }
+
+            // 直接起動の場合は現在のシーン更新してシーンヒストリーに入れる
+            if(currentSceneRoot == null && isDirectBoot)
+            {
+                currentSceneRoot = sceneRoot;
+                sceneHistory.Push(currentSceneRoot.GetSceneName());
             }
         }
 
