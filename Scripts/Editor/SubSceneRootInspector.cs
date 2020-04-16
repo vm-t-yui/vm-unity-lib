@@ -6,8 +6,8 @@ using UnityEditor;
 
 namespace VMUnityLib
 {
-    [CustomEditor(typeof(SceneRoot))]
-    public class SceneRootInspector : Editor
+    [CustomEditor(typeof(SubSceneRoot))]
+    public class SubSceneRootInspector : Editor
     {
         public void OnEnable()
         {
@@ -19,9 +19,9 @@ namespace VMUnityLib
 
         void CorrectMyName()
         {
-            SceneRoot obj = target as SceneRoot;
-            string newName = SceneManager.SCENE_ROOT_NAME_HEADER + obj.gameObject.scene.name;
-            if (target.name != newName)
+            SubSceneRoot obj = target as SubSceneRoot;
+            string newName = SceneManager.SUBSCENE_ROOT_NAME_HEADER + obj.gameObject.scene.name;
+            if(target.name != newName)
             {
                 target.name = newName;
                 Undo.RecordObject(obj, "CorrectMyName");

@@ -20,7 +20,8 @@ public sealed class CommonUiRoot : MonoBehaviour
             {
                 Debug.LogError("commonUiRootPrefabのロードに失敗");
             }
-            GameObject.Instantiate(commonUiRootPrefab);
+            var obj = GameObject.Instantiate(commonUiRootPrefab);
+            DontDestroyOnLoad(obj);
         }
     }
 }

@@ -2,26 +2,29 @@
 /*!    \brief  シーンのルートオブジェクトのエディタ拡張.
 *******************************************************************************/
 
+using UnityEngine;
 using UnityEditor;
 
 namespace VMUnityLib
 {
-    [CustomEditor(typeof(SceneRoot))]
-    public class SceneRootInspector : Editor
+    [CustomEditor(typeof(SubSceneActivateTrigger))]
+    public class SubSceneActivateTriggerInspector : Editor
     {
-        public void OnEnable()
+        public override void OnInspectorGUI()
         {
-            if (!EditorApplication.isPlayingOrWillChangePlaymode)
+            base.OnInspectorGUI();
+            if (GUILayout.Button("ゲームオブジェクトの名前を自動設定"))
             {
                 CorrectMyName();
             }
         }
 
+
         void CorrectMyName()
         {
-            SceneRoot obj = target as SceneRoot;
-            string newName = SceneManager.SCENE_ROOT_NAME_HEADER + obj.gameObject.scene.name;
-            if (target.name != newName)
+            SubSceneActivateTrigger obj = target as SubSceneActivateTrigger;
+            string newName = obj.gameObject.scene.name + "Trigger";
+            if(target.name != newName)
             {
                 target.name = newName;
                 Undo.RecordObject(obj, "CorrectMyName");

@@ -4,6 +4,7 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 using UnityScene = UnityEngine.SceneManagement.Scene;
 
@@ -14,20 +15,25 @@ namespace VMUnityLib
     /// </summary>
     public class SceneRoot : MonoBehaviour 
     {
-        // シーンUIとして何を表示するか.
-        [SerializeField]
+        [SerializeField, Tooltip("シーンUIとして何を表示するか")]
         CommonSceneUI.CommonSceneUIParam sceneUiParam = default;
         public CommonSceneUI.CommonSceneUIParam SceneUiParam => sceneUiParam;
 
-        // シーン背景の種別.
-        [SerializeField]
+        [SerializeField, Tooltip("シーン背景の種別")]
         UISceneBG.SceneBgKind sceneBgKind = default;
         public UISceneBG.SceneBgKind SceneBgKind => sceneBgKind;
 
-        // シーン名表示用のローカライズID.
-        [SerializeField]
+        [SerializeField, Tooltip("シーン名表示用のローカライズID")]
         string sceneNameLocalizeID = default;
         public string SceneNameLocalizeID => sceneNameLocalizeID;
+        
+        [SerializeField, Tooltip("サブシーンを持っているかどうか")]
+        bool hasSubScene = default;
+        public bool HasSubScene => hasSubScene;
+
+        [SerializeField, SceneName, Tooltip("初回にロードするサブシーンリスト")]
+        string firstSubSceneName = default;
+        public string FirstSubSceneName => firstSubSceneName;
 
         // Unityシーン情報
         public UnityScene UnityScene { get; private set; }
@@ -80,7 +86,7 @@ namespace VMUnityLib
 
         public string GetSceneName()
         {
-            return gameObject.name.Remove(0, SceneManager.SCENE_ROOT_NAME_HEADER.Length);
+            return gameObject.scene.name;
         }
 
         /// <summary>

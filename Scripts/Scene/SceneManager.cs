@@ -3,12 +3,10 @@
 *******************************************************************************/
 
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
-#if USE_POOL_MANAGER
-using PathologicalGames;
-#endif
 namespace VMUnityLib
 {
     public delegate void AfterSceneControlDelegate();
@@ -19,15 +17,16 @@ namespace VMUnityLib
     public class SceneManager : MonoBehaviour
     {
         public const string SCENE_ROOT_NAME_HEADER = "SceneRoot_";
+        public const string SUBSCENE_ROOT_NAME_HEADER = "SubSceneRoot_";
         const float DEBGUG_DUMMY_LOAD_TIME = 0.5f;
         const float DUMMY_LOAD_TIME = 2.0f;
 
-        SceneRoot           currentSceneRoot = null;                            // 現在アクティブなシーンルート.
-        List<SceneRoot>     loadedSceneRootList = new List<SceneRoot>();        // ロード済みのシーンルート.
-        Stack<string>       sceneHistory = new Stack<string>();                 // シーンの遷移ヒストリ.
+        SceneRoot           currentSceneRoot = null;                         // 現在アクティブなシーンルート.
+        List<SceneSet>      loadedScenes = new List<SceneSet>();             // ロード済みのシーンルートと所属するサブシーンルート.
+        Stack<string>       sceneHistory = new Stack<string>();              // シーンの遷移ヒストリ.
         bool                isFadeWaiting = false;
         CommonSceneUI       sceneUI = null;
-        bool                isDirectBoot;                                       // 直接起動かどうか
+        bool                isDirectBoot;                                   // 直接起動かどうか
 
         [SceneName, SerializeField] string firstSceneName = default;
         [SceneName, SerializeField] string debugFirstSceneName = default;
@@ -51,6 +50,15 @@ namespace VMUnityLib
                 fadeColor = inFadeColor;
                 loadingType = inLoadingType;
             }
+        }
+
+        /// <summary>
+        /// シーンルートと所属するサブシーンルート
+        /// </summary>
+        public class SceneSet
+        {
+            public SceneRoot            sceneRoot;
+            public List<SubSceneRoot>   subSceneRoots;
         }
 
         /// <summary>
@@ -285,21 +293,25 @@ namespace VMUnityLib
         /// </summary>
         public void UnloadAllOtherScene()
         {
-            // Sceneがすでにロードされているなら、そのシーンをアクティブにする.
-            foreach (SceneRoot root in loadedSceneRootList) 
+            SceneSet lastSceneSet = null;
+            foreach (var scene in loadedScenes) 
             {
-                if(root != currentSceneRoot)
+                if(scene.sceneRoot != currentSceneRoot)
                 {
-#if UNITY_5_5_OR_NEWER
-                    UnitySceneManager.UnloadSceneAsync(root.GetSceneName());
-#else
-                    UnitySceneManager.UnloadScene(root.GetSceneName());
-#endif
-                    GameObject.Destroy(root.gameObject);
+                    foreach (var item in scene.subSceneRoots)
+                    {
+                        UnitySceneManager.UnloadSceneAsync(item.GetSceneName());
+                    }
+                    UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
+                }
+                else
+                {
+                    lastSceneSet = scene;
                 }
             }
-            loadedSceneRootList = new List<SceneRoot> ();
-            loadedSceneRootList.Add (currentSceneRoot);
+
+            loadedScenes = new List<SceneSet>();
+            loadedScenes.Add (lastSceneSet);
         }
 
         /// <summary>
@@ -308,16 +320,15 @@ namespace VMUnityLib
         public void DebugUnloadAllScene()
         {
             // Sceneがすでにロードされているなら、そのシーンをアクティブにする.
-            foreach (SceneRoot root in loadedSceneRootList)
+            foreach (var scene in loadedScenes) 
             {
-#if UNITY_5_5_OR_NEWER
-                UnitySceneManager.UnloadSceneAsync(root.GetSceneName());
-#else
-                UnitySceneManager.UnloadScene(root.GetSceneName());
-#endif
-                GameObject.Destroy(root.gameObject);
+                foreach (var item in scene.subSceneRoots)
+                {
+                    UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
+                }
+                UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
             }
-            loadedSceneRootList = new List<SceneRoot>();
+            loadedScenes = new List<SceneSet>();
         }
 
         /// <summary>
@@ -343,7 +354,7 @@ namespace VMUnityLib
         /// <summary>
         /// シーンのアクティブ状態を変更する.
         /// </summary>
-        IEnumerator ChangeSceneActivation(string SceneName)
+        IEnumerator ChangeSceneActivation(string sceneName)
         {
             // 現在のシーンをディアクティブにする.
             if (currentSceneRoot) 
@@ -372,69 +383,167 @@ namespace VMUnityLib
 
             // Sceneがすでにロードされているなら、そのシーンをアクティブにする.
             bool isLoaded = false;
-            foreach (SceneRoot root in loadedSceneRootList) 
-            {
-                if(root.GetSceneName() == SceneName)
+            foreach (var scene in loadedScenes) 
                 {
-                    root.SetSceneActive();
-                    currentSceneRoot = root;
+                if(scene.sceneRoot.GetSceneName() == sceneName)
+                {
+                    scene.sceneRoot.SetSceneActive();
+                    currentSceneRoot = scene.sceneRoot;
                     isLoaded = true;
-#if USE_POOL_MANAGER
-                    // プールマネージャー初期化.
-                    foreach(KeyValuePair<string, SpawnPool> pool in PoolManager.Pools)
-                    {
-                        pool.Value.DespawnAll();
-                    }
-#endif
-
                     break;
                 }
             }
-        
+
             //ロードされていなかったらAddiveLoadする.
-            if(isLoaded == false)
+            SceneRoot sceneRoot = null;
+            if (isLoaded == false)
             {
-                AsyncOperation async = UnitySceneManager.LoadSceneAsync(SceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                yield return LoadSceneInternal(sceneName, false);
 
-                async.allowSceneActivation = true;
-                while(async.isDone == false || async.progress < 1.0f)
-                {
-                    yield return LibBridgeInfo.WaitForEndOfFrame;
-                }
-
-                GameObject sceneRootObj = GetLoadedSceneRoot(SCENE_ROOT_NAME_HEADER + SceneName);
-
-                // 120フレーム待ってもアクティブなルートが取れない場合は原因不明のエラーとしてassert
-                int waitCnt = 0;
-                while (sceneRootObj == null && waitCnt < 120)
-                {
-                    ++waitCnt;
-                    sceneRootObj = GetLoadedSceneRoot(SCENE_ROOT_NAME_HEADER + SceneName);
-                    yield return LibBridgeInfo.WaitForEndOfFrame;
-                }
-                if (sceneRootObj == null)
-                {
-                    Debug.LogAssertion("Scene root not found:" + SCENE_ROOT_NAME_HEADER + SceneName + " waited" + waitCnt + "frame.");
-                    DumpLoadedSceneRoot();
-
-                    UnitySceneManager.LoadSceneAsync(SceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
-                    sceneRootObj = GetLoadedSceneRoot(SCENE_ROOT_NAME_HEADER + SceneName);
-                    if (sceneRootObj == null)
-                    {
-                        Debug.LogAssertion("no sync load but Scene root not found:" + SCENE_ROOT_NAME_HEADER + SceneName);
-                        DumpLoadedSceneRoot();
-                    }
-                }
+                sceneRoot = GetLoadedSceneRoot(sceneName).GetComponent<SceneRoot>();
 
                 // UNITYのバージョンアップにともない、マルチシーン機能が実装されたため親子関係による変更は廃止
                 //sceneRootObj.transform.parent = gameObject.transform;
-                SceneRoot root = sceneRootObj.GetComponent<SceneRoot>();
-                currentSceneRoot = root;
+                currentSceneRoot = sceneRoot;
                 currentSceneRoot.SetSceneActive();
+
+                // 初回に必要なサブシーンをロードする
+                if (sceneRoot.HasSubScene)
+                {
+                    yield return LoadFirstSubScene(sceneRoot);
+                }
             }
 
-            // unityシーンをアクティブにする.
-            if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(SceneName)) == false)
+            // サブシーンを持っていなければシーンルートをアクティブにする.
+            if (!sceneRoot) sceneRoot = GetLoadedSceneRoot(sceneName).GetComponent<SceneRoot>();
+            if (!sceneRoot.HasSubScene && UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(sceneName)) == false)
+            {
+                Debug.Log("active scene fail");
+            }
+        }
+
+        /// <summary>
+        /// 初回に必要なサブシーンロード
+        /// </summary>
+        IEnumerator LoadFirstSubScene(SceneRoot sceneRoot)
+        {
+            yield return LoadSceneInternal(sceneRoot.FirstSubSceneName, true);
+
+            // 初回サブシーンが読み終わったら、必要サブシーンを読み込む
+            SubSceneRoot subSceneRoot = GetLoadedSubSceneRoot(sceneRoot.FirstSubSceneName).GetComponent<SubSceneRoot>();
+            foreach (var item in subSceneRoot.RequireSubSceneNames)
+            {
+                yield return LoadSceneInternal(item, true);
+            }
+
+            // サブシーンを持っている場合は、初回ロードのサブシーンをアクティブにする
+            if (sceneRoot.HasSubScene && UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(sceneRoot.FirstSubSceneName)) == false)
+            {
+                Debug.Log("active scene fail");
+            }
+        }
+
+        /// <summary>
+        /// シーンロード内部処理
+        /// </summary>
+        IEnumerator LoadSceneInternal(string sceneName, bool isSubScene)
+        {
+            AsyncOperation async = UnitySceneManager.LoadSceneAsync(sceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            async.allowSceneActivation = true;
+            while (async.isDone == false || async.progress < 1.0f)
+            {
+                yield return LibBridgeInfo.WaitForEndOfFrame;
+            }
+
+            Func<string, GameObject> getLoadedSceneRoot = GetLoadedSceneRoot;
+            if (isSubScene) getLoadedSceneRoot = GetLoadedSubSceneRoot;
+
+            // 120フレーム待ってもアクティブなルートが取れない場合は原因不明のエラーとしてassert
+            GameObject sceneRootObj = getLoadedSceneRoot(sceneName);
+            int waitCnt = 0;
+            while (sceneRootObj == null && waitCnt < 120)
+            {
+                ++waitCnt;
+                sceneRootObj = getLoadedSceneRoot(sceneName);
+                yield return LibBridgeInfo.WaitForEndOfFrame;
+            }
+            if (sceneRootObj == null)
+            {
+                Debug.LogAssertion("Scene root or sub scene not found:" + sceneName + " waited" + waitCnt + "frame.");
+                DumpLoadedSceneRoot();
+
+                UnitySceneManager.LoadScene(sceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                sceneRootObj = getLoadedSceneRoot(sceneName);
+                if (sceneRootObj == null)
+                {
+                    Debug.LogAssertion("no sync load but Scene root or sub scene not found:" + sceneName);
+                    DumpLoadedSceneRoot();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定サブシーンに必要なサブシーンのみをロードし、そのほかのシーンをアンロードする
+        /// </summary>
+        public void ActiveAndApplySubScene(SubSceneRoot subSceneRoot)
+        {
+            if(subSceneRoot.GetSceneName() != UnitySceneManager.GetActiveScene().name)
+            {
+                StopCoroutine("ActiveAndApplySubSceneInternal");
+                StartCoroutine(ActiveAndApplySubSceneInternal(subSceneRoot));
+            }
+        }
+        IEnumerator ActiveAndApplySubSceneInternal(SubSceneRoot subSceneRoot)
+        {
+            // ロード済のシーンから自分の親シーンを探す
+            var subSceneRootName = subSceneRoot.GetSceneName();
+            var unloadSceneList = new List<string>();
+            var loadSceneList = new List<string>();
+            foreach (var scene in loadedScenes)
+            {
+                if(scene.sceneRoot.GetSceneName() == subSceneRoot.ParentSceneName)
+                {
+                    // 既にロード済のサブシーンが新たなアクティブサブシーンの必要シーンに含まれていなければアンロード
+                    foreach (var item in scene.subSceneRoots)
+                    {
+                        var loadedSubSceneName = item.GetSceneName();
+                        if(subSceneRootName != loadedSubSceneName && !subSceneRoot.RequireSubSceneNames.Contains(loadedSubSceneName))
+                        {
+                            unloadSceneList.Add(loadedSubSceneName);
+                        }
+                    }
+
+                    // 新たなアクティブサブシーンの必要シーンがロードされていなければロード
+                    // HACK:サブシーンはゲームオブジェクトのオンオフではなく完全にロードアンロードのみの仕様とする
+                    foreach (var item in subSceneRoot.RequireSubSceneNames)
+                    {
+                        if(!scene.subSceneRoots.Exists(s => item == s.GetSceneName()))
+                        {
+                            loadSceneList.Add(item);
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // 参照する前にロード済リストから削除
+            foreach (var item in unloadSceneList)
+            {
+                foreach (var scene in loadedScenes)
+                {
+                    scene.subSceneRoots.RemoveAll(sub => sub.GetSceneName() == item);
+                }
+            }
+            foreach (var item in unloadSceneList)
+            {
+                yield return UnitySceneManager.UnloadSceneAsync(item);
+            }
+            foreach (var item in loadSceneList)
+            {
+                yield return LoadSceneInternal(item, true);
+            }
+
+            if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(subSceneRootName)) == false)
             {
                 Debug.Log("active scene fail");
             }
@@ -445,9 +554,21 @@ namespace VMUnityLib
         /// </summary>
         public void AddLoadedSceneRoot(SceneRoot sceneRoot)
         {
-            if(loadedSceneRootList.Contains(sceneRoot) == false)
+            bool containScene = false;
+            foreach (var scene in loadedScenes)
             {
-                loadedSceneRootList.Add(sceneRoot);
+                if(scene.sceneRoot == sceneRoot)
+                {
+                    containScene = true;
+                    break;
+                }
+            }
+            if (!containScene)
+            {
+                var newSceneSet = new SceneSet();
+                newSceneSet.sceneRoot = sceneRoot;
+                newSceneSet.subSceneRoots = new List<SubSceneRoot>();
+                loadedScenes.Add(newSceneSet);
             }
 
             // 直接起動の場合は現在のシーン更新してシーンヒストリーに入れる
@@ -455,6 +576,30 @@ namespace VMUnityLib
             {
                 currentSceneRoot = sceneRoot;
                 sceneHistory.Push(currentSceneRoot.GetSceneName());
+                StartCoroutine(LoadFirstSubScene(sceneRoot));   // どうせエディタ専用機能なのでコルーチンでサブシーンロード
+            }
+        }
+
+        /// <summary>
+        /// ロード済サブシーンルートを追加する（SubSceneRootが自己申告）.
+        /// </summary>
+        public void AddLoadedSubSceneRoot(SubSceneRoot subSceneRoot)
+        {
+            // ロード済みの所属サブシーンに追加する
+            // 親シーンが読み込まれている前提
+            bool foundParentScene = false;
+            foreach (var scene in loadedScenes)
+            {
+                if (scene.sceneRoot.GetSceneName() == subSceneRoot.ParentSceneName)
+                {
+                    foundParentScene = true;
+                    scene.subSceneRoots.Add(subSceneRoot);
+                    break;
+                }
+            }
+            if(!foundParentScene)
+            {
+                Debug.LogError("親シーンが読み込まれていないか、親シーン設定がおかしいです:" + subSceneRoot.name + " 親:" + subSceneRoot.ParentSceneName);
             }
         }
 
@@ -467,23 +612,37 @@ namespace VMUnityLib
             CmnFadeManager.Inst.StartFadeIn(EndFadeInCallBack, fadeParam.fadeInTime, fadeParam.fadeType, fadeParam.fadeColor);
             sceneUI.ChangeCommonSceneUI(currentSceneRoot.SceneUiParam, currentSceneRoot.SceneBgKind);
             sceneUI.ChangeSceneTitleLabel(currentSceneRoot.SceneNameLocalizeID);
-            if(afterSceneControlDelegate != null)
-            {
-                afterSceneControlDelegate();
-            }
+            afterSceneControlDelegate?.Invoke();
         }
 
         /// <summary>
         /// ロードが終了しているシーンルートを取得する.
         /// </summary>
-        /// <returns></returns>
-        GameObject GetLoadedSceneRoot(string rootName)
+        GameObject GetLoadedSceneRoot(string sceneName)
         {
-            foreach(SceneRoot root in loadedSceneRootList)
+            foreach (var scene in loadedScenes) 
             {
-                if(root.gameObject.name == rootName)
+                if(scene.sceneRoot.GetSceneName() == sceneName)
                 {
-                    return root.gameObject;
+                    return scene.sceneRoot.gameObject;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// ロードが終了しているサブシーンルートを取得する.
+        /// </summary>
+        GameObject GetLoadedSubSceneRoot(string subSceneName)
+        {
+            foreach (var scene in loadedScenes) 
+            {
+                foreach (var item in scene.subSceneRoots)
+                {
+                    if (item.GetSceneName() == subSceneName)
+                    {
+                        return item.gameObject;
+                    }
                 }
             }
             return null;
@@ -495,9 +654,13 @@ namespace VMUnityLib
         void DumpLoadedSceneRoot()
         {
             Debug.Log("---- loaded scene ---");
-            foreach (SceneRoot root in loadedSceneRootList)
+            foreach (var scene in loadedScenes) 
             {
-                Debug.Log(" " + root.gameObject.name);
+                Debug.Log(" " + scene.sceneRoot.gameObject.name);
+                foreach (var subRoot in scene.subSceneRoots)
+                {
+                    Debug.Log(" " + subRoot.gameObject.name);
+                }
             }
             Debug.Log("-------");
         }
