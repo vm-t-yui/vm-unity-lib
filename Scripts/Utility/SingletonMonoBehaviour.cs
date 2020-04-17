@@ -8,17 +8,44 @@ namespace VMUnityLib
     public class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
         static T instance;
+
+        /// <summary>
+        /// Awake時にインスタンス設定
+        /// </summary>
+        virtual protected void Awake()
+        {
+            // 他のGameObjectにアタッチされているか調べる.
+            // アタッチされている場合は破棄する.
+            if(instance == null)
+            {
+                instance = GetComponent<T>();
+            }
+            else if (this != instance)
+            {
+                Destroy(gameObject);
+                Debug.LogError(
+                    typeof(T) +
+                    " は既に他のGameObjectにアタッチされているため、コンポーネントを破棄しました." +
+                    " アタッチされているGameObjectは " + instance.gameObject.name + " です.");
+            }
+        }
+
         public static T Inst
         {
             get
             {
+                // もしAwake以前にインスタンス取得しようとしていたら警告
                 if (instance == null)
                 {
+                    Debug.LogWarning("Awakeが呼ばれる前にInstにアクセスしようとしました。" +
+                    "^\nScriptExecutionOrderを確認してください");
+
+                    // 全検索
                     instance = (T)FindObjectOfType(typeof(T));
 
                     if (instance == null)
                     {
-                        Logger.Error(typeof(T) + "is nothing");
+                        Debug.LogError(typeof(T) + "全検索をかけても見つかりませんでした");
                     }
                 }
 
