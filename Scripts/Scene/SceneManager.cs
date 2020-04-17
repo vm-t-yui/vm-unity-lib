@@ -427,13 +427,21 @@ namespace VMUnityLib
         /// </summary>
         IEnumerator LoadFirstSubScene(SceneRoot sceneRoot)
         {
-            yield return LoadSceneInternal(sceneRoot.FirstSubSceneName, true);
+            // 重複ロード防止のため1フレ待つ。既にロードされてたらやめとく
+            yield return null;
+            if(!IsLoadedSubScene(sceneRoot.FirstSubSceneName))
+            {
+                yield return LoadSceneInternal(sceneRoot.FirstSubSceneName, true);
+            }
 
             // 初回サブシーンが読み終わったら、必要サブシーンを読み込む
             SubSceneRoot subSceneRoot = GetLoadedSubSceneRoot(sceneRoot.FirstSubSceneName).GetComponent<SubSceneRoot>();
             foreach (var item in subSceneRoot.RequireSubSceneNames)
             {
-                yield return LoadSceneInternal(item, true);
+                if (!IsLoadedSubScene(item))
+                {
+                    yield return LoadSceneInternal(item, true);
+                }
             }
 
             // サブシーンを持っている場合は、初回ロードのサブシーンをアクティブにする
@@ -441,6 +449,23 @@ namespace VMUnityLib
             {
                 Debug.Log("active scene fail");
             }
+        }
+
+        /// <summary>
+        /// サブシーンが読み込まれていたかどうか
+        /// </summary>
+        public bool IsLoadedSubScene(string subSceneName)
+        {
+            bool alreadyLoaded = false;
+            foreach (var item in loadedScenes)
+            {
+                if (item.subSceneRoots.Exists(s => subSceneName == s.GetSceneName()))
+                {
+                    alreadyLoaded = true;
+                    break;
+                }
+            }
+            return alreadyLoaded;
         }
 
         /// <summary>
@@ -576,7 +601,11 @@ namespace VMUnityLib
             {
                 currentSceneRoot = sceneRoot;
                 sceneHistory.Push(currentSceneRoot.GetSceneName());
-                StartCoroutine(LoadFirstSubScene(sceneRoot));   // どうせエディタ専用機能なのでコルーチンでサブシーンロード
+                // どうせエディタ専用機能なのでコルーチンでサブシーンロード
+                if (sceneRoot.HasSubScene)
+                {
+                    StartCoroutine(LoadFirstSubScene(sceneRoot));
+                }
             }
         }
 
