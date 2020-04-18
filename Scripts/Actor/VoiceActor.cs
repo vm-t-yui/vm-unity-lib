@@ -4,41 +4,43 @@
 
 using UnityEngine;
 using System.Collections.Generic;
-
-public sealed class VoiceActor : MonoBehaviour 
+namespace VMUnityLib
 {
-    List<string> reserveActionVoiceIdList;
-
-    /// <summary>
-    /// 初期化.
-    /// </summary>
-    public void Start()
+    public sealed class VoiceActor : MonoBehaviour
     {
-        reserveActionVoiceIdList = new List<string>();
-    }
+        List<string> reserveActionVoiceIdList;
 
-    /// <summary>
-    /// アクションボイスの予約セット.
-    /// </summary>
-    public void ReserveActionVoiceList(List<string> voiceDataIdList)
-    {
-        reserveActionVoiceIdList.Clear();
-        foreach (string str in voiceDataIdList)
+        /// <summary>
+        /// 初期化.
+        /// </summary>
+        public void Start()
         {
-            reserveActionVoiceIdList.Add(str);
+            reserveActionVoiceIdList = new List<string>();
         }
-    }
 
-    /// <summary>
-    /// 予約されたアクションボイスを再生する.
-    /// </summary>
-    void PlayReservedActionVoiceList()
-    {
-        if (reserveActionVoiceIdList.Count != 0)
+        /// <summary>
+        /// アクションボイスの予約セット.
+        /// </summary>
+        public void ReserveActionVoiceList(List<string> voiceDataIdList)
         {
-            int idx = UnityEngine.Random.Range(0, reserveActionVoiceIdList.Count);
-            VoiceManager.Inst.PlayVoice(reserveActionVoiceIdList[idx]);
             reserveActionVoiceIdList.Clear();
+            foreach (string str in voiceDataIdList)
+            {
+                reserveActionVoiceIdList.Add(str);
+            }
+        }
+
+        /// <summary>
+        /// 予約されたアクションボイスを再生する.
+        /// </summary>
+        void PlayReservedActionVoiceList()
+        {
+            if (reserveActionVoiceIdList.Count != 0)
+            {
+                int idx = UnityEngine.Random.Range(0, reserveActionVoiceIdList.Count);
+                VoiceManager.Inst.PlayVoice(reserveActionVoiceIdList[idx]);
+                reserveActionVoiceIdList.Clear();
+            }
         }
     }
 }

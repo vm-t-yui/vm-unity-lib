@@ -4,31 +4,33 @@
 
 using UnityEngine;
 using System;
-using VMUnityLib;
 
-public class VoiceManager : SingletonMonoBehaviour<VoiceManager>
+namespace VMUnityLib
 {
-    [SerializeField]
-    SePlayer sePlayer = default;
-
-    /// <summary>
-    /// ボイス再生.
-    /// </summary>
-    public void PlayVoice(string id, Action onEndPlayVoice = null)
+    public class VoiceManager : SingletonMonoBehaviour<VoiceManager>
     {
-        VoiceData voiceData;
-        GameDataManager.Inst.VoiceDataManager.GetData(id, out voiceData);
-        if(voiceData)
+        [SerializeField]
+        SePlayer sePlayer = default;
+
+        /// <summary>
+        /// ボイス再生.
+        /// </summary>
+        public void PlayVoice(string id, Action onEndPlayVoice = null)
         {
-            // 字幕
-            if(voiceData.TermName != string.Empty)
+            VoiceData voiceData;
+            GameDataManager.Inst.VoiceDataManager.GetData(id, out voiceData);
+            if (voiceData)
             {
-                UISubtitle.Inst.SetSubtiltle(voiceData.TermName, voiceData.Time, onEndPlayVoice);
-            }
-            // 再生
-            if(voiceData.TermName != string.Empty)
-            {
-                sePlayer.PlaySe(voiceData.TermName);
+                // 字幕
+                if (voiceData.TermName != string.Empty)
+                {
+                    UISubtitle.Inst.SetSubtiltle(voiceData.TermName, voiceData.Time, onEndPlayVoice);
+                }
+                // 再生
+                if (voiceData.TermName != string.Empty)
+                {
+                    sePlayer.PlaySe(voiceData.TermName);
+                }
             }
         }
     }
