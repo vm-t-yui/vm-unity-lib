@@ -6,7 +6,9 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using VMUnityLib;
+#if !DISABLE_SHARE_HELP
 using SocialConnector;
+#endif
 
 public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper> 
 {
@@ -129,8 +131,11 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
     /// <param name="shareURL">シェアするURL</param>
     public void Share(string shareText, string shareURL)
     {
+#if !DISABLE_SHARE_HELP
         StartCoroutine(_Share(shareText, shareURL));
+#endif
     }
+#if !DISABLE_SHARE_HELP
     public IEnumerator _Share(string shareText, string shareURL)
     {
         // スクリーンショットがない場合は撮影
@@ -147,5 +152,6 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
         // 投稿する
         SocialConnector.SocialConnector.Share(shareText, shareURL, captureFilePath);
     }
+#endif    
 }
 #endif
