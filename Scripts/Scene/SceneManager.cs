@@ -36,7 +36,7 @@ namespace VMUnityLib
         public SceneRoot CurrentSceneRoot { get; private set; }
         public SubSceneRoot CurrentSubSceneRoot { get; private set; }
         public string CurrentSceneName { get { return CurrentSceneRoot.GetSceneName(); } }
-        public string CurrentSubSceneName { get { return CurrentSubSceneRoot.GetSceneName(); } }
+        public string CurrentSubSceneName { get { return CurrentSubSceneRoot ? CurrentSubSceneRoot.GetSceneName() : null; } }
 
         // シーンチェンジ時のフェードのパラメータ.
         public struct SceneChangeFadeParam
