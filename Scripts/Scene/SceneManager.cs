@@ -21,17 +21,22 @@ namespace VMUnityLib
         const float DEBGUG_DUMMY_LOAD_TIME = 0.5f;
         const float DUMMY_LOAD_TIME = 2.0f;
 
-        SceneRoot           currentSceneRoot = null;                         // 現在アクティブなシーンルート.
         List<SceneSet>      loadedScenes = new List<SceneSet>();             // ロード済みのシーンルートと所属するサブシーンルート.
         Stack<string>       sceneHistory = new Stack<string>();              // シーンの遷移ヒストリ.
         bool                isFadeWaiting = false;
         CommonSceneUI       sceneUI = null;
-        bool                isDirectBoot;                                   // 直接起動かどうか
+        bool                isDirectBoot;                                    // 直接起動かどうか
 
         [SceneName, SerializeField] string firstSceneName = default;
         [SceneName, SerializeField] string debugFirstSceneName = default;
         [SerializeField] bool isDebug = true;
         public static SceneManager Instance { get; set; }
+
+        // 現在アクティブなシーンルート.
+        public SceneRoot CurrentSceneRoot { get; private set; }
+        public SubSceneRoot CurrentSubSceneRoot { get; private set; }
+        public string CurrentSceneName { get { return CurrentSceneRoot.GetSceneName(); } }
+        public string CurrentSubSceneName { get { return CurrentSubSceneRoot.GetSceneName(); } }
 
         // シーンチェンジ時のフェードのパラメータ.
         public struct SceneChangeFadeParam
@@ -296,7 +301,7 @@ namespace VMUnityLib
             SceneSet lastSceneSet = null;
             foreach (var scene in loadedScenes) 
             {
-                if(scene.sceneRoot != currentSceneRoot)
+                if(scene.sceneRoot != CurrentSceneRoot)
                 {
                     foreach (var item in scene.subSceneRoots)
                     {
@@ -345,9 +350,9 @@ namespace VMUnityLib
         void EndFadeInCallBack()
         {
             // フェード終了メッセージを流す.
-            if (currentSceneRoot)
+            if (CurrentSceneRoot)
             {
-                currentSceneRoot.BroadcastMessage(CmnMonoBehaviour.FADE_END_NAME, SendMessageOptions.DontRequireReceiver);
+                CurrentSceneRoot.BroadcastMessage(CmnMonoBehaviour.FADE_END_NAME, SendMessageOptions.DontRequireReceiver);
             }
         }
 
@@ -357,9 +362,9 @@ namespace VMUnityLib
         IEnumerator ChangeSceneActivation(string sceneName)
         {
             // 現在のシーンをディアクティブにする.
-            if (currentSceneRoot) 
+            if (CurrentSceneRoot) 
             {
-                currentSceneRoot.SetSceneDeactive();
+                CurrentSceneRoot.SetSceneDeactive();
             }
 
             // デバッグだったらダミー遅延.
@@ -373,9 +378,9 @@ namespace VMUnityLib
             }
 
             // 偽の読み込み時間分待機
-            if(currentSceneRoot != null)
+            if(CurrentSceneRoot != null)
             {
-                if (currentSceneRoot.GetSceneName() != "demo")
+                if (CurrentSceneRoot.GetSceneName() != "demo")
                 {
                     yield return new WaitForSeconds(DUMMY_LOAD_TIME);
                 }
@@ -388,7 +393,7 @@ namespace VMUnityLib
                 if(scene.sceneRoot.GetSceneName() == sceneName)
                 {
                     scene.sceneRoot.SetSceneActive();
-                    currentSceneRoot = scene.sceneRoot;
+                    CurrentSceneRoot = scene.sceneRoot;
                     isLoaded = true;
                     break;
                 }
@@ -404,13 +409,17 @@ namespace VMUnityLib
 
                 // UNITYのバージョンアップにともない、マルチシーン機能が実装されたため親子関係による変更は廃止
                 //sceneRootObj.transform.parent = gameObject.transform;
-                currentSceneRoot = sceneRoot;
-                currentSceneRoot.SetSceneActive();
+                CurrentSceneRoot = sceneRoot;
+                CurrentSceneRoot.SetSceneActive();
 
                 // 初回に必要なサブシーンをロードする
                 if (sceneRoot.HasSubScene)
                 {
                     yield return LoadFirstSubScene(sceneRoot);
+                }
+                else
+                {
+                    CurrentSubSceneRoot = null;
                 }
             }
 
@@ -449,6 +458,8 @@ namespace VMUnityLib
             {
                 Debug.Log("active scene fail");
             }
+
+            CurrentSubSceneRoot = subSceneRoot;
         }
 
         /// <summary>
@@ -568,6 +579,8 @@ namespace VMUnityLib
                 yield return LoadSceneInternal(item, true);
             }
 
+            CurrentSubSceneRoot = subSceneRoot;
+
             if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(subSceneRootName)) == false)
             {
                 Debug.Log("active scene fail");
@@ -597,10 +610,10 @@ namespace VMUnityLib
             }
 
             // 直接起動の場合は現在のシーン更新してシーンヒストリーに入れる
-            if(currentSceneRoot == null && isDirectBoot)
+            if(CurrentSceneRoot == null && isDirectBoot)
             {
-                currentSceneRoot = sceneRoot;
-                sceneHistory.Push(currentSceneRoot.GetSceneName());
+                CurrentSceneRoot = sceneRoot;
+                sceneHistory.Push(CurrentSceneRoot.GetSceneName());
                 // どうせエディタ専用機能なのでコルーチンでサブシーンロード
                 if (sceneRoot.HasSubScene)
                 {
@@ -639,8 +652,8 @@ namespace VMUnityLib
         {
             LoadingUIManager.Inst.HideLoadingUI(fadeParam.loadingType);
             CmnFadeManager.Inst.StartFadeIn(EndFadeInCallBack, fadeParam.fadeInTime, fadeParam.fadeType, fadeParam.fadeColor);
-            sceneUI.ChangeCommonSceneUI(currentSceneRoot.SceneUiParam, currentSceneRoot.SceneBgKind);
-            sceneUI.ChangeSceneTitleLabel(currentSceneRoot.SceneNameLocalizeID);
+            sceneUI.ChangeCommonSceneUI(CurrentSceneRoot.SceneUiParam, CurrentSceneRoot.SceneBgKind);
+            sceneUI.ChangeSceneTitleLabel(CurrentSceneRoot.SceneNameLocalizeID);
             afterSceneControlDelegate?.Invoke();
         }
 
@@ -672,6 +685,21 @@ namespace VMUnityLib
                     {
                         return item.gameObject;
                     }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// ロードが終了しているサブシーンルートを取得する.
+        /// </summary>
+        public IReadOnlyList<SubSceneRoot> GetCurrentSubSceneRoots()
+        {
+            foreach (var scene in loadedScenes)
+            {
+                if(scene.sceneRoot == CurrentSceneRoot)
+                {
+                    return scene.subSceneRoots;
                 }
             }
             return null;
