@@ -415,7 +415,7 @@ namespace VMUnityLib
                 // 初回に必要なサブシーンをロードする
                 if (sceneRoot.HasSubScene)
                 {
-                    yield return LoadFirstSubScene(sceneRoot);
+                    yield return LoadSubSceneInternal(sceneRoot.FirstSubSceneName);
                 }
                 else
                 {
@@ -432,19 +432,19 @@ namespace VMUnityLib
         }
 
         /// <summary>
-        /// 初回に必要なサブシーンロード
+        /// サブシーンロード
         /// </summary>
-        IEnumerator LoadFirstSubScene(SceneRoot sceneRoot)
+        IEnumerator LoadSubSceneInternal(string subSceneName)
         {
             // 重複ロード防止のため1フレ待つ。既にロードされてたらやめとく
             yield return null;
-            if(!IsLoadedSubScene(sceneRoot.FirstSubSceneName))
+            if(!IsLoadedSubScene(subSceneName))
             {
-                yield return LoadSceneInternal(sceneRoot.FirstSubSceneName, true);
+                yield return LoadSceneInternal(subSceneName, true);
             }
 
-            // 初回サブシーンが読み終わったら、必要サブシーンを読み込む
-            SubSceneRoot subSceneRoot = GetLoadedSubSceneRoot(sceneRoot.FirstSubSceneName).GetComponent<SubSceneRoot>();
+            // サブシーンが読み終わったら、必要サブシーンを読み込む
+            SubSceneRoot subSceneRoot = GetLoadedSubSceneRoot(subSceneName).GetComponent<SubSceneRoot>();
             foreach (var item in subSceneRoot.RequireSubSceneNames)
             {
                 if (!IsLoadedSubScene(item))
@@ -453,8 +453,8 @@ namespace VMUnityLib
                 }
             }
 
-            // サブシーンを持っている場合は、初回ロードのサブシーンをアクティブにする
-            if (sceneRoot.HasSubScene && UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(sceneRoot.FirstSubSceneName)) == false)
+            // サブシーンをアクティブにする
+            if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(subSceneName)) == false)
             {
                 Debug.Log("active scene fail");
             }
@@ -521,6 +521,22 @@ namespace VMUnityLib
         /// <summary>
         /// 指定サブシーンに必要なサブシーンのみをロードし、そのほかのシーンをアンロードする
         /// </summary>
+        public void ActiveAndApplySubScene(string subSceneName)
+        {
+            foreach (var scene in loadedScenes)
+            {
+                foreach (var item in scene.subSceneRoots)
+                {
+                    if (item.GetSceneName() == subSceneName)
+                    {
+                        ActiveAndApplySubScene(item);
+                        return;
+                    }
+                }
+            }
+            StopCoroutine("LoadSubSceneInternal");
+            StartCoroutine(LoadSubSceneInternal(subSceneName));
+        }
         public void ActiveAndApplySubScene(SubSceneRoot subSceneRoot)
         {
             if(subSceneRoot.GetSceneName() != UnitySceneManager.GetActiveScene().name)
@@ -617,7 +633,7 @@ namespace VMUnityLib
                 // どうせエディタ専用機能なのでコルーチンでサブシーンロード
                 if (sceneRoot.HasSubScene)
                 {
-                    StartCoroutine(LoadFirstSubScene(sceneRoot));
+                    StartCoroutine(LoadSubSceneInternal(sceneRoot.FirstSubSceneName));
                 }
             }
         }
