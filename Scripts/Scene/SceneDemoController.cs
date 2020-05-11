@@ -18,7 +18,7 @@ public sealed class SceneDemoController : MonoBehaviour
     IEnumerator ChangeSceneCoroutine(float time)
     {
         yield return new WaitForSeconds(time);
-        SceneManager.Instance.PushScene(SceneName.title, LibBridgeInfo.DefaultSceneChangeFadeParam);
+        SceneManager.Instance.PushScene("SceneName.title", LibBridgeInfo.DefaultSceneChangeFadeParam);
 
     }
 }
