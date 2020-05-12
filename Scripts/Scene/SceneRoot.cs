@@ -31,7 +31,11 @@ namespace VMUnityLib
         bool hasSubScene = default;
         public bool HasSubScene => hasSubScene;
 
-        [SerializeField, SceneName, Tooltip("初回にロードするサブシーンリスト")]
+        [SerializeField, SceneName, Tooltip("サブシーン名リスト")]
+        string[] subSceneList = default;
+        public string[] SubSceneList => subSceneList;
+
+        [SerializeField, SceneName, Tooltip("初回にロードするサブシーン")]
         string firstSubSceneName = default;
         public string FirstSubSceneName => firstSubSceneName;
 
