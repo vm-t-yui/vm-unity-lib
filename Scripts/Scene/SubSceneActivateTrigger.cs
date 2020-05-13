@@ -12,6 +12,14 @@ namespace VMUnityLib
         public SubSceneRoot TargetSubSceneRoot { get; private set; }
 
         /// <summary>
+        /// 開始前
+        /// </summary>
+        private void Awake()
+        {
+            gameObject.layer = LayerName.IgnoreRaycast;
+        }
+
+        /// <summary>
         /// Start
         /// </summary>
         private void Start()
