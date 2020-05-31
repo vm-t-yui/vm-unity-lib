@@ -52,5 +52,10 @@ namespace VMUnityLib
                 return instance;
             }
         }
+
+        /// <summary>
+        /// インスタンスチェック。Instでチェックするとtype全検索かけてしまう
+        /// </summary>
+        public static bool IsNullInstance { get { return (instance == null); } }
     }
 }
