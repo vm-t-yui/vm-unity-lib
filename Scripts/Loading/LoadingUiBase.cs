@@ -11,6 +11,6 @@ public class LoadingUiBase : MonoBehaviour
     [SerializeField,LabelText("UIの処理が終了したかどうか")]
     [InfoBox("ロードUIの処理で次のシーンへ移行できるタイミングになったときにisEndをtrueにしてください。\n" +
              "trueになったら自動でロードUIが閉じられ、次のシーンへ移行します。")]
-    bool isEnd = false;
+    protected bool isEnd = false;
     public bool IsEnd => isEnd;
 }
