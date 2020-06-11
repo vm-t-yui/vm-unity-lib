@@ -25,6 +25,7 @@ namespace VMUnityLib
         Stack<string>       sceneHistory = new Stack<string>();              // シーンの遷移ヒストリ.
         bool                isFadeWaiting = false;
         CommonSceneUI       sceneUI = null;
+        LoadingUiBase       currentLoadingUi = null;                         // 現在ロード中に表示しているUI
         bool                isDirectBoot;                                    // 直接起動かどうか
 
         [SceneName, SerializeField] string firstSceneName = default;
@@ -156,12 +157,16 @@ namespace VMUnityLib
                 yield return null;
             }
 
-            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType);
+            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType,out currentLoadingUi);
             yield return null;  // 表示のために１フレ待つ.
 
             yield return StartCoroutine(ChangeSceneActivation(sceneName));
 
             sceneHistory.Push(sceneName);
+
+            // 表示中のロードUIの処理が終わるまで待機
+            yield return WaitEndLoadUi();
+
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
     
@@ -183,7 +188,7 @@ namespace VMUnityLib
                 yield return null;
             }
 
-            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType);
+            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType, out currentLoadingUi);
             yield return null;  // 表示のために１フレ待つ.
 
             if (sceneHistory.Count > 0)
@@ -192,6 +197,10 @@ namespace VMUnityLib
                 sceneHistory.Push(SceneName);
                 yield return StartCoroutine(ChangeSceneActivation(SceneName));
             }
+
+            // 表示中のロードUIの処理が終わるまで待機
+            yield return WaitEndLoadUi();
+
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
@@ -212,7 +221,7 @@ namespace VMUnityLib
                 yield return null;
             }
 
-            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType);
+            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType, out currentLoadingUi);
             yield return null;  // 表示のために１フレ待つ.
 
             if (sceneHistory.Count > 0)
@@ -221,6 +230,10 @@ namespace VMUnityLib
                 string SceneName = sceneHistory.Peek();
                 yield return StartCoroutine(ChangeSceneActivation(SceneName));
             }
+
+            // 表示中のロードUIの処理が終わるまで待機
+            yield return WaitEndLoadUi();
+
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
@@ -257,7 +270,7 @@ namespace VMUnityLib
                 yield return null;
             }
 
-            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType);
+            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType, out currentLoadingUi);
             yield return null;  // 表示のために１フレ待つ.
 
             // 最初に見つかった同名シーンまでポップ.
@@ -289,6 +302,10 @@ namespace VMUnityLib
                 string nextSceneName = sceneHistory.Peek();
                 yield return StartCoroutine(ChangeSceneActivation(nextSceneName));
             }
+
+            // 表示中のロードUIの処理が終わるまで待機
+            yield return WaitEndLoadUi();
+
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
@@ -736,6 +753,21 @@ namespace VMUnityLib
                 }
             }
             Debug.Log("-------");
+        }
+
+        /// <summary>
+        /// ロードUIの終了を待機
+        /// </summary>
+        IEnumerator WaitEndLoadUi()
+        {
+            if (currentLoadingUi != null)
+            {
+                while (!currentLoadingUi.IsEnd)
+                {
+                    yield return null;
+                }
+            }
+            currentLoadingUi = null;
         }
     }
 }
