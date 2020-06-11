@@ -5,7 +5,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using VMUnityLib;
+using System.Linq;
 
 namespace VMUnityLib
 {
@@ -15,6 +15,7 @@ namespace VMUnityLib
         class UiTypeSet
         {
             public LibBridgeInfo.LoadingType type = default;
+            public LoadingUiBase loadingUi = default;
 #if USE_TWEEN
             public uTweenAlpha tweenAlpha = default;
 #endif
@@ -24,29 +25,27 @@ namespace VMUnityLib
         List<UiTypeSet> loadingUiList = default;
 
 #if USE_TWEEN
-        Dictionary<LibBridgeInfo.LoadingType, uTweenAlpha> loadingUiDict;
+        Dictionary<LibBridgeInfo.LoadingType, UiTypeSet> loadingUiDict;
 #endif
 
         void Start()
         {
 #if USE_TWEEN
-            loadingUiDict = new Dictionary<LibBridgeInfo.LoadingType, uTweenAlpha>();
-            foreach (UiTypeSet item in loadingUiList)
-            {
-                loadingUiDict.Add(item.type, item.tweenAlpha);
-            }
+            loadingUiDict = new Dictionary<LibBridgeInfo.LoadingType, UiTypeSet>();
+            loadingUiDict = loadingUiList.ToDictionary(ui => ui.type);
 #endif
         }
 
         /// <summary>
         /// ロード画面を表示する.
         /// </summary>
-        public void ShowLoadingUI(LibBridgeInfo.LoadingType type)
+        public void ShowLoadingUI(LibBridgeInfo.LoadingType type,out LoadingUiBase loadingUi)
         {
 #if USE_TWEEN
-            loadingUiDict[type].gameObject.SetActive(true);
-            loadingUiDict[type].Play(PlayDirection.Forward);
+            loadingUiDict[type].loadingUi.gameObject.SetActive(true);
+            loadingUiDict[type].tweenAlpha.Play(PlayDirection.Forward);
 #endif
+            loadingUi = loadingUiDict[type].loadingUi;
         }
 
         /// <summary>
@@ -55,7 +54,7 @@ namespace VMUnityLib
         public void HideLoadingUI(LibBridgeInfo.LoadingType type)
         {
 #if USE_TWEEN
-            loadingUiDict[type].Play(PlayDirection.Reverse);
+            loadingUiDict[type].tweenAlpha.Play(PlayDirection.Reverse);
 #endif
         }
     }
