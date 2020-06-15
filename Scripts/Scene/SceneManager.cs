@@ -674,7 +674,7 @@ namespace VMUnityLib
             }
             if(!foundParentScene)
             {
-                Debug.LogError("親シーンが読み込まれていないか、親シーン設定がおかしいです:" + subSceneRoot.name + " 親:" + subSceneRoot.ParentSceneName);
+                Debug.LogError("設定が不正です。読み込まれた一番上を親シーンかつActiveにし、親シーンの設定を確認してください。:" + subSceneRoot.name + " 親:" + subSceneRoot.ParentSceneName);
             }
         }
 
