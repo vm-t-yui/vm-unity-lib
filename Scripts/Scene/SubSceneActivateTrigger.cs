@@ -49,8 +49,9 @@ namespace VMUnityLib
         /// </summary>
         private void OnTriggerEnter(Collider other)
         {
-            if(other.tag == TagName.Player)
+            if(other.tag == TagName.MainCamera)
             {
+                // 初回のEnterでNextPrevを決定する
                 // サブシーンを切り替えて確定待ちをする
                 if(SubSceneActiveChangingCnt == 0)
                 {
@@ -59,11 +60,6 @@ namespace VMUnityLib
                     SceneManager.Instance?.ActiveAndApplySubScene(NextSubSceneRoot);
                 }
                 ++SubSceneActiveChangingCnt;
-                if(SubSceneActiveChangingCnt > 2)
-                {
-                    Debug.LogError("SubSceneActivateTriggerが３つ以上重なっています。SubSceneActivateTriggerは２つが重なっており、" +
-                    "これから読み込む先のトリガーが先にヒットする必要があります");
-                }
             }
         }
 
@@ -72,28 +68,16 @@ namespace VMUnityLib
         /// </summary>
         private void OnTriggerExit(Collider other)
         {
-            if (other.tag == TagName.Player)
+            if (other.tag == TagName.MainCamera)
             {
+                // 重なっているものが一つもなくなった時、最初にEnterした箇所からExitしてたらキャンセル
+                // それ以外は最後に抜けたところを適用確定(最初のEnterの時に適用されているから何もしない
                 if(SubSceneActiveChangingCnt == 1)
                 {
-                    // Exit呼ばれたのがNext側なら確定。何もしない
-                    // Exit呼ばれたのがPrev側ならキャンセル読み込み
-                    if (TargetSubSceneRoot == NextSubSceneRoot) // targetがnext=prev側
+                    // targetがNext=自分シーン側
+                    if (TargetSubSceneRoot == NextSubSceneRoot)
                     {
                         SceneManager.Instance?.ActiveAndApplySubScene(PrevSubSceneRoot);
-                    }
-                }
-                else if (SubSceneActiveChangingCnt == 2)
-                {
-                    // Exit呼ばれたのがNext側ならキャンセルしてカウント減算
-                    if(PrevSubSceneRoot == TargetSubSceneRoot)
-                    {
-                        SceneManager.Instance?.ActiveAndApplySubScene(PrevSubSceneRoot);
-                    }
-                    // Exit呼ばれたのがPrev側なら次の読み込みが確定しているのでNextを現在のものに更新してキャンセルに備える
-                    else
-                    {
-                        NextSubSceneRoot = TargetSubSceneRoot;
                     }
                 }
                 --SubSceneActiveChangingCnt;
