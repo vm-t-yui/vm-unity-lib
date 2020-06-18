@@ -648,5 +648,164 @@ namespace VMUnityLib
                 }
             }
         }
+
+        /// <summary>
+        /// 線分と線分の交差を調べる
+        /// </summary>
+        /// <param name="st1">線分１の始点</param>
+        /// <param name="en1">線分１の終点</param>
+        /// <param name="st2">線分２の始点</param>
+        /// <param name="en2">線分２の終点</param>
+        /// <param name="intersection">交点</param>
+        /// <returns>交差しているかどうか</returns>
+        public static bool LineSegmentsIntersection(Vector2 st1, Vector2 en1, Vector2 st2, Vector3 en2,
+         out Vector2 intersection)
+        {
+            intersection = Vector2.zero;
+
+            var d = (en1.x - st1.x) * (en2.y - st2.y) - (en1.y - st1.y) * (en2.x - st2.x);
+
+            if (d == 0.0f)
+            {
+                return false;
+            }
+
+            var u = ((st2.x - st1.x) * (en2.y - st2.y) - (st2.y - st1.y) * (en2.x - st2.x)) / d;
+            var v = ((st2.x - st1.x) * (en1.y - st1.y) - (st2.y - st1.y) * (en1.x - st1.x)) / d;
+
+            if (u < 0.0f || u > 1.0f || v < 0.0f || v > 1.0f)
+            {
+                return false;
+            }
+
+            intersection.x = st1.x + u * (en1.x - st1.x);
+            intersection.y = st1.y + u * (en1.y - st1.y);
+
+            return true;
+        }
+
+        /// <summary>
+        /// 丸み不均一スプライン上の点を取得する
+        /// </summary>
+        /// <param name="st">始点</param>
+        /// <param name="en">終点</param>
+        /// <param name="stFoward">始点の進行方向ベクトル</param>
+        /// <param name="enFoward">終点の進行方向ベクトル</param>
+        /// <param name="t">重み</param>
+        /// <returns>計算結果</returns>
+        public static Vector3 SplineCurve(Vector3 st, Vector3 en, Vector3 stFoward, Vector3 enFoward, float t)
+        {
+            Matrix4x4 T = new Matrix4x4();
+            Matrix4x4 H = new Matrix4x4();
+            Matrix4x4 G = new Matrix4x4();
+
+            T.m00 = t * t * t; T.m01 = t * t; T.m02 = t; T.m03 = 1;
+
+            H.m00 = 2; H.m01 = -2; H.m02 = 1; H.m03 = 1;
+            H.m10 = -3; H.m11 = 3; H.m12 = -2; H.m13 = -1;
+            H.m20 = 0; H.m21 = 0; H.m22 = 1; H.m23 = 0;
+            H.m30 = 1; H.m31 = 0; H.m32 = 0; H.m33 = 0;
+
+            G.m00 = st.x; G.m01 = st.y; G.m02 = st.z; G.m03 = 1;
+            G.m10 = en.x; G.m11 = en.y; G.m12 = en.z; G.m13 = 1;
+            G.m20 = stFoward.x; G.m21 = stFoward.y; G.m22 = stFoward.z; G.m23 = 1;
+            G.m30 = enFoward.x; G.m31 = enFoward.y; G.m32 = enFoward.z; G.m33 = 1;
+
+            return (T * H * G).GetRow(0);
+        }
+
+
+        /// <summary>
+        /// 連続点上の丸み不均一スプラインを作り、その上の点を取得する
+        /// </summary>
+        /// <param name="vLength">進行方向ベクトルの長さ(≒スプラインの丸み)</param>
+        /// <param name="stPrev">始点の前の点</param>
+        /// <param name="st">始点</param>
+        /// <param name="en">終点</param>
+        /// <param name="enNext">終点の次の点</param>
+        /// <param name="t">重み</param>
+        /// <returns>計算結果</returns>
+        public static Vector3 SplineCurveContinuousPoints(float vLength, Vector3? stPrev, Vector3 st, Vector3 en, Vector3? enNext, float t)
+        {
+            // st-stPrev,st-enのなす角の二等分線に垂直なベクトルを始点の進行ベクトルとする
+            // 同じく終点進行ベクトルはen-st,en-enNextなす角の二等分線に垂直なベクトルとする
+            // prev,nextが存在しない場合は次次点から始点、始点から前点の方向ベクトルで補う
+            Vector3 stFoward, enFoward;
+            if (stPrev != null)
+            {
+                stFoward = (en - stPrev.Value) / (en - stPrev.Value).magnitude * vLength;
+            }
+            else
+            {
+                stFoward = (st - enNext.Value).normalized * vLength;
+            }
+            if (enNext != null)
+            {
+                enFoward = (enNext.Value - st) / (enNext.Value - st).magnitude * vLength;
+            }
+            else
+            {
+                enFoward = (stPrev.Value - st).normalized * vLength;
+            }
+            return SplineCurve(st, en, stFoward, enFoward, t);
+        }
+
+        /// <summary>
+        /// Bスプライン曲線における X 座標を返します
+        /// </summary>
+        /// <remarks>http://opentype.jp/fontguide_doc2.htm</remarks>
+        /// <param name="x1">開始点の X 座標</param>
+        /// <param name="x2">制御点の X 座標</param>
+        /// <param name="x3">終点の X 座標</param>
+        /// <param name="t">重み(0 から 1)</param>
+        /// <returns>B-スプライン曲線における X 座標</returns>
+        static float BSplineCurveX(float x1, float x2, float x3, float t)
+        {
+            return (1 - t) * (1 - t) * x1 + 2 * t * (1 - t) * x2 + t * t * x3;
+        }
+
+        /// <summary>
+        /// Bスプライン曲線における Y 座標を返します
+        /// </summary>
+        /// <remarks>http://opentype.jp/fontguide_doc2.htm</remarks>
+        /// <param name="y1">開始点の Y 座標</param>
+        /// <param name="y2">制御点の Y 座標</param>
+        /// <param name="y3">終点の Y 座標</param>
+        /// <param name="t">重み(0 から 1)</param>
+        /// <returns>B-スプライン曲線における Y 座標</returns>
+        static float BSplineCurveY(float y1, float y2, float y3, float t)
+        {
+            return (1 - t) * (1 - t) * y1 + 2 * t * (1 - t) * y2 + t * t * y3;
+        }
+
+        /// <summary>
+        /// Bスプライン曲線における Z 座標を返します
+        /// </summary>
+        /// <remarks>http://opentype.jp/fontguide_doc2.htm</remarks>
+        /// <param name="z1">開始点の Z 座標</param>
+        /// <param name="z2">制御点の Z 座標</param>
+        /// <param name="z3">終点の Z 座標</param>
+        /// <param name="t">重み(0 から 1)</param>
+        /// <returns>B-スプライン曲線における Z 座標</returns>
+        static float BSplineCurveZ(float z1, float z2, float z3, float t)
+        {
+            return (1 - t) * (1 - t) * z1 + 2 * t * (1 - t) * z2 + t * t * z3;
+        }
+
+        /// <summary>
+        /// Bスプライン曲線における 3 次元座標を返します
+        /// </summary>
+        /// <param name="st">開始点の座標</param>
+        /// <param name="control">制御点の座標</param>
+        /// <param name="en">終点の座標</param>
+        /// <param name="t">重み(0 から 1)</param>
+        /// <returns>B-スプライン曲線における 3 次元座標</returns>
+        public static Vector3 BSplineCurve(Vector3 st, Vector3 control, Vector3 en, float t)
+        {
+            return new Vector3(
+                BSplineCurveX(st.x, control.x, en.x, t),
+                BSplineCurveY(st.y, control.y, en.y, t),
+                BSplineCurveZ(st.z, control.z, en.z, t));
+        }
     }
 }
