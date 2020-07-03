@@ -2,6 +2,7 @@
 /*!    \brief  シングルトンのMonoBehaviourジェネリック.
 *******************************************************************************/
 
+using UnityEditor;
 using UnityEngine;
 namespace VMUnityLib
 {
@@ -37,9 +38,14 @@ namespace VMUnityLib
                 // もしAwake以前にインスタンス取得しようとしていたら警告
                 if (instance == null)
                 {
-                    Debug.LogWarning("Awakeが呼ばれる前にInstにアクセスしようとしました。" +
-                    "^\nScriptExecutionOrderを確認してください");
-
+#if UNITY_EDITOR && DEBUG
+                    // 警告は再生中のみ
+                    if (EditorApplication.isPlaying)
+                    {
+                        Debug.LogWarning("Awakeが呼ばれる前にInstにアクセスしようとしました。" +
+                        "^\nScriptExecutionOrderを確認してください");
+                    }
+#endif
                     // 全検索
                     instance = (T)FindObjectOfType(typeof(T));
 
