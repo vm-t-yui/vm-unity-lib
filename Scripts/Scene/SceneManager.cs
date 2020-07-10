@@ -453,7 +453,7 @@ namespace VMUnityLib
                 // 初回に必要なサブシーンをロードする
                 if (sceneRoot.HasSubScene)
                 {
-                    yield return LoadSubSceneInternal(sceneRoot.FirstSubSceneName);
+                    yield return LoadSubSceneInternal(sceneRoot.FirstSubSceneName, false);
                 }
                 else
                 {
@@ -472,7 +472,7 @@ namespace VMUnityLib
         /// <summary>
         /// サブシーンロード
         /// </summary>
-        IEnumerator LoadSubSceneInternal(string subSceneName)
+        IEnumerator LoadSubSceneInternal(string subSceneName, bool unloadOtherScene)
         {
             // 重複ロード防止のため1フレ待つ。既にロードされてたらやめとく
             yield return null;
@@ -497,6 +497,42 @@ namespace VMUnityLib
                 Debug.Log("active scene fail");
             }
 
+            if(unloadOtherScene)
+            {
+                // 既にロード済のサブシーンが新たなアクティブサブシーンの必要シーンに含まれていなければアンロード
+                var unloadSceneList = new List<string>();
+                foreach (var scene in loadedScenes)
+                {
+                    if (scene.sceneRoot == CurrentSceneRoot)
+                    {
+                        foreach (var item in scene.subSceneRoots)
+                        {
+                            var searchSubSceneName = item.GetSceneName();
+                            if (searchSubSceneName != subSceneName)
+                            {
+                                if(!subSceneRoot.RequireSubSceneNames.Contains(searchSubSceneName))
+                                {
+                                    unloadSceneList.Add(searchSubSceneName);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                // 参照する前にロード済リストから削除
+                foreach (var item in unloadSceneList)
+                {
+                    foreach (var scene in loadedScenes)
+                    {
+                        scene.subSceneRoots.RemoveAll(sub => sub.GetSceneName() == item);
+                    }
+                }
+                foreach (var item in unloadSceneList)
+                {
+                    yield return UnitySceneManager.UnloadSceneAsync(item);
+                }
+            }
             CurrentSubSceneRoot = subSceneRoot;
         }
 
@@ -573,7 +609,7 @@ namespace VMUnityLib
                 }
             }
             StopCoroutine("LoadSubSceneInternal");
-            StartCoroutine(LoadSubSceneInternal(subSceneName));
+            StartCoroutine(LoadSubSceneInternal(subSceneName, true));
         }
         public void ActiveAndApplySubScene(SubSceneRoot subSceneRoot)
         {
@@ -671,7 +707,7 @@ namespace VMUnityLib
                 // どうせエディタ専用機能なのでコルーチンでサブシーンロード
                 if (sceneRoot.HasSubScene)
                 {
-                    StartCoroutine(LoadSubSceneInternal(sceneRoot.FirstSubSceneName));
+                    StartCoroutine(LoadSubSceneInternal(sceneRoot.FirstSubSceneName, false));
                 }
             }
         }
