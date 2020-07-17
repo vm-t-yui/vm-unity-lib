@@ -244,6 +244,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
             beforeBanner[(int)inBanner] = false;
         }
     }
+#if USE_NEND
     /// <summary>
     /// インタースティシャル表示
     /// </summary>
@@ -258,6 +259,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
             myNendNative.Show(false);
         }
     }
+#endif
     /// <summary>
     /// 動画表示
     /// </summary>
@@ -272,7 +274,9 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowTitleFormat()
     {
+#if USE_NEND
         ShowNativeAd(false);
+#endif
         for (int i = 0; i < (int)BANNER.MAX; i++)
         {
             if(i == (int)BANNER.TOP)
@@ -290,7 +294,9 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowMusicSelectFormat()
     {
+#if USE_NEND
         ShowNativeAd(false);
+#endif
         for (int i = 0; i < (int)BANNER.MAX; i++)
         {
             if (i == (int)BANNER.TOP)
@@ -314,7 +320,9 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     IEnumerator ShowLoadFormatAfterWait(float inWaitTime)
     {
         yield return new WaitForSeconds(inWaitTime);
+#if USE_NEND
         ShowNativeAd(true);
+#endif
         for (int i = 0; i < (int)BANNER.MAX; i++)
         {
             ShowBanner((BANNER)i, true);
@@ -325,7 +333,9 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowBattleFormat()
     {
-        ShowNativeAd(false);
+#if USE_NEND
+        ShowNativeAd(true);
+#endif
         for (int i = 0; i < (int)BANNER.MAX; i++)
         {
             if (i == (int)BANNER.TOP)
@@ -343,7 +353,9 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowResultFormat()
     {
-        ShowNativeAd(false);
+#if USE_NEND
+        ShowNativeAd(true);
+#endif
         for (int i = 0; i < (int)BANNER.MAX; i++)
         {
             if (i == (int)BANNER.BOTTOM)
@@ -364,7 +376,9 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     {
         // この関数でのみ
         // Show～関数での非表示を行わない
-        myNendNative.Show(false);
+#if USE_NEND
+        ShowNativeAd(true);
+#endif
         for (int i = 0; i < (int)BANNER.MAX; i++)
         {
             banner[i].Hide();
