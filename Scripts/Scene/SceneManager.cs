@@ -27,6 +27,7 @@ namespace VMUnityLib
         CommonSceneUI       sceneUI = null;
         LoadingUiBase       currentLoadingUi = null;                         // 現在ロード中に表示しているUI
         bool                isDirectBoot;                                    // 直接起動かどうか
+        bool                firstDirectBoot = true;                          // 直接起動の初回判定用
 
         [SceneName, SerializeField] string firstSceneName = default;
         [SceneName, SerializeField] string debugFirstSceneName = default;
@@ -141,16 +142,17 @@ namespace VMUnityLib
         /// <summary>
         /// シーンプッシュ.
         /// </summary>
-        /// <param name="sceneName">シーン名.</param>
+        /// <param name="nextSceneName">シーン名.</param>
         /// <param name="fadeTime">フェードパラメータ.</param>
         /// <param name="pushAnchor">シーンまでのアンカー.</param>
-        public void PushScene(string sceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadPrevScene = true)
+        public void PushScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
         {
+            StopAllCoroutines();
             isFadeWaiting = true;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-            StartCoroutine(PushSceneInternal(sceneName, fadeParam, afterSceneControlDelegate, unloadPrevScene));
+            StartCoroutine(PushSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate, unloadOtherScene));
         }
-        IEnumerator PushSceneInternal(string sceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadPrevScene)
+        IEnumerator PushSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadOtherScene)
         {
             while (isFadeWaiting)
             {
@@ -160,28 +162,36 @@ namespace VMUnityLib
             LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType,out currentLoadingUi);
             yield return null;  // 表示のために１フレ待つ.
 
-            yield return StartCoroutine(ChangeSceneActivation(sceneName, unloadPrevScene));
-
-            sceneHistory.Push(sceneName);
+            // 他シーンアンロードフラグがたってたら一つだけシーンロード
+            if (unloadOtherScene)
+            {
+                yield return LoadOneSceneInternal(nextSceneName);
+            }
+            else
+            {
+                yield return StartCoroutine(ChangeSceneActivation(nextSceneName, unloadOtherScene));
+            }
+            sceneHistory.Push(nextSceneName);
 
             // 表示中のロードUIの処理が終わるまで待機
             yield return WaitEndLoadUi();
 
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
-    
+
         /// <summary>
         /// シーン変更.
         /// </summary>
-        /// <param name="SceneName">シーン名.</param>
+        /// <param name="nextSceneName">シーン名.</param>
         /// <param name="fadeTime">フェードパラメータ.</param>
-        public void ChangeScene(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadPrevScene = true)
+        public void ChangeScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
         {
+            StopAllCoroutines();
             isFadeWaiting = true;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-            StartCoroutine(ChangeSceneInternal(SceneName, fadeParam, afterSceneControlDelegate, unloadPrevScene));
+            StartCoroutine(ChangeSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate, unloadOtherScene));
         }
-        IEnumerator ChangeSceneInternal(string SceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadPrevScene)
+        IEnumerator ChangeSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadOtherScene)
         {
             while (isFadeWaiting)
             {
@@ -194,8 +204,17 @@ namespace VMUnityLib
             if (sceneHistory.Count > 0)
             {
                 sceneHistory.Pop();
-                sceneHistory.Push(SceneName);
-                yield return StartCoroutine(ChangeSceneActivation(SceneName, unloadPrevScene));
+                sceneHistory.Push(nextSceneName);
+
+                // 他シーンアンロードフラグがたってるか、同じシーンの指定なら一つだけシーンロード
+                if (nextSceneName == CurrentSceneName || (nextSceneName != CurrentSceneName && unloadOtherScene))
+                {
+                    yield return LoadOneSceneInternal(nextSceneName);
+                }
+                else
+                {
+                    yield return ChangeSceneActivation(nextSceneName, unloadOtherScene);
+                }
             }
 
             // 表示中のロードUIの処理が終わるまで待機
@@ -208,13 +227,14 @@ namespace VMUnityLib
         /// シーンポップ.
         /// </summary>
         /// <param name="fadeTime">フェードパラメータ.</param>
-        public void PopScene(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadPrevScene = true)
+        public void PopScene(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
         {
+            StopAllCoroutines();
             isFadeWaiting = true;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-            StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate, unloadPrevScene));
+            StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate, unloadOtherScene));
         }
-        IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadPrevScene)
+        IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadOtherScene)
         {
             while (isFadeWaiting)
             {
@@ -227,8 +247,17 @@ namespace VMUnityLib
             if (sceneHistory.Count > 0)
             {
                 sceneHistory.Pop();
-                string SceneName = sceneHistory.Peek();
-                yield return StartCoroutine(ChangeSceneActivation(SceneName, unloadPrevScene));
+                string nextSceneName = sceneHistory.Peek();
+
+                // 他シーンアンロードフラグがたってたら一つだけシーンロード
+                if (unloadOtherScene)
+                {
+                    yield return LoadOneSceneInternal(nextSceneName);
+                }
+                else
+                {
+                    yield return ChangeSceneActivation(nextSceneName, unloadOtherScene);
+                }
             }
 
             // 表示中のロードUIの処理が終わるまで待機
@@ -240,30 +269,31 @@ namespace VMUnityLib
         /// <summary>
         /// 指定シーンまでシーンポップ.
         /// </summary>
-        /// <param name="sceneName">ポップ先のシーン名.</param>
+        /// <param name="nextSceneName">ポップ先のシーン名.</param>
         /// <param name="fadeTime">フェードパラメータ.</param>
-        public void PopSceneTo(string sceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadPrevScene = true)
+        public void PopSceneTo(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
         {
+            StopAllCoroutines();
             isFadeWaiting = true;
 
             // アンカーが無ければ警告出して無視
             bool bFound = false;
             foreach (var item in sceneHistory)
             {
-                if (item == sceneName)
+                if (item == nextSceneName)
                 {
                     CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-                    StartCoroutine(PopSceneToInternal(sceneName, fadeParam, afterSceneControlDelegate, unloadPrevScene));
+                    StartCoroutine(PopSceneToInternal(nextSceneName, fadeParam, afterSceneControlDelegate, unloadOtherScene));
                     bFound = true;
                     break;
                 }
             }
             if(bFound == false)
             {
-                Debug.LogWarning("Anchor not found.:" + sceneName);
+                Debug.LogWarning("Anchor not found.:" + nextSceneName);
             }
         }
-        IEnumerator PopSceneToInternal(string sceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadPrevScene)
+        IEnumerator PopSceneToInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadOtherScene)
         {
             while (isFadeWaiting)
             {
@@ -280,7 +310,7 @@ namespace VMUnityLib
             while (sceneHistoryCopy.Count > 0)
             {
                 ++popCount;
-                if(sceneName != sceneHistoryCopy.Peek())
+                if(nextSceneName != sceneHistoryCopy.Peek())
                 {
                     sceneHistoryCopy.Pop();
                 }
@@ -291,7 +321,7 @@ namespace VMUnityLib
             }
             if (popCount >= sceneHistory.Count)
             {
-                Debug.LogError("invalid scene name:" + sceneName);
+                Debug.LogError("invalid scene name:" + nextSceneName);
             }
             else
             {
@@ -299,8 +329,17 @@ namespace VMUnityLib
                 {
                     sceneHistory.Pop();
                 }
-                string nextSceneName = sceneHistory.Peek();
-                yield return StartCoroutine(ChangeSceneActivation(nextSceneName, unloadPrevScene));
+                string peekedNextSceneName = sceneHistory.Peek();
+
+                // 他シーンアンロードフラグがたってたら一つだけシーンロード
+                if (unloadOtherScene)
+                {
+                    yield return LoadOneSceneInternal(peekedNextSceneName);
+                }
+                else
+                {
+                    yield return ChangeSceneActivation(peekedNextSceneName, unloadOtherScene);
+                }
             }
 
             // 表示中のロードUIの処理が終わるまで待機
@@ -309,12 +348,12 @@ namespace VMUnityLib
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
-
         /// <summary>
         /// 現在読まれているシーン以外をすべてアンロード.
         /// </summary>
         public void UnloadAllOtherScene()
         {
+            StopAllCoroutines();
             SceneSet lastSceneSet = null;
             foreach (var scene in loadedScenes) 
             {
@@ -376,10 +415,10 @@ namespace VMUnityLib
         /// <summary>
         /// シーンのアクティブ状態を変更する.
         /// </summary>
-        IEnumerator ChangeSceneActivation(string sceneName, bool unloadPrevScene)
+        IEnumerator ChangeSceneActivation(string sceneName, bool unloadOtherScene)
         {
             // 現在のシーンをディアクティブにする.
-            if (CurrentSceneRoot) 
+            if (CurrentSceneRoot)
             {
                 CurrentSceneRoot.SetSceneDeactive();
             }
@@ -410,11 +449,11 @@ namespace VMUnityLib
                 if(scene.sceneRoot.GetSceneName() == sceneName)
                 {
                     scene.sceneRoot.SetSceneActive();
-                    if (unloadPrevScene)
+                    if (unloadOtherScene)
                     {
                         var delSceneSet = loadedScenes.Find(s => CurrentSceneRoot == s.sceneRoot);
                         loadedScenes.Remove(delSceneSet);
-                        var syncUnload = UnitySceneManager.UnloadSceneAsync(CurrentSceneRoot.GetSceneName());
+                        var syncUnload = UnitySceneManager.UnloadSceneAsync(delSceneSet.sceneRoot.GetSceneName());
                         while(!syncUnload.isDone)
                         {
                             yield return null;
@@ -434,11 +473,11 @@ namespace VMUnityLib
 
                 sceneRoot = GetLoadedSceneRoot(sceneName).GetComponent<SceneRoot>();
 
-                if (unloadPrevScene)
+                if (unloadOtherScene)
                 {
                     var delSceneSet = loadedScenes.Find(s => CurrentSceneRoot == s.sceneRoot);
                     loadedScenes.Remove(delSceneSet);
-                    var syncUnload = UnitySceneManager.UnloadSceneAsync(CurrentSceneRoot.GetSceneName());
+                    var syncUnload = UnitySceneManager.UnloadSceneAsync(delSceneSet.sceneRoot.GetSceneName());
                     while (!syncUnload.isDone)
                     {
                         yield return null;
@@ -534,6 +573,27 @@ namespace VMUnityLib
                 }
             }
             CurrentSubSceneRoot = subSceneRoot;
+        }
+
+        /// <summary>
+        /// シーンを一つだけロードして他すべてアンロード
+        /// </summary>
+        IEnumerator LoadOneSceneInternal(string sceneName)
+        {
+            // ロード済シーンは全削除して新しいシーンを開く
+            loadedScenes.Clear();
+            var syncLoad = UnitySceneManager.LoadSceneAsync(sceneName);
+            while (!syncLoad.isDone)
+            {
+                yield return null;
+            }
+            CurrentSceneRoot = GetLoadedSceneRoot(sceneName).GetComponent<SceneRoot>();
+
+            // 初回に必要なサブシーンをロードする
+            if (CurrentSceneRoot.HasSubScene)
+            {
+                yield return LoadSubSceneInternal(CurrentSceneRoot.FirstSubSceneName, false);
+            }
         }
 
         /// <summary>
@@ -700,8 +760,9 @@ namespace VMUnityLib
             }
 
             // 直接起動の場合は現在のシーン更新してシーンヒストリーに入れる
-            if(CurrentSceneRoot == null && isDirectBoot)
+            if(CurrentSceneRoot == null && isDirectBoot && firstDirectBoot)
             {
+                firstDirectBoot = false;
                 CurrentSceneRoot = sceneRoot;
                 sceneHistory.Push(CurrentSceneRoot.GetSceneName());
                 // どうせエディタ専用機能なのでコルーチンでサブシーンロード

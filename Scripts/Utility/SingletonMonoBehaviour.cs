@@ -31,6 +31,14 @@ namespace VMUnityLib
             }
         }
 
+        /// <summary>
+        /// 削除時にnull入れる
+        /// </summary>
+        private void OnDestroy()
+        {
+            instance = null;
+        }
+
         public static T Inst
         {
             get
