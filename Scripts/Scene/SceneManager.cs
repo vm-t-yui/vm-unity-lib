@@ -398,6 +398,7 @@ namespace VMUnityLib
         void EndFadeOutCallBack()
         {
             isFadeWaiting = false;
+            Time.timeScale = 0;
         }
 
         /// <summary>
@@ -801,6 +802,7 @@ namespace VMUnityLib
         /// </summary>
         void CleaneUpAfterChangeSceneActivation(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
+            Time.timeScale = 1;
             LoadingUIManager.Inst.HideLoadingUI(fadeParam.loadingType);
             CmnFadeManager.Inst.StartFadeIn(EndFadeInCallBack, fadeParam.fadeInTime, fadeParam.fadeType, fadeParam.fadeColor);
             sceneUI.ChangeCommonSceneUI(CurrentSceneRoot.SceneUiParam, CurrentSceneRoot.SceneBgKind);
