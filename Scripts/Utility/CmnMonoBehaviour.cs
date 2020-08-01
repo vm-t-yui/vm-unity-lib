@@ -16,6 +16,16 @@ namespace VMUnityLib
         public const string SCENCE_DEACTIVE_NAME      = "OnSceneDeactive";
 
         /// <summary>
+        /// ログをスタック記録するかどうか
+        /// </summary>
+        public bool EnableLogStack { get; set; } = true;
+
+        /// <summary>
+        /// ログを表示するかどうか
+        /// </summary>
+        public bool ShowLog { get; set; } = true;
+
+        /// <summary>
         /// シーン切り替え後の初期化.
         /// </summary>
         protected virtual void InitSceneChange() { }
@@ -101,19 +111,19 @@ namespace VMUnityLib
         /// </summary>
         public void LogError(string message)
         {
-            VMLogger.Error(message, this);
+            VMLogger.Error(message, this, EnableLogStack, !ShowLog);
         }
         public void LogException(Exception exp)
         {
-            VMLogger.Exception(exp, this);
+            VMLogger.Exception(exp, this, EnableLogStack, !ShowLog);
         }
         public void LogWarn(string message)
         {
-            VMLogger.Warn(message, this);
+            VMLogger.Warn(message, this, EnableLogStack, !ShowLog);
         }
         public void Log(string message)
         {
-            VMLogger.Log(message, this);
+            VMLogger.Log(message, this, EnableLogStack, !ShowLog);
         }
         public void DumpLog()
         {

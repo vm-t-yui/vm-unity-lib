@@ -25,20 +25,6 @@ namespace VMUnityLib
         }
 
         /// <summary>
-        /// Use this for initialization.
-        /// </summary>
-        void Start()
-        {
-        }
-
-        /// <summary>
-        /// Update is called once per frame.
-        /// </summary>
-        void FixedUpdate()
-        {
-        }
-
-        /// <summary>
         /// Raises the GU event.
         /// </summary>
         public void OnGUI()
