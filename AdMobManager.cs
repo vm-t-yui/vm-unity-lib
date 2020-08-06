@@ -126,8 +126,8 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
 #endif
         // バナー設定
         // Create a 320x50 banner at the top of the screen.
-        banner[(int)BANNER.TOP]    = new BannerView(id[(int)BANNER.TOP], AdSize.Banner, AdPosition.TopLeft);
-        banner[(int)BANNER.BOTTOM] = new BannerView(id[(int)BANNER.BOTTOM], AdSize.Banner, AdPosition.BottomLeft);
+        banner[(int)BANNER.TOP]    = new BannerView(id[(int)BANNER.TOP], AdSize.Banner, AdPosition.Top);
+        banner[(int)BANNER.BOTTOM] = new BannerView(id[(int)BANNER.BOTTOM], AdSize.Banner, AdPosition.Bottom);
 
         // Create an empty ad request.
         AdRequest request = new AdRequest.Builder().Build();
