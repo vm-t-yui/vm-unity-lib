@@ -28,6 +28,10 @@ namespace VMUnityLib
         LoadingUiBase       currentLoadingUi = null;                         // 現在ロード中に表示しているUI
         bool                isDirectBoot;                                    // 直接起動かどうか
         bool                firstDirectBoot = true;                          // 直接起動の初回判定用
+        List<string>        loadingSubScene = new List<string>();
+
+        Coroutine LoadSubSceneInternalCoroutine = null;
+        Coroutine ActiveAndApplySubSceneInternalCoroutine = null;
 
         [SceneName, SerializeField] string firstSceneName = default;
         [SceneName, SerializeField] string debugFirstSceneName = default;
@@ -443,8 +447,12 @@ namespace VMUnityLib
                 }
             }
 
-            // Sceneがすでにロードされているなら、そのシーンをアクティブにする.
+            // Sceneがすでにロードされているか、ロード中なら、そのシーンをアクティブにする.
             bool isLoaded = false;
+            if (loadingSubScene.Count != 0)
+            {
+                yield return null;  // ロード待ちの場合は終わるまで待つ
+            }
             foreach (var scene in loadedScenes) 
             {
                 if(scene.sceneRoot.GetSceneName() == sceneName)
@@ -516,7 +524,13 @@ namespace VMUnityLib
         {
             // 重複ロード防止のため1フレ待つ。既にロードされてたらやめとく
             yield return null;
-            if(!IsLoadedSubScene(subSceneName))
+
+            if (loadingSubScene.Count != 0)
+            {
+                yield return null;  // ロード待ちの場合は終わるまで待つ
+            }
+
+            if (!IsLoadedSubScene(subSceneName))
             {
                 yield return LoadSceneInternal(subSceneName, true);
             }
@@ -620,10 +634,18 @@ namespace VMUnityLib
         IEnumerator LoadSceneInternal(string sceneName, bool isSubScene)
         {
             AsyncOperation async = UnitySceneManager.LoadSceneAsync(sceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            if(isSubScene)
+            {
+                loadingSubScene.Add(sceneName);
+            }
             async.allowSceneActivation = true;
             while (async.isDone == false || async.progress < 1.0f)
             {
                 yield return LibBridgeInfo.WaitForEndOfFrame;
+            }
+            if (isSubScene)
+            {
+                loadingSubScene.Remove(sceneName);
             }
 
             Func<string, GameObject> getLoadedSceneRoot = GetLoadedSceneRoot;
@@ -669,19 +691,24 @@ namespace VMUnityLib
                     }
                 }
             }
-            StopCoroutine("LoadSubSceneInternal");
-            StartCoroutine(LoadSubSceneInternal(subSceneName, true));
+            if(LoadSubSceneInternalCoroutine != null) StopCoroutine(LoadSubSceneInternalCoroutine);
+            LoadSubSceneInternalCoroutine = StartCoroutine(LoadSubSceneInternal(subSceneName, true));
         }
         public void ActiveAndApplySubScene(SubSceneRoot subSceneRoot)
         {
             if(subSceneRoot.GetSceneName() != UnitySceneManager.GetActiveScene().name)
             {
-                StopCoroutine("ActiveAndApplySubSceneInternal");
-                StartCoroutine(ActiveAndApplySubSceneInternal(subSceneRoot));
+                if (ActiveAndApplySubSceneInternalCoroutine != null) StopCoroutine(ActiveAndApplySubSceneInternalCoroutine);
+                ActiveAndApplySubSceneInternalCoroutine = StartCoroutine(ActiveAndApplySubSceneInternal(subSceneRoot));
             }
         }
         IEnumerator ActiveAndApplySubSceneInternal(SubSceneRoot subSceneRoot)
         {
+            if (loadingSubScene.Count != 0)
+            {
+                yield return null;  // ロード待ちの場合は終わるまで待つ
+            }
+
             // ロード済のシーンから自分の親シーンを探す
             var subSceneRootName = subSceneRoot.GetSceneName();
             var unloadSceneList = new List<string>();
@@ -767,9 +794,10 @@ namespace VMUnityLib
                 CurrentSceneRoot = sceneRoot;
                 sceneHistory.Push(CurrentSceneRoot.GetSceneName());
                 // どうせエディタ専用機能なのでコルーチンでサブシーンロード
-                if (sceneRoot.HasSubScene)
+                // サブシーン読み込みが先に走っていたら無視
+                if (sceneRoot.HasSubScene && loadingSubScene.Count == 0)
                 {
-                    StartCoroutine(LoadSubSceneInternal(sceneRoot.FirstSubSceneName, false));
+                    LoadSubSceneInternalCoroutine = StartCoroutine(LoadSubSceneInternal(sceneRoot.FirstSubSceneName, false));
                 }
             }
         }
