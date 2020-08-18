@@ -607,7 +607,11 @@ namespace VMUnityLib
             // 初回に必要なサブシーンをロードする
             if (CurrentSceneRoot.HasSubScene)
             {
-                yield return LoadSubSceneInternal(CurrentSceneRoot.FirstSubSceneName, false);
+                // 既にサブシーンロード中のコルーチンがあったら無視
+                if(LoadSubSceneInternalCoroutine == null)
+                {
+                    yield return LoadSubSceneInternal(CurrentSceneRoot.FirstSubSceneName, false);
+                }
             }
         }
 
