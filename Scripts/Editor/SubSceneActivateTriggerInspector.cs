@@ -13,6 +13,7 @@ namespace VMUnityLib
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
+            EditorGUILayout.HelpBox("隣のサブシーンとの切り替え用のトリガーは重なっている必要があり、これから読み込む側のトリガーが先にヒットする必要がある", MessageType.Info);
             if (GUILayout.Button("ゲームオブジェクトの名前を自動設定"))
             {
                 CorrectMyName();
