@@ -456,7 +456,7 @@ namespace VMUnityLib
 
             // Sceneがすでにロードされているか、ロード中なら、そのシーンをアクティブにする.
             bool isLoaded = false;
-            if (loadingSubScene.Count != 0)
+            while (loadingSubScene.Count != 0)
             {
                 yield return null;  // ロード待ちの場合は終わるまで待つ
             }
@@ -532,7 +532,7 @@ namespace VMUnityLib
             // 重複ロード防止のため1フレ待つ。既にロードされてたらやめとく
             yield return null;
 
-            if (loadingSubScene.Count != 0)
+            while (loadingSubScene.Count != 0)
             {
                 yield return null;  // ロード待ちの場合は終わるまで待つ
             }
@@ -715,7 +715,7 @@ namespace VMUnityLib
         }
         IEnumerator ActiveAndApplySubSceneInternal(SubSceneRoot subSceneRoot)
         {
-            if (loadingSubScene.Count != 0)
+            while (loadingSubScene.Count != 0)
             {
                 yield return null;  // ロード待ちの場合は終わるまで待つ
             }
@@ -919,11 +919,15 @@ namespace VMUnityLib
         /// </summary>
         IEnumerator WaitEndLoadUi()
         {
-            IsLoadDone = true;
-            if (loadingSubScene.Count != 0)
+            // サブシーンのロード開始が１フレまっているので、サブシーンのロードがないか確認するために1フレ待つ
+            yield return null;
+
+            while (loadingSubScene.Count != 0)
             {
                 yield return null;  // ロード待ちの場合は終わるまで待つ
             }
+
+            IsLoadDone = true;
 
             if (currentLoadingUi != null)
             {
