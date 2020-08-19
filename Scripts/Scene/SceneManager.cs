@@ -44,6 +44,9 @@ namespace VMUnityLib
         public string CurrentSceneName { get { return CurrentSceneRoot.GetSceneName(); } }
         public string CurrentSubSceneName { get { return CurrentSubSceneRoot ? CurrentSubSceneRoot.GetSceneName() : null; } }
 
+        // ロードが完了しているかどうか
+        public bool IsLoadDone { get; private set; }
+
         // シーンチェンジ時のフェードのパラメータ.
         public struct SceneChangeFadeParam
         {
@@ -153,6 +156,7 @@ namespace VMUnityLib
         {
             StopAllCoroutines();
             isFadeWaiting = true;
+            IsLoadDone = false;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(PushSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate, unloadOtherScene));
         }
@@ -192,6 +196,7 @@ namespace VMUnityLib
         {
             StopAllCoroutines();
             isFadeWaiting = true;
+            IsLoadDone = false;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(ChangeSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate, unloadOtherScene));
         }
@@ -235,6 +240,7 @@ namespace VMUnityLib
         {
             StopAllCoroutines();
             isFadeWaiting = true;
+            IsLoadDone = false;
             CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
             StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate, unloadOtherScene));
         }
@@ -278,6 +284,7 @@ namespace VMUnityLib
         public void PopSceneTo(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
         {
             StopAllCoroutines();
+            IsLoadDone = false;
             isFadeWaiting = true;
 
             // アンカーが無ければ警告出して無視
@@ -912,6 +919,12 @@ namespace VMUnityLib
         /// </summary>
         IEnumerator WaitEndLoadUi()
         {
+            IsLoadDone = true;
+            if (loadingSubScene.Count != 0)
+            {
+                yield return null;  // ロード待ちの場合は終わるまで待つ
+            }
+
             if (currentLoadingUi != null)
             {
                 while (!currentLoadingUi.IsEnd)
