@@ -19,12 +19,11 @@ public class GameServiceUtil
     //    GameServiceID.ACHIEVEMENT_4
     //};
 
-    //// 各リーダーボードID
-    //static string[] LEADERBOARD_IDs =
-    //{
-    //    GameServiceID.LEADERBOARD_1,
-    //    GameServiceID.LEADERBOARD_2
-    //};
+    // 各リーダーボードID
+    static string[] LEADERBOARD_IDs =
+    {
+        "HighScore"
+    };
 
     /// <summary>
     /// ユーザー認証.
@@ -80,13 +79,13 @@ public class GameServiceUtil
     public static void ReportScore(long score, int leaderboardNum)
     {
 #if !UNITY_EDITOR
-        //Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success => 
-        //{
-        //    if(!success)
-        //    {
-        //        Debug.LogWarning("スコア報告に失敗しました。id:" + LEADERBOARD_IDs[leaderboardNum]);
-        //    }
-        //});
+        Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success => 
+        {
+            if(!success)
+            {
+                Debug.LogWarning("スコア報告に失敗しました。id:" + LEADERBOARD_IDs[leaderboardNum]);
+            }
+        });
 #endif
     }
 
