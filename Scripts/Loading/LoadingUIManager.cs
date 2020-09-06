@@ -20,11 +20,12 @@ namespace VMUnityLib
             public uTweenAlpha tweenAlpha = default;
 #endif
         }
+
+#if USE_TWEEN
         // ロード画面マップ.
         [SerializeField]
         List<UiTypeSet> loadingUiList = default;
 
-#if USE_TWEEN
         Dictionary<LibBridgeInfo.LoadingType, UiTypeSet> loadingUiDict;
 #endif
 
@@ -44,8 +45,10 @@ namespace VMUnityLib
 #if USE_TWEEN
             loadingUiDict[type].loadingUi.gameObject.SetActive(true);
             loadingUiDict[type].tweenAlpha.Play(PlayDirection.Forward);
-#endif
             loadingUi = loadingUiDict[type].loadingUi;
+#else
+            loadingUi = null;
+#endif
         }
 
         /// <summary>

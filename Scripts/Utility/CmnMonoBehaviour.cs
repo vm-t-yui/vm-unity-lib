@@ -106,6 +106,7 @@ namespace VMUnityLib
             return ret;
         }
 
+#if DEBUG && LOG_TRACE
         /// <summary>
         /// ログ
         /// </summary>
@@ -129,5 +130,6 @@ namespace VMUnityLib
         {
             VMLogger.Dump(this);
         }
+#endif
     }
 }

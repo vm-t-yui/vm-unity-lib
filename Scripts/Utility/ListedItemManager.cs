@@ -100,7 +100,9 @@ namespace VMUnityLib
         {
             if (idx < 0 || idx >= itemList.Count)
             {
+#if DEBUG && LOG_TRACE
                 VMLogger.Error(idx + ":idx over. count:"+ itemList.Count, null);
+#endif
                 return default(T);
             }
             else

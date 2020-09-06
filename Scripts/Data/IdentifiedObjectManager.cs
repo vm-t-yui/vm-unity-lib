@@ -37,7 +37,9 @@ namespace VMUnityLib
             }
             else
             {
+#if DEBUG && LOG_TRACE
                 VMLogger.Error(id + " does not exist.", null);
+#endif
                 return false;
             }
         }
