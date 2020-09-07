@@ -594,7 +594,15 @@ namespace VMUnityLib
                     yield return UnitySceneManager.UnloadSceneAsync(item);
                 }
             }
+            if (CurrentSubSceneRoot && CurrentSubSceneRoot.DirectionalLight != null)
+            {
+                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
+            }
             CurrentSubSceneRoot = subSceneRoot;
+            if(CurrentSubSceneRoot.DirectionalLight != null)
+            {
+                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
+            }
         }
 
         /// <summary>
@@ -768,7 +776,15 @@ namespace VMUnityLib
                 yield return LoadSceneInternal(item, true);
             }
 
+            if (CurrentSubSceneRoot && CurrentSubSceneRoot.DirectionalLight != null)
+            {
+                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
+            }
             CurrentSubSceneRoot = subSceneRoot;
+            if (CurrentSubSceneRoot.DirectionalLight != null)
+            {
+                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
+            }
 
             if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(subSceneRootName)) == false)
             {

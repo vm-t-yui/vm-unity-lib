@@ -21,6 +21,10 @@ namespace VMUnityLib
         [SerializeField, SceneName,Tooltip("読まれているべきサブシーンリスト")]
         List<string> requireSubSceneNames = default;
         public List<string> RequireSubSceneNames => requireSubSceneNames;
+        
+        [SerializeField, Tooltip("このサブシーンに入った時に有効になるディレクショナルライト")]
+        Light directionalLight = default;
+        public　Light DirectionalLight => directionalLight;
 
         // Unityシーン情報
         public UnityScene UnityScene { get; private set; }
@@ -32,6 +36,10 @@ namespace VMUnityLib
         {
             if (SceneManager.Instance != null)
             {
+                if(directionalLight != null)
+                {
+                    directionalLight.gameObject.SetActive(false);
+                }
                 // 自身がロード済だと自己申告.
                 SceneManager.Instance.AddLoadedSubSceneRoot(this);
             }
