@@ -216,6 +216,7 @@ namespace VMUnityLib
                 sceneHistory.Push(nextSceneName);
 
                 // 他シーンアンロードフラグがたってるか、同じシーンの指定なら一つだけシーンロード
+                // FIXME: yui-t アンロードフラグがONだとサブシーンロードできない。いったんはアンロードフラグ立てないことで解決
                 if (nextSceneName == CurrentSceneName || (nextSceneName != CurrentSceneName && unloadOtherScene))
                 {
                     yield return LoadOneSceneInternal(nextSceneName);
