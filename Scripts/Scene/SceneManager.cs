@@ -346,7 +346,7 @@ namespace VMUnityLib
             // サブシーンのディレクショナルライト設定
             if (CurrentSubSceneRoot && CurrentSubSceneRoot.DirectionalLight != null)
             {
-                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
+                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
             }
             loadOperationRunning = false;
         }
