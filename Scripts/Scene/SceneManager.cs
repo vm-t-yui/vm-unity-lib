@@ -217,7 +217,7 @@ namespace VMUnityLib
             // カレントアンロード→メインシーン→目標サブシーン→サブシーン必要シーンの順でロードを行う
             LoadOperationSet loadOperationSet;
             // カレントアンロード
-            if(unloadCurrent)
+            if(unloadCurrent && CurrentSceneRoot != null)
             {
                 // ロード済のサブシーンがあればサブシーンからアンロード
                 if(CurrentSceneRoot.HasSubScene)
@@ -278,6 +278,10 @@ namespace VMUnityLib
                 }
                 // 目標サブシーンまで読み込んだ時点で、
                 // 必要サブシーンをロードリストに追加し、既にロードされている不要サブシーンをすべてアンロード
+                if (CurrentSubSceneRoot != null && CurrentSubSceneRoot.DirectionalLight != null)    // 直前のディレクショナルライト消す
+                {
+                    CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
+                }
                 CurrentSubSceneRoot = GetLoadedSubSceneRoot(currentAimLoadSubScene);
                 foreach (var item in CurrentSubSceneRoot.RequireSubSceneNames)
                 {
@@ -338,13 +342,11 @@ namespace VMUnityLib
                     Debug.Log("active scene fail:" + currentAimLoadSubScene);
                 }
             }
+
+            // サブシーンのディレクショナルライト設定
             if (CurrentSubSceneRoot && CurrentSubSceneRoot.DirectionalLight != null)
             {
                 CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
-            }
-            if (CurrentSubSceneRoot.DirectionalLight != null)
-            {
-                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
             }
             loadOperationRunning = false;
         }
@@ -543,9 +545,9 @@ namespace VMUnityLib
             int popCount = 0;
             while (sceneHistoryCopy.Count > 0)
             {
-                ++popCount;
                 if(nextSceneName != sceneHistoryCopy.Peek())
                 {
+                    ++popCount;
                     sceneHistoryCopy.Pop();
                 }
                 else
