@@ -4,6 +4,7 @@
 
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
@@ -18,8 +19,7 @@ namespace VMUnityLib
     {
         public const string SCENE_ROOT_NAME_HEADER = "SceneRoot_";
         public const string SUBSCENE_ROOT_NAME_HEADER = "SubSceneRoot_";
-        const float DEBGUG_DUMMY_LOAD_TIME = 0.5f;
-        const float DUMMY_LOAD_TIME = 2.0f;
+        const float LOAD_OPELATION_DELAY = 1.0f;
 
         List<SceneSet>      loadedScenes = new List<SceneSet>();             // ロード済みのシーンルートと所属するサブシーンルート.
         Stack<string>       sceneHistory = new Stack<string>();              // シーンの遷移ヒストリ.
@@ -28,10 +28,24 @@ namespace VMUnityLib
         LoadingUiBase       currentLoadingUi = null;                         // 現在ロード中に表示しているUI
         bool                isDirectBoot;                                    // 直接起動かどうか
         bool                firstDirectBoot = true;                          // 直接起動の初回判定用
-        List<string>        loadingSubScene = new List<string>();
 
-        Coroutine LoadSubSceneInternalCoroutine = null;
-        Coroutine ActiveAndApplySubSceneInternalCoroutine = null;
+        // アンロードとロードタスク
+        // loadOperationはloadingTaskとunloadingTask全てを解決するタスク
+        // load/unloadが追加されるたびにタスクはloadOperationを待つ
+        class LoadOperationSet
+        {
+            public string sceneName;
+            public AsyncOperation sync;
+            public bool isSubScene;
+        }
+        // 現在ロード目標としているシーン
+        string currentAimLoadScene;
+        string currentAimLoadSubScene;
+        List<LoadOperationSet> loading = new List<LoadOperationSet>();
+        List<LoadOperationSet> unloading = new List<LoadOperationSet>();
+        Coroutine              loadOperation;
+        Coroutine              sceneOperation;
+        bool                   loadOperationRunning = false;
 
         [SceneName, SerializeField] string firstSceneName = default;
         [SceneName, SerializeField] string debugFirstSceneName = default;
@@ -110,6 +124,9 @@ namespace VMUnityLib
         /// </summary>
         void Awake()
         {
+            // まずダミーシーンを非アクティブでロードしておく
+            UnitySceneManager.LoadScene("dummy", UnityEngine.SceneManagement.LoadSceneMode.Additive);
+
             // アクティブなシーン名が"root"でない場合は直接起動フラグをたてる
             if (UnitySceneManager.GetActiveScene().name != "root")
             {
@@ -122,6 +139,273 @@ namespace VMUnityLib
             else
             {
                 Destroy(this);
+            }
+        }
+
+        /// <summary>
+        /// フェードしてロードUIの表示を待つまでのタスク
+        /// </summary>
+        IEnumerator FadeToShowUi(SceneChangeFadeParam fadeParam)
+        {
+            isFadeWaiting = true;
+            IsLoadDone = false;
+            CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
+            while (isFadeWaiting)
+            {
+                yield return null;
+            }
+
+            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType, out currentLoadingUi);
+            //yield return null;  // 表示のために１フレ待つ.
+        }
+
+        /// <summary>
+        /// ロードすべきメインシーンを設定
+        /// </summary>
+        void SetLoadScene(string sceneName)
+        {
+            currentAimLoadScene = sceneName;
+            currentAimLoadSubScene = null;
+            RecreateLoadOperation(true, true);
+        }
+
+        /// <summary>
+        /// ロードすべきサブシーンを設定
+        /// </summary>
+        public void ActiveAndApplySubScene(string subSceneName)
+        {
+            currentAimLoadSubScene = subSceneName;
+            RecreateLoadOperation(false, false);
+        }
+
+        void RecreateLoadOperation(bool loadImmidiate, bool unloadCurrent)
+        {
+            // ロードオペレーション再生成
+            if(loadOperation != null) StopCoroutine(loadOperation);
+            loadOperation = StartCoroutine(LoadOperation(loadImmidiate, unloadCurrent));
+        }
+
+        /// <summary>
+        /// ロードオペレーション
+        /// </summary>
+        IEnumerator LoadOperation(bool loadImmidiate, bool unloadCurrent)
+        {
+            loadOperationRunning = true;
+            // 既に走っているロード/アンロードがあれば先に待つ
+            foreach (var item in unloading)
+            {
+                yield return SceneUnloadWait(item);
+            }
+            foreach (var item in loading)
+            {
+                if (item.sync != null)
+                {
+                    yield return SceneLoadWait(item);
+                }
+            }
+
+            // すべて片付いているのでいったんタスククリア
+            loading.Clear();
+            unloading.Clear();
+
+            // 一定時間待つ
+            if(!loadImmidiate)
+            {
+                yield return new WaitForSecondsRealtime(LOAD_OPELATION_DELAY);
+            }
+
+            // カレントアンロード→メインシーン→目標サブシーン→サブシーン必要シーンの順でロードを行う
+            LoadOperationSet loadOperationSet;
+            // カレントアンロード
+            if(unloadCurrent)
+            {
+                // ロード済のサブシーンがあればサブシーンからアンロード
+                if(CurrentSceneRoot.HasSubScene)
+                {
+                    foreach (var item in CurrentSceneRoot.SubSceneList)
+                    {
+                        if (GetLoadedSubSceneRoot(item) != null)
+                        {
+                            loadOperationSet = new LoadOperationSet();
+                            loadOperationSet.sceneName = item;
+                            loadOperationSet.isSubScene = true;
+                            RemoveLoadedScene(loadOperationSet);
+                            loadOperationSet.sync = UnitySceneManager.UnloadSceneAsync(item);
+                            unloading.Add(loadOperationSet);
+                        }
+                    }
+                }
+                loadOperationSet = new LoadOperationSet();
+                loadOperationSet.sceneName = CurrentSceneRoot.GetSceneName();
+                RemoveLoadedScene(loadOperationSet);
+                loadOperationSet.sync = UnitySceneManager.UnloadSceneAsync(CurrentSceneRoot.GetSceneName());
+                CurrentSceneRoot = null;    // アンロード開始したらカレントメインシーンはなし
+                unloading.Add(loadOperationSet);
+                foreach (var item in unloading)
+                {
+                    if (item.sync != null)
+                    {
+                        yield return SceneUnloadWait(item);
+                    }
+                }
+                unloading.Clear();
+            }
+            // メインシーンロード
+            if(GetLoadedSceneRoot(currentAimLoadScene) == null)
+            {
+                loadOperationSet = new LoadOperationSet();
+                loadOperationSet.sceneName = currentAimLoadScene;
+                yield return LoadInternal(loadOperationSet);
+            }
+            CurrentSceneRoot = GetLoadedSceneRoot(currentAimLoadScene);
+
+            // サブシーンが最初から設定されていない＝メインシーン初回サブシーンを指定
+            var mainSceneRoot = GetLoadedSceneRoot(currentAimLoadScene);
+            if (currentAimLoadSubScene == null && mainSceneRoot.HasSubScene)
+            {
+                currentAimLoadSubScene = mainSceneRoot.FirstSubSceneName;
+            }
+
+            // サブシーン指定があれば指定サブシーン、なければメインシーンの初回シーン
+            if(currentAimLoadSubScene != null)
+            {
+                if (GetLoadedSubSceneRoot(currentAimLoadSubScene) == null)
+                {
+                    loadOperationSet = new LoadOperationSet();
+                    loadOperationSet.sceneName = currentAimLoadSubScene;
+                    loadOperationSet.isSubScene = true;
+                    yield return LoadInternal(loadOperationSet);
+                }
+                // 目標サブシーンまで読み込んだ時点で、
+                // 必要サブシーンをロードリストに追加し、既にロードされている不要サブシーンをすべてアンロード
+                CurrentSubSceneRoot = GetLoadedSubSceneRoot(currentAimLoadSubScene);
+                foreach (var item in CurrentSubSceneRoot.RequireSubSceneNames)
+                {
+                    // 既にロード済でないもの
+                    if (GetLoadedSubSceneRoot(item) == null)
+                    {
+                        var newOpe = new LoadOperationSet();
+                        newOpe.sceneName = item;
+                        newOpe.isSubScene = true;
+                        loading.Add(newOpe);
+                    }
+                }
+                foreach (var item in loadedScenes)
+                {
+                    foreach (var sub in item.subSceneRoots)
+                    {
+                        // 必要シーンにふくまれていなくて、メインサブシーンでもないもの
+                        var subSceneName = sub.GetSceneName();
+                        if (subSceneName != currentAimLoadSubScene &&
+                            !CurrentSubSceneRoot.RequireSubSceneNames.Contains(subSceneName))
+                        {
+                            var newOpe = new LoadOperationSet();
+                            newOpe.sceneName = subSceneName;
+                            newOpe.isSubScene = true;
+                            unloading.Add(newOpe);
+                        }
+                    }
+                }
+                // 必要サブシーンのロードはアンロード後
+                // 一気にアンロードしてから１シーンずつロード
+                foreach (var item in unloading)
+                {
+                    RemoveLoadedScene(item);
+                    item.sync = UnitySceneManager.UnloadSceneAsync(item.sceneName);
+                }
+                foreach (var item in unloading)
+                {
+                    yield return SceneUnloadWait(item);
+                }
+                foreach (var item in loading)
+                {
+                    yield return LoadInternal(item);
+                }
+            }
+
+            // サブシーンを持っていなければシーンルートをアクティブにする.
+            if(!CurrentSceneRoot.HasSubScene)
+            {
+                if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(currentAimLoadScene)) == false)
+                {
+                    Debug.Log("active scene fail:" + currentAimLoadScene);
+                }
+            }
+            else
+            {
+                if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(currentAimLoadSubScene)) == false)
+                {
+                    Debug.Log("active scene fail:" + currentAimLoadSubScene);
+                }
+            }
+            if (CurrentSubSceneRoot && CurrentSubSceneRoot.DirectionalLight != null)
+            {
+                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
+            }
+            if (CurrentSubSceneRoot.DirectionalLight != null)
+            {
+                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
+            }
+            loadOperationRunning = false;
+        }
+        IEnumerator LoadInternal(LoadOperationSet set)
+        {
+            // ロード済なら何もしない
+            if((set.isSubScene && GetLoadedSceneRoot(set.sceneName) == null)
+                ||
+                (!set.isSubScene && loadedScenes.Find(s => s.sceneRoot.GetSceneName() == set.sceneName) == null))
+            {
+                set.sync = UnitySceneManager.LoadSceneAsync(set.sceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                set.sync.allowSceneActivation = true;
+                yield return SceneLoadWait(set);
+            }
+        }
+        IEnumerator SceneLoadWait(LoadOperationSet set)
+        {
+            while (set.sync.isDone == false || set.sync.progress < 1.0f)
+            {
+                yield return null;
+            }
+            // ロード済セット追加待ち
+            while ((!set.isSubScene && GetLoadedSceneRoot(set.sceneName) == null)
+                 ||
+                 (set.isSubScene && GetLoadedSubSceneRoot(set.sceneName) == null))
+            {
+                yield return null;
+            }
+        }
+        IEnumerator SceneUnloadWait(LoadOperationSet set)
+        {
+            while (set.sync.isDone == false)
+            {
+                yield return null;
+            }
+        }
+
+        void RemoveLoadedScene(LoadOperationSet set)
+        {
+            // ロード済セットから削除
+            if (!set.isSubScene)
+            {
+                var del = loadedScenes.Find(s => s.sceneRoot.GetSceneName() == set.sceneName);
+                if (del != null)
+                {
+                    loadedScenes.Remove(del);
+                }
+            }
+            else
+            {
+                foreach (var scene in loadedScenes)
+                {
+                    if (set.isSubScene)
+                    {
+                        var del = scene.subSceneRoots.Find(s => s.GetSceneName() == set.sceneName);
+                        if (del != null)
+                        {
+                            scene.subSceneRoots.Remove(del);
+                        }
+                    }
+                }
             }
         }
 
@@ -152,38 +436,22 @@ namespace VMUnityLib
         /// <param name="nextSceneName">シーン名.</param>
         /// <param name="fadeTime">フェードパラメータ.</param>
         /// <param name="pushAnchor">シーンまでのアンカー.</param>
-        public void PushScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
+        public void PushScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
-            StopAllCoroutines();
-            isFadeWaiting = true;
-            IsLoadDone = false;
-            CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-            StartCoroutine(PushSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate, unloadOtherScene));
+            if (sceneOperation != null) StopCoroutine(sceneOperation);
+            sceneOperation = StartCoroutine(PushSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
         }
-        IEnumerator PushSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadOtherScene)
+        IEnumerator PushSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
-            while (isFadeWaiting)
+            yield return FadeToShowUi(fadeParam);
+
+            sceneHistory.Push(nextSceneName);
+            SetLoadScene(nextSceneName);
+            while (loadOperationRunning)
             {
                 yield return null;
             }
-
-            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType,out currentLoadingUi);
-            yield return null;  // 表示のために１フレ待つ.
-
-            // 他シーンアンロードフラグがたってたら一つだけシーンロード
-            if (unloadOtherScene)
-            {
-                yield return LoadOneSceneInternal(nextSceneName);
-            }
-            else
-            {
-                yield return StartCoroutine(ChangeSceneActivation(nextSceneName, unloadOtherScene));
-            }
-            sceneHistory.Push(nextSceneName);
-
-            // 表示中のロードUIの処理が終わるまで待機
             yield return WaitEndLoadUi();
-
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
@@ -192,44 +460,26 @@ namespace VMUnityLib
         /// </summary>
         /// <param name="nextSceneName">シーン名.</param>
         /// <param name="fadeTime">フェードパラメータ.</param>
-        public void ChangeScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
+        public void ChangeScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
-            StopAllCoroutines();
-            isFadeWaiting = true;
-            IsLoadDone = false;
-            CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-            StartCoroutine(ChangeSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate, unloadOtherScene));
+            if (sceneOperation != null) StopCoroutine(sceneOperation);
+            sceneOperation = StartCoroutine(ChangeSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
         }
-        IEnumerator ChangeSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadOtherScene)
+        IEnumerator ChangeSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
-            while (isFadeWaiting)
-            {
-                yield return null;
-            }
-
-            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType, out currentLoadingUi);
-            yield return null;  // 表示のために１フレ待つ.
+            yield return FadeToShowUi(fadeParam);
 
             if (sceneHistory.Count > 0)
             {
                 sceneHistory.Pop();
                 sceneHistory.Push(nextSceneName);
-
-                // 他シーンアンロードフラグがたってるか、同じシーンの指定なら一つだけシーンロード
-                // FIXME: yui-t アンロードフラグがONだとサブシーンロードできない。いったんはアンロードフラグ立てないことで解決
-                if (nextSceneName == CurrentSceneName || (nextSceneName != CurrentSceneName && unloadOtherScene))
+                SetLoadScene(nextSceneName);
+                while (loadOperationRunning)
                 {
-                    yield return LoadOneSceneInternal(nextSceneName);
-                }
-                else
-                {
-                    yield return ChangeSceneActivation(nextSceneName, unloadOtherScene);
+                    yield return null;
                 }
             }
-
-            // 表示中のロードUIの処理が終わるまで待機
             yield return WaitEndLoadUi();
-
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
@@ -237,43 +487,25 @@ namespace VMUnityLib
         /// シーンポップ.
         /// </summary>
         /// <param name="fadeTime">フェードパラメータ.</param>
-        public void PopScene(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
+        public void PopScene(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
-            StopAllCoroutines();
-            isFadeWaiting = true;
-            IsLoadDone = false;
-            CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-            StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate, unloadOtherScene));
+            if (sceneOperation != null) StopCoroutine(sceneOperation);
+            sceneOperation = StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate));
         }
-        IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadOtherScene)
+        IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
-            while (isFadeWaiting)
-            {
-                yield return null;
-            }
-
-            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType, out currentLoadingUi);
-            yield return null;  // 表示のために１フレ待つ.
-
+            yield return FadeToShowUi(fadeParam);
             if (sceneHistory.Count > 0)
             {
-                sceneHistory.Pop();
                 string nextSceneName = sceneHistory.Peek();
-
-                // 他シーンアンロードフラグがたってたら一つだけシーンロード
-                if (unloadOtherScene)
+                sceneHistory.Pop();
+                SetLoadScene(nextSceneName);
+                while (loadOperationRunning)
                 {
-                    yield return LoadOneSceneInternal(nextSceneName);
-                }
-                else
-                {
-                    yield return ChangeSceneActivation(nextSceneName, unloadOtherScene);
+                    yield return null;
                 }
             }
-
-            // 表示中のロードUIの処理が終わるまで待機
             yield return WaitEndLoadUi();
-
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
@@ -282,20 +514,16 @@ namespace VMUnityLib
         /// </summary>
         /// <param name="nextSceneName">ポップ先のシーン名.</param>
         /// <param name="fadeTime">フェードパラメータ.</param>
-        public void PopSceneTo(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null, bool unloadOtherScene = true)
+        public void PopSceneTo(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
-            StopAllCoroutines();
-            IsLoadDone = false;
-            isFadeWaiting = true;
-
             // アンカーが無ければ警告出して無視
             bool bFound = false;
             foreach (var item in sceneHistory)
             {
                 if (item == nextSceneName)
                 {
-                    CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
-                    StartCoroutine(PopSceneToInternal(nextSceneName, fadeParam, afterSceneControlDelegate, unloadOtherScene));
+                    if (sceneOperation != null) StopCoroutine(sceneOperation);
+                    sceneOperation = StartCoroutine(PopSceneToInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
                     bFound = true;
                     break;
                 }
@@ -305,15 +533,9 @@ namespace VMUnityLib
                 Debug.LogWarning("Anchor not found.:" + nextSceneName);
             }
         }
-        IEnumerator PopSceneToInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate, bool unloadOtherScene)
+        IEnumerator PopSceneToInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
-            while (isFadeWaiting)
-            {
-                yield return null;
-            }
-
-            LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType, out currentLoadingUi);
-            yield return null;  // 表示のために１フレ待つ.
+            yield return FadeToShowUi(fadeParam);
 
             // 最初に見つかった同名シーンまでポップ.
             Stack<string> sceneHistoryCopy = new Stack<string>(sceneHistory);
@@ -342,67 +564,58 @@ namespace VMUnityLib
                     sceneHistory.Pop();
                 }
                 string peekedNextSceneName = sceneHistory.Peek();
-
-                // 他シーンアンロードフラグがたってたら一つだけシーンロード
-                if (unloadOtherScene)
+                SetLoadScene(peekedNextSceneName);
+                while (loadOperationRunning)
                 {
-                    yield return LoadOneSceneInternal(peekedNextSceneName);
-                }
-                else
-                {
-                    yield return ChangeSceneActivation(peekedNextSceneName, unloadOtherScene);
+                    yield return null;
                 }
             }
-
-            // 表示中のロードUIの処理が終わるまで待機
             yield return WaitEndLoadUi();
-
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
-        /// <summary>
-        /// 現在読まれているシーン以外をすべてアンロード.
-        /// </summary>
-        public void UnloadAllOtherScene()
-        {
-            StopAllCoroutines();
-            SceneSet lastSceneSet = null;
-            foreach (var scene in loadedScenes) 
-            {
-                if(scene.sceneRoot != CurrentSceneRoot)
-                {
-                    foreach (var item in scene.subSceneRoots)
-                    {
-                        UnitySceneManager.UnloadSceneAsync(item.GetSceneName());
-                    }
-                    UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
-                }
-                else
-                {
-                    lastSceneSet = scene;
-                }
-            }
+        ///// <summary>
+        ///// 現在読まれているシーン以外をすべてアンロード.
+        ///// </summary>
+        //public void UnloadAllOtherScene()
+        //{
+        //    SceneSet lastSceneSet = null;
+        //    foreach (var scene in loadedScenes) 
+        //    {
+        //        if(scene.sceneRoot != CurrentSceneRoot)
+        //        {
+        //            foreach (var item in scene.subSceneRoots)
+        //            {
+        //                UnitySceneManager.UnloadSceneAsync(item.GetSceneName());
+        //            }
+        //            UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
+        //        }
+        //        else
+        //        {
+        //            lastSceneSet = scene;
+        //        }
+        //    }
 
-            loadedScenes = new List<SceneSet>();
-            loadedScenes.Add (lastSceneSet);
-        }
+        //    loadedScenes = new List<SceneSet>();
+        //    loadedScenes.Add (lastSceneSet);
+        //}
 
-        /// <summary>
-        /// シーンをすべてアンロード.
-        /// </summary>
-        public void DebugUnloadAllScene()
-        {
-            // Sceneがすでにロードされているなら、そのシーンをアクティブにする.
-            foreach (var scene in loadedScenes) 
-            {
-                foreach (var item in scene.subSceneRoots)
-                {
-                    UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
-                }
-                UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
-            }
-            loadedScenes = new List<SceneSet>();
-        }
+        ///// <summary>
+        ///// シーンをすべてアンロード.
+        ///// </summary>
+        //public void DebugUnloadAllScene()
+        //{
+        //    // Sceneがすでにロードされているなら、そのシーンをアクティブにする.
+        //    foreach (var scene in loadedScenes) 
+        //    {
+        //        foreach (var item in scene.subSceneRoots)
+        //        {
+        //            UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
+        //        }
+        //        UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
+        //    }
+        //    loadedScenes = new List<SceneSet>();
+        //}
 
         /// <summary>
         /// フェードアウト終了時のコールバック.
@@ -426,212 +639,6 @@ namespace VMUnityLib
         }
 
         /// <summary>
-        /// シーンのアクティブ状態を変更する.
-        /// </summary>
-        IEnumerator ChangeSceneActivation(string sceneName, bool unloadOtherScene)
-        {
-            // 現在のシーンをディアクティブにする.
-            if (CurrentSceneRoot)
-            {
-                CurrentSceneRoot.SetSceneDeactive();
-            }
-
-            // デバッグだったらダミー遅延.
-            if (isDebug)
-            {
-                float startTime = Time.time;
-                while (Time.time - startTime < DEBGUG_DUMMY_LOAD_TIME)
-                {
-                    yield return null;
-                }
-            }
-
-            // 偽の読み込み時間分待機
-            if(CurrentSceneRoot != null)
-            {
-                if (CurrentSceneRoot.GetSceneName() != "demo")
-                {
-                    yield return new WaitForSeconds(DUMMY_LOAD_TIME);
-                }
-            }
-
-            // Sceneがすでにロードされているか、ロード中なら、そのシーンをアクティブにする.
-            bool isLoaded = false;
-            while (loadingSubScene.Count != 0)
-            {
-                yield return null;  // ロード待ちの場合は終わるまで待つ
-            }
-            foreach (var scene in loadedScenes) 
-            {
-                if(scene.sceneRoot.GetSceneName() == sceneName)
-                {
-                    scene.sceneRoot.SetSceneActive();
-                    if (unloadOtherScene)
-                    {
-                        var delSceneSet = loadedScenes.Find(s => CurrentSceneRoot == s.sceneRoot);
-                        loadedScenes.Remove(delSceneSet);
-                        var syncUnload = UnitySceneManager.UnloadSceneAsync(delSceneSet.sceneRoot.GetSceneName());
-                        while(!syncUnload.isDone)
-                        {
-                            yield return null;
-                        }
-                    }
-                    CurrentSceneRoot = scene.sceneRoot;
-                    isLoaded = true;
-                    break;
-                }
-            }
-
-            //ロードされていなかったらAddiveLoadする.
-            SceneRoot sceneRoot = null;
-            if (isLoaded == false)
-            {
-                yield return LoadSceneInternal(sceneName, false);
-
-                sceneRoot = GetLoadedSceneRoot(sceneName).GetComponent<SceneRoot>();
-
-                if (unloadOtherScene)
-                {
-                    var delSceneSet = loadedScenes.Find(s => CurrentSceneRoot == s.sceneRoot);
-                    loadedScenes.Remove(delSceneSet);
-                    var syncUnload = UnitySceneManager.UnloadSceneAsync(delSceneSet.sceneRoot.GetSceneName());
-                    while (!syncUnload.isDone)
-                    {
-                        yield return null;
-                    }
-                }
-
-                // UNITYのバージョンアップにともない、マルチシーン機能が実装されたため親子関係による変更は廃止
-                //sceneRootObj.transform.parent = gameObject.transform;
-                CurrentSceneRoot = sceneRoot;
-                CurrentSceneRoot.SetSceneActive();
-
-                // 初回に必要なサブシーンをロードする
-                if (sceneRoot.HasSubScene)
-                {
-                    yield return LoadSubSceneInternal(sceneRoot.FirstSubSceneName, false);
-                }
-                else
-                {
-                    CurrentSubSceneRoot = null;
-                }
-            }
-
-            // サブシーンを持っていなければシーンルートをアクティブにする.
-            if (!sceneRoot) sceneRoot = GetLoadedSceneRoot(sceneName).GetComponent<SceneRoot>();
-            if (!sceneRoot.HasSubScene && UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(sceneName)) == false)
-            {
-                Debug.Log("active scene fail");
-            }
-        }
-
-        /// <summary>
-        /// サブシーンロード
-        /// </summary>
-        IEnumerator LoadSubSceneInternal(string subSceneName, bool unloadOtherScene)
-        {
-            // 重複ロード防止のため1フレ待つ。既にロードされてたらやめとく
-            yield return null;
-
-            while (loadingSubScene.Count != 0)
-            {
-                yield return null;  // ロード待ちの場合は終わるまで待つ
-            }
-
-            if (!IsLoadedSubScene(subSceneName))
-            {
-                yield return LoadSceneInternal(subSceneName, true);
-            }
-
-            // サブシーンが読み終わったら、必要サブシーンを読み込む
-            SubSceneRoot subSceneRoot = GetLoadedSubSceneRoot(subSceneName).GetComponent<SubSceneRoot>();
-            foreach (var item in subSceneRoot.RequireSubSceneNames)
-            {
-                if (!IsLoadedSubScene(item))
-                {
-                    yield return LoadSceneInternal(item, true);
-                }
-            }
-
-            // サブシーンをアクティブにする
-            if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(subSceneName)) == false)
-            {
-                Debug.Log("active scene fail");
-            }
-
-            if(unloadOtherScene)
-            {
-                // 既にロード済のサブシーンが新たなアクティブサブシーンの必要シーンに含まれていなければアンロード
-                var unloadSceneList = new List<string>();
-                foreach (var scene in loadedScenes)
-                {
-                    if (scene.sceneRoot == CurrentSceneRoot)
-                    {
-                        foreach (var item in scene.subSceneRoots)
-                        {
-                            var searchSubSceneName = item.GetSceneName();
-                            if (searchSubSceneName != subSceneName)
-                            {
-                                if(!subSceneRoot.RequireSubSceneNames.Contains(searchSubSceneName))
-                                {
-                                    unloadSceneList.Add(searchSubSceneName);
-                                }
-                            }
-                        }
-                        break;
-                    }
-                }
-
-                // 参照する前にロード済リストから削除
-                foreach (var item in unloadSceneList)
-                {
-                    foreach (var scene in loadedScenes)
-                    {
-                        scene.subSceneRoots.RemoveAll(sub => sub.GetSceneName() == item);
-                    }
-                }
-                foreach (var item in unloadSceneList)
-                {
-                    yield return UnitySceneManager.UnloadSceneAsync(item);
-                }
-            }
-            if (CurrentSubSceneRoot && CurrentSubSceneRoot.DirectionalLight != null)
-            {
-                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
-            }
-            CurrentSubSceneRoot = subSceneRoot;
-            if(CurrentSubSceneRoot.DirectionalLight != null)
-            {
-                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
-            }
-        }
-
-        /// <summary>
-        /// シーンを一つだけロードして他すべてアンロード
-        /// </summary>
-        IEnumerator LoadOneSceneInternal(string sceneName)
-        {
-            // ロード済シーンは全削除して新しいシーンを開く
-            loadedScenes.Clear();
-            var syncLoad = UnitySceneManager.LoadSceneAsync(sceneName);
-            while (!syncLoad.isDone)
-            {
-                yield return null;
-            }
-            CurrentSceneRoot = GetLoadedSceneRoot(sceneName).GetComponent<SceneRoot>();
-
-            // 初回に必要なサブシーンをロードする
-            if (CurrentSceneRoot.HasSubScene)
-            {
-                // 既にサブシーンロード中のコルーチンがあったら無視
-                if(LoadSubSceneInternalCoroutine == null)
-                {
-                    yield return LoadSubSceneInternal(CurrentSceneRoot.FirstSubSceneName, false);
-                }
-            }
-        }
-
-        /// <summary>
         /// サブシーンが読み込まれていたかどうか
         /// </summary>
         public bool IsLoadedSubScene(string subSceneName)
@@ -646,151 +653,6 @@ namespace VMUnityLib
                 }
             }
             return alreadyLoaded;
-        }
-
-        /// <summary>
-        /// シーンロード内部処理
-        /// </summary>
-        IEnumerator LoadSceneInternal(string sceneName, bool isSubScene)
-        {
-            AsyncOperation async = UnitySceneManager.LoadSceneAsync(sceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
-            if(isSubScene)
-            {
-                loadingSubScene.Add(sceneName);
-            }
-            async.allowSceneActivation = true;
-            while (async.isDone == false || async.progress < 1.0f)
-            {
-                yield return LibBridgeInfo.WaitForEndOfFrame;
-            }
-            if (isSubScene)
-            {
-                loadingSubScene.Remove(sceneName);
-            }
-
-            Func<string, GameObject> getLoadedSceneRoot = GetLoadedSceneRoot;
-            if (isSubScene) getLoadedSceneRoot = GetLoadedSubSceneRoot;
-
-            // 120フレーム待ってもアクティブなルートが取れない場合は原因不明のエラーとしてassert
-            GameObject sceneRootObj = getLoadedSceneRoot(sceneName);
-            int waitCnt = 0;
-            while (sceneRootObj == null && waitCnt < 120)
-            {
-                ++waitCnt;
-                sceneRootObj = getLoadedSceneRoot(sceneName);
-                yield return LibBridgeInfo.WaitForEndOfFrame;
-            }
-            if (sceneRootObj == null)
-            {
-                Debug.LogAssertion("Scene root or sub scene not found:" + sceneName + " waited" + waitCnt + "frame.");
-                DumpLoadedSceneRoot();
-
-                UnitySceneManager.LoadScene(sceneName, UnityEngine.SceneManagement.LoadSceneMode.Additive);
-                sceneRootObj = getLoadedSceneRoot(sceneName);
-                if (sceneRootObj == null)
-                {
-                    Debug.LogAssertion("no sync load but Scene root or sub scene not found:" + sceneName);
-                    DumpLoadedSceneRoot();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 指定サブシーンに必要なサブシーンのみをロードし、そのほかのシーンをアンロードする
-        /// </summary>
-        public void ActiveAndApplySubScene(string subSceneName)
-        {
-            foreach (var scene in loadedScenes)
-            {
-                foreach (var item in scene.subSceneRoots)
-                {
-                    if (item.GetSceneName() == subSceneName)
-                    {
-                        ActiveAndApplySubScene(item);
-                        return;
-                    }
-                }
-            }
-            if(LoadSubSceneInternalCoroutine != null) StopCoroutine(LoadSubSceneInternalCoroutine);
-            LoadSubSceneInternalCoroutine = StartCoroutine(LoadSubSceneInternal(subSceneName, true));
-        }
-        public void ActiveAndApplySubScene(SubSceneRoot subSceneRoot)
-        {
-            if(subSceneRoot.GetSceneName() != UnitySceneManager.GetActiveScene().name)
-            {
-                if (ActiveAndApplySubSceneInternalCoroutine != null) StopCoroutine(ActiveAndApplySubSceneInternalCoroutine);
-                ActiveAndApplySubSceneInternalCoroutine = StartCoroutine(ActiveAndApplySubSceneInternal(subSceneRoot));
-            }
-        }
-        IEnumerator ActiveAndApplySubSceneInternal(SubSceneRoot subSceneRoot)
-        {
-            while (loadingSubScene.Count != 0)
-            {
-                yield return null;  // ロード待ちの場合は終わるまで待つ
-            }
-
-            // ロード済のシーンから自分の親シーンを探す
-            var subSceneRootName = subSceneRoot.GetSceneName();
-            var unloadSceneList = new List<string>();
-            var loadSceneList = new List<string>();
-            foreach (var scene in loadedScenes)
-            {
-                if(scene.sceneRoot.GetSceneName() == subSceneRoot.ParentSceneName)
-                {
-                    // 既にロード済のサブシーンが新たなアクティブサブシーンの必要シーンに含まれていなければアンロード
-                    foreach (var item in scene.subSceneRoots)
-                    {
-                        var loadedSubSceneName = item.GetSceneName();
-                        if(subSceneRootName != loadedSubSceneName && !subSceneRoot.RequireSubSceneNames.Contains(loadedSubSceneName))
-                        {
-                            unloadSceneList.Add(loadedSubSceneName);
-                        }
-                    }
-
-                    // 新たなアクティブサブシーンの必要シーンがロードされていなければロード
-                    // HACK:サブシーンはゲームオブジェクトのオンオフではなく完全にロードアンロードのみの仕様とする
-                    foreach (var item in subSceneRoot.RequireSubSceneNames)
-                    {
-                        if(!scene.subSceneRoots.Exists(s => item == s.GetSceneName()))
-                        {
-                            loadSceneList.Add(item);
-                        }
-                    }
-                    break;
-                }
-            }
-
-            // 参照する前にロード済リストから削除
-            foreach (var item in unloadSceneList)
-            {
-                foreach (var scene in loadedScenes)
-                {
-                    scene.subSceneRoots.RemoveAll(sub => sub.GetSceneName() == item);
-                }
-            }
-            foreach (var item in unloadSceneList)
-            {
-                yield return UnitySceneManager.UnloadSceneAsync(item);
-            }
-            foreach (var item in loadSceneList)
-            {
-                yield return LoadSceneInternal(item, true);
-            }
-
-            if (CurrentSubSceneRoot && CurrentSubSceneRoot.DirectionalLight != null)
-            {
-                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
-            }
-            CurrentSubSceneRoot = subSceneRoot;
-            if (CurrentSubSceneRoot.DirectionalLight != null)
-            {
-                CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
-            }
-
-            if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(subSceneRootName)) == false)
-            {
-                Debug.Log("active scene fail");
-            }
         }
 
         /// <summary>
@@ -820,12 +682,11 @@ namespace VMUnityLib
             {
                 firstDirectBoot = false;
                 CurrentSceneRoot = sceneRoot;
+                currentAimLoadScene = sceneRoot.GetSceneName();
                 sceneHistory.Push(CurrentSceneRoot.GetSceneName());
-                // どうせエディタ専用機能なのでコルーチンでサブシーンロード
-                // サブシーン読み込みが先に走っていたら無視
-                if (sceneRoot.HasSubScene && loadingSubScene.Count == 0)
+                if(CurrentSceneRoot.HasSubScene)
                 {
-                    LoadSubSceneInternalCoroutine = StartCoroutine(LoadSubSceneInternal(sceneRoot.FirstSubSceneName, false));
+                    ActiveAndApplySubScene(CurrentSceneRoot.FirstSubSceneName);
                 }
             }
         }
@@ -869,13 +730,13 @@ namespace VMUnityLib
         /// <summary>
         /// ロードが終了しているシーンルートを取得する.
         /// </summary>
-        GameObject GetLoadedSceneRoot(string sceneName)
+        SceneRoot GetLoadedSceneRoot(string sceneName)
         {
             foreach (var scene in loadedScenes) 
             {
                 if(scene.sceneRoot.GetSceneName() == sceneName)
                 {
-                    return scene.sceneRoot.gameObject;
+                    return scene.sceneRoot;
                 }
             }
             return null;
@@ -884,7 +745,7 @@ namespace VMUnityLib
         /// <summary>
         /// ロードが終了しているサブシーンルートを取得する.
         /// </summary>
-        GameObject GetLoadedSubSceneRoot(string subSceneName)
+        SubSceneRoot GetLoadedSubSceneRoot(string subSceneName)
         {
             foreach (var scene in loadedScenes) 
             {
@@ -892,7 +753,7 @@ namespace VMUnityLib
                 {
                     if (item.GetSceneName() == subSceneName)
                     {
-                        return item.gameObject;
+                        return item;
                     }
                 }
             }
@@ -936,12 +797,12 @@ namespace VMUnityLib
         /// </summary>
         IEnumerator WaitEndLoadUi()
         {
-            // サブシーンのロード開始が１フレまっているので、サブシーンのロードがないか確認するために1フレ待つ
-            yield return null;
+            //// サブシーンのロード開始が１フレまっているので、サブシーンのロードがないか確認するために1フレ待つ
+            //yield return null;
 
-            while (loadingSubScene.Count != 0)
+            while(loadOperationRunning)
             {
-                yield return null;  // ロード待ちの場合は終わるまで待つ
+                yield return null;
             }
 
             IsLoadDone = true;

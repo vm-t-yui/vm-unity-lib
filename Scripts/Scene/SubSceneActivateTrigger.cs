@@ -57,7 +57,7 @@ namespace VMUnityLib
                 {
                     PrevSubSceneRoot = SceneManager.Instance?.CurrentSubSceneRoot;
                     NextSubSceneRoot = TargetSubSceneRoot;
-                    SceneManager.Instance?.ActiveAndApplySubScene(NextSubSceneRoot);
+                    SceneManager.Instance?.ActiveAndApplySubScene(NextSubSceneRoot.GetSceneName());
                 }
                 ++SubSceneActiveChangingCnt;
             }
@@ -77,7 +77,7 @@ namespace VMUnityLib
                     // targetがNext=自分シーン側
                     if (TargetSubSceneRoot == NextSubSceneRoot)
                     {
-                        SceneManager.Instance?.ActiveAndApplySubScene(PrevSubSceneRoot);
+                        SceneManager.Instance?.ActiveAndApplySubScene(PrevSubSceneRoot.GetSceneName());
                     }
                 }
                 --SubSceneActiveChangingCnt;
