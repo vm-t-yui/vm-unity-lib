@@ -9,7 +9,7 @@ namespace VMUnityLib
     public class AutoMobileShaderSwitch : MonoBehaviour
     {
         [SerializeField]
-        ReplacementList replacements;
+        ReplacementList replacements = default;
 
         // Use this for initialization
         void OnEnable()
