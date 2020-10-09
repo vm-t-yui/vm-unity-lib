@@ -184,7 +184,7 @@ namespace IceMilkTea.Core
         // メンバ変数定義
         private UpdateState updateState;
         private List<State> stateList;
-        private State currentState;
+        protected State currentState;
         private State nextState;
         private Stack<State> stateStack;
         private HashSet<Func<Type, State>> stateFactorySet;
