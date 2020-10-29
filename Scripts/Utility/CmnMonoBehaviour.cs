@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 /*!    \brief  標準MonoBehaviour（便利機能をラップしたMonoBehaviour）.
 *******************************************************************************/
 
@@ -106,30 +106,46 @@ namespace VMUnityLib
             return ret;
         }
 
-#if DEBUG && LOG_TRACE
         /// <summary>
         /// ログ
         /// </summary>
         public void LogError(string message)
         {
+#if DEBUG && LOG_TRACE
             VMLogger.Error(message, this, EnableLogStack, !ShowLog);
+#else
+            Debug.LogError(message, this);
+#endif
         }
         public void LogException(Exception exp)
         {
+#if DEBUG && LOG_TRACE
             VMLogger.Exception(exp, this, EnableLogStack, !ShowLog);
+#else
+            Debug.LogError(message, this);
+#endif
         }
         public void LogWarn(string message)
         {
+#if DEBUG && LOG_TRACE
             VMLogger.Warn(message, this, EnableLogStack, !ShowLog);
+#else
+            Debug.LogWarn(message, this);
+#endif
         }
         public void Log(string message)
         {
+#if DEBUG && LOG_TRACE
             VMLogger.Log(message, this, EnableLogStack, !ShowLog);
+#else
+            Debug.Log(message, this);
+#endif
         }
         public void DumpLog()
         {
+#if DEBUG && LOG_TRACE
             VMLogger.Dump(this);
-        }
 #endif
+        }
     }
 }
