@@ -28,6 +28,7 @@ namespace VMUnityLib
         LoadingUiBase       currentLoadingUi = null;                         // 現在ロード中に表示しているUI
         bool                isDirectBoot;                                    // 直接起動かどうか
         bool                firstDirectBoot = true;                          // 直接起動の初回判定用
+        public bool IsDirectBoot => isDirectBoot;
 
         // アンロードとロードタスク
         // loadOperationはloadingTaskとunloadingTask全てを解決するタスク
