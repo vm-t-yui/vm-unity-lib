@@ -122,7 +122,7 @@ namespace VMUnityLib
 #if DEBUG && LOG_TRACE
             VMLogger.Exception(exp, this, EnableLogStack, !ShowLog);
 #else
-            Debug.LogError(message, this);
+            Debug.LogException(exp, this);
 #endif
         }
         public void LogWarn(string message)
@@ -130,7 +130,7 @@ namespace VMUnityLib
 #if DEBUG && LOG_TRACE
             VMLogger.Warn(message, this, EnableLogStack, !ShowLog);
 #else
-            Debug.LogWarn(message, this);
+            Debug.LogWarning(message, this);
 #endif
         }
         public void Log(string message)
