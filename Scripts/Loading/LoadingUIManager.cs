@@ -50,6 +50,7 @@ namespace VMUnityLib
 #else
             loadingUi = null;
 #endif
+            loadingUi.OnStartLoad();
         }
 
         /// <summary>

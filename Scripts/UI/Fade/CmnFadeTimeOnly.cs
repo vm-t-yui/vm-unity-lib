@@ -1,12 +1,15 @@
 /******************************************************************************/
 /*!    \brief  フェード（時間のみ）.
 *******************************************************************************/
-
+using System.Collections;
+using UnityEngine;
 
 namespace VMUnityLib
 {
     public sealed class CmnFadeTimeOnly : ICmnFade
     {
+        Coroutine coroutine;
+
         /// <summary>
         /// 初期化.
         /// </summary>
@@ -16,13 +19,14 @@ namespace VMUnityLib
         }
 
         /// <summary>
-        /// Update.
+        /// Calc.
         /// </summary>
-        protected override void FixedUpdate()
+        IEnumerator FadeCalcCoroutine()
         {
-            if (IsStartedFade)
+            while (IsStartedFade)
             {
                 CalcAmount();
+                yield return null;
             }
         }
 
@@ -32,6 +36,8 @@ namespace VMUnityLib
         public override void StartFadeIn(EndFadeCallBack callBack, float time)
         {
             StartFadeInInternal(callBack, time);
+            if (coroutine != null) { StopCoroutine(coroutine); }
+            coroutine = StartCoroutine(FadeCalcCoroutine());
         }
 
         /// <summary>
@@ -40,6 +46,8 @@ namespace VMUnityLib
         public override void StartFadeOut(EndFadeCallBack callBack, float time)
         {
             StartFadeOutInternal(callBack, time);
+            if (coroutine != null) { StopCoroutine(coroutine); }
+            coroutine = StartCoroutine(FadeCalcCoroutine());
         }
     }
 }

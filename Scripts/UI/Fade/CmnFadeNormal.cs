@@ -1,16 +1,20 @@
 /******************************************************************************/
 /*!    \brief  通常のフェード.
 *******************************************************************************/
-
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace VMUnityLib
 {
+    /// <summary>
+    /// Unity3時代のモノなのでTweenもコルーチンも何もかも使わなかった時代の化石
+    /// </summary>
     public sealed class CmnFadeNormal : ICmnFade
     {
-        public  Color Color { get; set; }             // フェードするオブジェクトのカラー.
+        public Color Color { get; set; }             // フェードするオブジェクトのカラー.
         Image overlay;                        // フェード用の上に重ねるオブジェクト.
+        Coroutine coroutine;
 
         /// <summary>
         /// 初期化.
@@ -24,14 +28,15 @@ namespace VMUnityLib
         }
 
         /// <summary>
-        /// Update.
+        /// Calc.
         /// </summary>
-        protected override void FixedUpdate()
+        IEnumerator FadeCalcCoroutine()
         {
-            if (IsStartedFade)
+            while(IsStartedFade)
             {
                 CalcAmount();
                 overlay.color = new Color(Color.r, Color.g, Color.b, Amount);
+                yield return null;
             }
         }
 
@@ -41,6 +46,8 @@ namespace VMUnityLib
         public override void StartFadeIn(EndFadeCallBack callBack, float time)
         {
             StartFadeInInternal(callBack, time);
+            if(coroutine != null) { StopCoroutine(coroutine); }
+            coroutine = StartCoroutine(FadeCalcCoroutine());
             overlay.color = new Color(Color.r, Color.g, Color.b, 1.0f);
         }
 
@@ -50,6 +57,8 @@ namespace VMUnityLib
         public override void StartFadeOut(EndFadeCallBack callBack, float time)
         {
             StartFadeOutInternal(callBack, time);
+            if(coroutine != null) { StopCoroutine(coroutine); }
+            coroutine = StartCoroutine(FadeCalcCoroutine());
             overlay.color = new Color(Color.r, Color.g, Color.b, 0.0f);
         }
     }

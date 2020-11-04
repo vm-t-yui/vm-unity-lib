@@ -14,5 +14,10 @@ namespace VMUnityLib
                  "trueになったら自動でロードUIが閉じられ、次のシーンへ移行します。")]
         protected bool isEnd = false;
         public bool IsEnd => isEnd;
+
+        /// <summary>
+        /// ロード開始
+        /// </summary>
+        public virtual void OnStartLoad() { }
     }
 }

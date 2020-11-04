@@ -26,7 +26,6 @@ namespace VMUnityLib
         protected float Amount { get; set; }    // フェード進行度.
 
         protected abstract void Start();
-        protected abstract void FixedUpdate();
 
         float fadeTime;                       // フェード所要時間.
         float fadeStartTime;                  // フェード開始時間.
@@ -51,7 +50,7 @@ namespace VMUnityLib
             fadeTime = time;
             IsStartedFade = true;
             IsFadeIn = true;
-            fadeStartTime = Time.time;
+            fadeStartTime = Time.unscaledTime;
             endFadeCallBack = callBack;
             transform.GetComponent<Collider>().enabled = true;
         }
@@ -65,7 +64,7 @@ namespace VMUnityLib
             fadeTime = time;
             IsStartedFade = true;
             IsFadeIn = false;
-            fadeStartTime = Time.time;
+            fadeStartTime = Time.unscaledTime;
             endFadeCallBack = callBack;
             transform.GetComponent<Collider>().enabled = true;
         }
@@ -77,7 +76,7 @@ namespace VMUnityLib
         {
             if (fadeTime > 0)
             {
-                Amount = (Time.time - fadeStartTime) / fadeTime;
+                Amount = (Time.unscaledTime - fadeStartTime) / fadeTime;
             }
             else
             {
@@ -88,10 +87,7 @@ namespace VMUnityLib
             {
                 Amount = 1.0f;
                 IsStartedFade = false;
-                if (endFadeCallBack != null)
-                {
-                    endFadeCallBack();
-                }
+                endFadeCallBack();
                 if (IsFadeIn)
                 {
                     gameObject.SetActive(false);
