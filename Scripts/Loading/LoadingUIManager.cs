@@ -6,7 +6,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Events;
 
 namespace VMUnityLib
 {
@@ -58,15 +57,7 @@ namespace VMUnityLib
         public void HideLoadingUI(LibBridgeInfo.LoadingType type)
         {
 #if USE_TWEEN
-            // フェードアウト
             loadingUiDict[type].tweenAlpha.Play(PlayDirection.Reverse);
-            // フェードアウトが終わったら、オブジェクトをオフにする
-            UnityAction onEndFadeout = null;
-            loadingUiDict[type].tweenAlpha.onFinished.AddListener(onEndFadeout = () =>
-            {
-                loadingUiDict[type].tweenAlpha.gameObject.SetActive(false);
-                loadingUiDict[type].tweenAlpha.onFinished.RemoveListener(onEndFadeout);
-            });
 #endif
         }
     }
