@@ -35,6 +35,7 @@ using UnityEngine;
 using GoogleMobileAds.Api;
 using VMUnityLib;
 using System;
+using UnityEngine.Advertisements;
 
 public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
 {
@@ -82,6 +83,19 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
         RequestNativeExpress();
         // 動画広告読み込み
         RequestRewardBasedVideo();
+        // UnityAdsの初期化
+        InitializeUnityAds();
+    }
+
+    void InitializeUnityAds()
+    {
+        //初期化
+#if UNITY_ANDROID
+        Advertisement.Initialize("3896591");
+#elif UNITY_IOS
+        Advertisement.Initialize("3896590");
+#else
+#endif
     }
 
     void RequestRewardBasedVideo()
