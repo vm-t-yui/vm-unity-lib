@@ -118,6 +118,8 @@ namespace VMUnityLib
                     PushScene(debugFirstSceneName, noTimeFade);
                 }
             }
+            // Startまできたら用済みなのでフラグ下げる
+            isDirectBoot = false;
         }
 
         /// <summary>
