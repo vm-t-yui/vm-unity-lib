@@ -34,9 +34,9 @@ namespace VMUnityLib
         /// <param name="isShow"></param>
         public void Show(bool isShow)
         {
-#if !UNITY_EDITOR
+//#if !UNITY_EDITOR
             nativeView.gameObject.SetActive(isShow);
-#endif
+//#endif
         }
 #endif
     }

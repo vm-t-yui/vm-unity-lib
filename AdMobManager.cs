@@ -35,7 +35,8 @@ using UnityEngine;
 using GoogleMobileAds.Api;
 using VMUnityLib;
 using System;
-using UnityEngine.Advertisements;
+using UnityEngine.Purchasing;
+
 
 public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
 {
@@ -61,6 +62,8 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     Action rewardAction = default;
     [SerializeField]
     MyNendNative myNendNative = default;
+    [SerializeField]
+    string adRemovingName = default;
 
     InterstitialAd interstitial;
     BannerView[]   banner = new BannerView[(int)BANNER.MAX];
@@ -70,6 +73,8 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
 
     bool is_close_interstitial = false;
     bool isMovieReward;
+    bool isShowAd;
+    public bool IsShowAd => isShowAd;
 
 
     // Use this for initialization
@@ -83,19 +88,58 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
         RequestNativeExpress();
         // 動画広告読み込み
         RequestRewardBasedVideo();
-        // UnityAdsの初期化
-        InitializeUnityAds();
+        // 広告外しの課金がされたかどうか
+        HasBeenAdRemovingCharging();
     }
 
-    void InitializeUnityAds()
+    /// <summary>
+    /// 広告外しの課金がされたかどうか
+    /// </summary>
+    void HasBeenAdRemovingCharging()
     {
-        //初期化
-#if UNITY_ANDROID
-        Advertisement.Initialize("3896591");
-#elif UNITY_IOS
-        Advertisement.Initialize("3896590");
-#else
-#endif
+        isShowAd = true;
+        // IAPの初期化処理が終わっていたら
+        if (CodelessIAPStoreListener.initializationComplete)
+        {
+            // 広告外しが購入されているかを調べる
+            var product = CodelessIAPStoreListener.Instance.GetProduct(adRemovingName);
+            // 広告外しが購入されたレシートが存在しているなら
+            if (product.hasReceipt)
+            {
+                isShowAd = false;
+            }
+        }
+        // IAPの初期化処理が終わっていないなら
+        else
+        {
+            StartCoroutine(WaitInitializeIAP());
+        }
+    }
+
+    /// <summary>
+    /// IAPの初期化を待つ
+    /// </summary>
+    IEnumerator WaitInitializeIAP()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(3.0f);
+            // IAPの初期化処理が終わっていたら
+            if (CodelessIAPStoreListener.initializationComplete)
+            {
+                // 広告外しが購入されているかを調べる
+                var product = CodelessIAPStoreListener.Instance.GetProduct(adRemovingName);
+                // 広告外しが購入されたレシートが存在しているなら
+                if (product.hasReceipt)
+                {
+                    isShowAd = false;
+                    myNendNative.Show(false);
+                    NendAdController.Inst.ShowBottomBanner(false);
+                    NendAdController.Inst.ShowTopBanner(false);
+                }
+                break;
+            }
+        }
     }
 
     void RequestRewardBasedVideo()
@@ -237,7 +281,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowInterstitial()
     {
-        if (interstitial.IsLoaded())
+        if (interstitial.IsLoaded() && isShowAd)
         {
             interstitial.Show();
         }
@@ -247,7 +291,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowBanner(BANNER inBanner, bool inIsShow)
     {
-        if(inIsShow)
+        if(inIsShow && isShowAd)
         {
             banner[(int)inBanner].Show();
             beforeBanner[(int)inBanner] = true;
@@ -264,7 +308,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowNativeAd(bool inIsShow)
     {
-        if (inIsShow)
+        if (inIsShow && isShowAd)
         {
             myNendNative.Show(true);
         }
@@ -445,6 +489,20 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
             }
         }
         StartCoroutine("_waitConnectRewardVideo");
+    }
+
+    /// <summary>
+    /// 課金が完了した時の処理
+    /// </summary>
+    public void OnPurchaseComplete(Product product)
+    {
+        if(product.transactionID == adRemovingName)
+        {
+            isShowAd = false;
+            myNendNative.Show(false);
+            NendAdController.Inst.ShowBottomBanner(false);
+            NendAdController.Inst.ShowTopBanner(false);
+        }
     }
 }
 #endif

@@ -46,7 +46,7 @@ namespace VMUnityLib
         /// </summary>
         public void ShowTopBanner(bool show)
         {
-            if (show)
+            if (show && AdMobManager.Inst.IsShowAd)
                 topBanner.Show();
             else
                 topBanner.Hide();
@@ -70,7 +70,10 @@ namespace VMUnityLib
         /// </summary>
         public void ShowInterstitial()
         {
-            inter.Show();
+            if (AdMobManager.Inst.IsShowAd)
+            {
+                inter.Show();
+            }
         }
 #endif
     }
