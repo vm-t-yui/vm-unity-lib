@@ -64,6 +64,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     MyNendNative myNendNative = default;
     [SerializeField]
     string adRemovingName = default;
+    public string AdRemovingName => adRemovingName;
 
     InterstitialAd interstitial;
     BannerView[]   banner = new BannerView[(int)BANNER.MAX];
