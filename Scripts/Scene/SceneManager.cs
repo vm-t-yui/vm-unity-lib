@@ -420,6 +420,7 @@ namespace VMUnityLib
         /// </summary>
         void EndFadeInCallBack()
         {
+            EventManager.Inst.InvokeEvent(SubjectType.EndFadeIn);
             // フェード終了メッセージを流す.
             if (currentSceneRoot)
             {

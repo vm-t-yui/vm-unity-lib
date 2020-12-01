@@ -56,6 +56,7 @@ namespace VMUnityLib
         }
         public void StartFadeOut(EndFadeCallBack callBack, float time, FadeType type, Color color)
         {
+            EventManager.Inst.InvokeEvent(SubjectType.StartFadeOut);
             switch (type)
             {
                 case FadeType.FADE_TIMEONLY:
