@@ -497,7 +497,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void OnPurchaseComplete(Product product)
     {
-        if(product.transactionID == adRemovingName)
+        if (product.definition.id == adRemovingName)
         {
             isShowAd = false;
             myNendNative.Show(false);
