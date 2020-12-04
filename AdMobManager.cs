@@ -36,6 +36,7 @@ using GoogleMobileAds.Api;
 using VMUnityLib;
 using System;
 using UnityEngine.Purchasing;
+using UnityEngine.Advertisements;
 
 
 public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
@@ -65,6 +66,12 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     [SerializeField]
     string adRemovingName = default;
     public string AdRemovingName => adRemovingName;
+    [SerializeField]
+    string iosId = default;
+    [SerializeField]
+    string androidId = default;
+    [SerializeField]
+    bool isTest = default;
 
     InterstitialAd interstitial;
     BannerView[]   banner = new BannerView[(int)BANNER.MAX];
@@ -91,6 +98,21 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
         RequestRewardBasedVideo();
         // 広告外しの課金がされたかどうか
         HasBeenAdRemovingCharging();
+        // UnityAdsの初期化
+        InitializeUnityAds();
+    }
+
+    /// <summary>
+    /// unityAdsの初期化
+    /// </summary>
+    void InitializeUnityAds()
+    {
+#if UNITY_ANDROID
+        Advertisement.Initialize(androidId,isTest);
+#elif UNITY_IOS
+        Advertisement.Initialize(iosId, isTest);
+#else
+#endif
     }
 
     /// <summary>
@@ -503,6 +525,17 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
             myNendNative.Show(false);
             NendAdController.Inst.ShowBottomBanner(false);
             NendAdController.Inst.ShowTopBanner(false);
+        }
+    }
+
+    /// <summary>
+    /// 動画広告の表示
+    /// </summary>
+    public void ShowMovieAd()
+    {
+        if (Advertisement.IsReady())
+        {
+            Advertisement.Show();
         }
     }
 }
