@@ -533,7 +533,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowMovieAd()
     {
-        if (Advertisement.IsReady())
+        if (Advertisement.IsReady() && isShowAd)
         {
             Advertisement.Show();
         }
