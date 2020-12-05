@@ -114,7 +114,7 @@ namespace VMUnityLib
 #if DEBUG && LOG_TRACE
             VMLogger.Error(message, this, EnableLogStack, !ShowLog);
 #else
-            Debug.LogError(message, this);
+            Debug.LogError(message, gameObject);
 #endif
         }
         public void LogException(Exception exp)
@@ -122,7 +122,7 @@ namespace VMUnityLib
 #if DEBUG && LOG_TRACE
             VMLogger.Exception(exp, this, EnableLogStack, !ShowLog);
 #else
-            Debug.LogException(exp, this);
+            Debug.LogException(exp, gameObject);
 #endif
         }
         public void LogWarn(string message)
@@ -130,7 +130,7 @@ namespace VMUnityLib
 #if DEBUG && LOG_TRACE
             VMLogger.Warn(message, this, EnableLogStack, !ShowLog);
 #else
-            Debug.LogWarning(message, this);
+            Debug.LogWarning(message, gameObject);
 #endif
         }
         public void Log(string message)
@@ -138,7 +138,7 @@ namespace VMUnityLib
 #if DEBUG && LOG_TRACE
             VMLogger.Log(message, this, EnableLogStack, !ShowLog);
 #else
-            Debug.Log(message, this);
+            Debug.Log(message, gameObject);
 #endif
         }
         public void DumpLog()
