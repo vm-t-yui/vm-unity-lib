@@ -112,7 +112,7 @@ namespace VMUnityLib
         public void LogError(string message)
         {
 #if DEBUG && LOG_TRACE
-            VMLogger.Error(message, this, EnableLogStack, !ShowLog);
+            VMLogger.Error(message, this, EnableLogStack); // エラーはログ出す
 #else
             Debug.LogError(message, gameObject);
 #endif
@@ -120,7 +120,7 @@ namespace VMUnityLib
         public void LogException(Exception exp)
         {
 #if DEBUG && LOG_TRACE
-            VMLogger.Exception(exp, this, EnableLogStack, !ShowLog);
+            VMLogger.Exception(exp, this, EnableLogStack); // エラーはログ出す
 #else
             Debug.LogException(exp, gameObject);
 #endif
