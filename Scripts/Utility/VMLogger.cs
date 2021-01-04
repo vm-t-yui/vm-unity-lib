@@ -1,11 +1,10 @@
-#if LOG_TRACE
+#if LOG_TRACE && DEBUG
 
 using UnityEngine;
 using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace VMUnityLib
 {
@@ -138,7 +137,12 @@ namespace VMUnityLib
                 if (!context) Debug.LogError(message);
                 else Debug.LogError(message, context);
             }
-            if (addStack) AddLogStack(message, context);
+            if (addStack)
+            {
+                AddLogStack(message, context);
+                // エラー時はダンプする
+                Dump(context);
+            }
         }
         static public void Exception(Exception exp, UnityEngine.Object context, bool addStack = true, bool disableConsole = false)
         {
