@@ -91,7 +91,7 @@ namespace VMUnityLib
             string dumpStr = "";
             if(messageStackDict.ContainsKey(target))
             {
-                dumpStr += "---------[" + target.name + "]---------\n";
+                dumpStr += "---------[" + target.name + "("+ target.GetInstanceID() +")]---------\n";
                 var obj = messageStackDict[target];
                 foreach (var item in obj)
                 {
@@ -180,7 +180,16 @@ namespace VMUnityLib
             DateTime now = DateTime.Now;
             string timeStr = now.ToString() + ":" + now.Millisecond;
             var target = messageStackDict[context];
-            target.AddMessage(timeStr + ": " + message);
+            var stackTraceStr = StackTraceUtility.ExtractStackTrace();
+
+            // スタックトレース3行削除
+            for (int i = 0; i < 3; i++)
+            {
+                var index = stackTraceStr.IndexOf("\n");
+                stackTraceStr = stackTraceStr.Remove(0, index + 1);
+            }
+
+            target.AddMessage(timeStr + ": " + message + "\n" + stackTraceStr);
             messageAddQueue.Enqueue(target);
             RemoveOverQueues();
         }
