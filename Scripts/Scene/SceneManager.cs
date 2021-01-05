@@ -29,6 +29,7 @@ namespace VMUnityLib
 
         bool isFadeWaiting = false;             // フェードが終わったかどうか
         CommonSceneUI sceneUI = null;           // 共通シーンUI
+        bool isSubscribeUnloadEvent = false;    // アンロードイベントを登録したかどうか
 
         [SceneNameAttribute, SerializeField] string firstSceneName = default;       // 最初のシーンの名前
         [SceneNameAttribute, SerializeField] string debugFirstSceneName = default;  // デモの最初のシーンの名前
@@ -595,6 +596,33 @@ namespace VMUnityLib
                 Debug.Log(" " + root.gameObject.name);
             }
             Debug.Log("-------");
+        }
+
+
+        public void SubscribeSceneUnloadEvent()
+        {
+            if(!isSubscribeUnloadEvent)
+            {
+                isSubscribeUnloadEvent = true;
+            EventManager.Inst.Subscribe(SubjectType.EndFadeIn,Unit => UnloadSceneBack());
+            }
+        }
+
+
+        void UnloadSceneBack()
+        {
+            var root = loadedSceneRootList[loadedSceneRootList.Count - 2];
+
+            if (root != currentSceneRoot && root.GetSceneName() != "demo")
+            {
+#if UNITY_5_5_OR_NEWER
+                UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(root.GetSceneName());
+#else
+                    UnityEngine.SceneManagement.SceneManager.UnloadScene(root.GetSceneName());
+#endif
+                Destroy(root.gameObject);
+                loadedSceneRootList.Remove(root);
+            }
         }
     }
 }
