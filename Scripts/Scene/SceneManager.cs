@@ -598,7 +598,9 @@ namespace VMUnityLib
             Debug.Log("-------");
         }
 
-
+        /// <summary>
+        /// シーンのアンロードイベントを登録する
+        /// </summary>
         public void SubscribeSceneUnloadEvent()
         {
             if(!isSubscribeUnloadEvent)
@@ -608,17 +610,18 @@ namespace VMUnityLib
             }
         }
 
-
+        /// <summary>
+        /// シーンの後ろからアンロードする
+        /// </summary>
         void UnloadSceneBack()
         {
             var root = loadedSceneRootList[loadedSceneRootList.Count - 2];
-
             if (root != currentSceneRoot && root.GetSceneName() != "demo")
             {
 #if UNITY_5_5_OR_NEWER
                 UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(root.GetSceneName());
 #else
-                    UnityEngine.SceneManagement.SceneManager.UnloadScene(root.GetSceneName());
+                UnityEngine.SceneManagement.SceneManager.UnloadScene(root.GetSceneName());
 #endif
                 Destroy(root.gameObject);
                 loadedSceneRootList.Remove(root);
