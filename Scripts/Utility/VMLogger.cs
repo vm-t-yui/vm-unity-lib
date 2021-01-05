@@ -1,5 +1,7 @@
 #if LOG_TRACE && DEBUG
-
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using System;
 using System.IO;
@@ -39,17 +41,22 @@ namespace VMUnityLib
             }
         }
         static Dictionary<UnityEngine.Object, ObjectLog> messageStackDict = new Dictionary<UnityEngine.Object, ObjectLog>();
-        static string dumpPath = null;
+        static string dumpFilePath = null;
+        static string dumpDirectoryPath = null;
         static Queue<ObjectLog> messageAddQueue = new Queue<ObjectLog>();   // 追加した順番を記録
         static int maxQueueSize = 1000;       // ログできるメッセージの総数
         // NOTE: ログ出来るオブジェクトは無限設定なので、シーン移動のタイミング等ゲーム側で適宜クリアする必要がある
 
         /// <summary>
-        /// ダンプパス設定
-        /// </summary>
-        static public void SetDumpPath(string path)
+        /// ダンプパス設定(拡張子、ファイルとディレクトリの隙間の/は不要)
+        /// </summary
+        static public void SetDumpDirectoryPath(string path)
         {
-            dumpPath = path;
+            dumpDirectoryPath = path;
+        }
+        static public void SetDumpFilePath(string path)
+        {
+            dumpFilePath = path;
         }
         
         /// <summary>
@@ -106,16 +113,32 @@ namespace VMUnityLib
         /// </summary>
         static void DumpExternal(string dumpStr)
         {
-            if (!string.IsNullOrEmpty(dumpPath))
+            if (!string.IsNullOrEmpty(dumpFilePath) && !string.IsNullOrEmpty(dumpFilePath))
             {
                 try
                 {
-                    File.WriteAllText(dumpPath, dumpStr);
+                    var now = DateTime.Now.ToString();
+                    now = now.Replace(" ","_");
+                    now = now.Replace("/","");
+                    now = now.Replace(":","-");
+                    var filePath = dumpDirectoryPath + "/" + dumpFilePath + "_" + now + ".txt";
+                    File.WriteAllText(filePath, dumpStr);
+#if UNITY_EDITOR
+                    EditorUtility.RevealInFinder(filePath);
+#endif
                 }
                 catch (IOException e)
                 {
                     Debug.LogError(e.Message);
                 }
+            }
+#if UNITY_EDITOR
+            else if(EditorApplication.isPlaying)
+#else
+            else
+#endif
+            {
+                Debug.LogError("SetDumpXXXPathで外部出力パスを設定してください。");
             }
         }
 
