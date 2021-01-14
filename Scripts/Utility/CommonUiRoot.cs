@@ -19,10 +19,19 @@ public sealed class CommonUiRoot : MonoBehaviour
     {
         if (SceneManager.Instance == null)
         {
-            GameObject commonUiRootPrefab = Resources.Load<GameObject>("CommonUiRoot");
-            if (commonUiRootPrefab == null)
+            // Unityがロード失敗するのが急に起こるようになったので調暫定処理
+            GameObject commonUiRootPrefab = null;
+            for (int i = 0; i < 100; i++)
             {
-                Debug.LogError("commonUiRootPrefabのロードに失敗");
+                commonUiRootPrefab = Resources.Load<GameObject>("CommonUiRoot");
+                if (commonUiRootPrefab == null)
+                {
+                    Debug.LogError("commonUiRootPrefabのロードに失敗");
+                }
+                else
+                {
+                    break;
+                }
             }
             var obj = GameObject.Instantiate(commonUiRootPrefab);
             DontDestroyOnLoad(obj);

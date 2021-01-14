@@ -28,10 +28,19 @@ namespace VMUnityLib
         {
             if (SceneManager.Instance == null)
             {
-                GameObject commonProgramObjPrefab = Resources.Load<GameObject>("CommonProgramObj");
-                if (commonProgramObjPrefab == null)
+                // Unityがロード失敗するのが急に起こるようになったので調暫定処理
+                GameObject commonProgramObjPrefab = null;
+                for (int i = 0; i < 100; i++)
                 {
-                    Debug.LogError("commonProgramObjPrefabのロードに失敗");
+                    commonProgramObjPrefab = Resources.Load<GameObject>("CommonProgramObj");
+                    if (commonProgramObjPrefab == null)
+                    {
+                        Debug.LogError("commonProgramObjPrefabのロードに失敗");
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 GameObject.Instantiate(commonProgramObjPrefab);
             }
