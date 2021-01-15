@@ -28,11 +28,13 @@ namespace VMUnityLib
         {
             if (SceneManager.Instance == null)
             {
-                Object obj = Resources.Load("CommonProgramObj"); ;
+                var prefabName = "CommonProgramObj";
+                Object obj = Resources.Load(prefabName);
                 GameObject prefab = (GameObject)obj;
                 if (prefab == null)
                 {
-                    Debug.LogAssertion("CommonProgramObjPrefabのロードに失敗 obj:" + obj);
+                    var stackTraceStr = StackTraceUtility.ExtractStackTrace();
+                    Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj + "\n" + stackTraceStr);
                 }
                 var instantiated = Instantiate(prefab);
                 DontDestroyOnLoad(instantiated);

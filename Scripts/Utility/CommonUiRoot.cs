@@ -19,11 +19,13 @@ public sealed class CommonUiRoot : MonoBehaviour
     {
         if (SceneManager.Instance == null)
         {
-            Object obj = Resources.Load("CommonUiRoot"); ;
+            var prefabName = "CommonUiRoot";
+            Object obj = Resources.Load(prefabName);
             GameObject prefab = (GameObject)obj;
             if (prefab == null)
             {
-                Debug.LogAssertion("commonUiRootPrefabのロードに失敗 obj:" + obj);
+                var stackTraceStr = StackTraceUtility.ExtractStackTrace();
+                Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj + "\n" + stackTraceStr);
             }
             var instantiated = Instantiate(prefab);
             DontDestroyOnLoad(instantiated);
