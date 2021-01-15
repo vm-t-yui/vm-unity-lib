@@ -11,10 +11,12 @@ namespace VMUnityLib
 {
     public sealed class CommonProgramObj : MonoBehaviour
     {
+        const string prefabName = "CommonProgramObj";
 #if UNITY_EDITOR
         int prevScreenW;
         int prevScreenH;
         EditorWindow gameview;
+        const string prefabPath = "Assets/MyGameAssets/LibBridge/Resources/"+ prefabName+ ".prefab";
 #endif
 
         // 音声の遅延フレーム数.
@@ -28,13 +30,14 @@ namespace VMUnityLib
         {
             if (SceneManager.Instance == null)
             {
-                var prefabName = "CommonProgramObj";
                 Object obj = Resources.Load(prefabName);
                 GameObject prefab = (GameObject)obj;
                 if (prefab == null)
                 {
-                    var stackTraceStr = StackTraceUtility.ExtractStackTrace();
-                    Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj + "\n" + stackTraceStr);
+                    Debug.LogError(prefabName + "のロードに失敗 obj:" + obj);
+#if UNITY_EDITOR
+                    prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
+#endif
                 }
                 var instantiated = Instantiate(prefab);
                 DontDestroyOnLoad(instantiated);
@@ -62,24 +65,24 @@ namespace VMUnityLib
             }
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// GUI.
         /// </summary>
         void OnGUI()
         {
-#if UNITY_EDITOR
-        if (prevScreenW != Screen.width || prevScreenH != Screen.height)
-        {
-            GameWindowSize.ReCalc(LibBridgeInfo.FIXED_SCREEN_WI, LibBridgeInfo.FIXED_SCREEN_HI);
-            foreach (GUIStyle style in GUI.skin)
+            if (prevScreenW != Screen.width || prevScreenH != Screen.height)
             {
-                style.fontSize = (int)(20 * GameWindowSize.GameScreenScale);
+                GameWindowSize.ReCalc(LibBridgeInfo.FIXED_SCREEN_WI, LibBridgeInfo.FIXED_SCREEN_HI);
+                foreach (GUIStyle style in GUI.skin)
+                {
+                    style.fontSize = (int)(20 * GameWindowSize.GameScreenScale);
+                }
             }
+            prevScreenW = (int)gameview.position.width;
+            prevScreenH = (int)gameview.position.height;
         }
-        prevScreenW = (int)gameview.position.width;
-        prevScreenH = (int)gameview.position.height;
 #endif
-        }
 
 #if USE_CRI
         /// <summary>

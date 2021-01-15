@@ -4,12 +4,19 @@
 
 using UnityEngine;
 using VMUnityLib;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public sealed class CommonUiRoot : MonoBehaviour
 {
+    const string prefabName = "CommonUiRoot";
 #if DEBUG
     [SerializeField]
-    GameObject debugMenu;
+    GameObject debugMenu = default;
+#if UNITY_EDITOR
+    const string prefabPath = "Assets/MyGameAssets/LibBridge/Resources/"+ prefabName+ ".prefab";
+#endif
 #endif
     /// <summary>
     /// 自身の生成前に呼ばれる関数。生成するしない関係なしに呼ばれる.
@@ -19,13 +26,14 @@ public sealed class CommonUiRoot : MonoBehaviour
     {
         if (SceneManager.Instance == null)
         {
-            var prefabName = "CommonUiRoot";
             Object obj = Resources.Load(prefabName);
             GameObject prefab = (GameObject)obj;
             if (prefab == null)
             {
-                var stackTraceStr = StackTraceUtility.ExtractStackTrace();
-                Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj + "\n" + stackTraceStr);
+                Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj);
+#if UNITY_EDITOR
+                prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
+#endif
             }
             var instantiated = Instantiate(prefab);
             DontDestroyOnLoad(instantiated);
