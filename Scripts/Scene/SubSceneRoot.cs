@@ -29,11 +29,14 @@ namespace VMUnityLib
         // Unityシーン情報
         public UnityScene UnityScene { get; private set; }
 
+        string sceneNameCache;
+
         /// <summary>
         /// 生成時.
         /// </summary>
         protected void Awake()
         {
+            sceneNameCache = gameObject.scene.name;
             if (SceneManager.Instance != null)
             {
                 if(directionalLight != null)
@@ -47,7 +50,7 @@ namespace VMUnityLib
 
         public string GetSceneName()
         {
-            return gameObject.scene.name;
+            return sceneNameCache;
         }
     }
 }

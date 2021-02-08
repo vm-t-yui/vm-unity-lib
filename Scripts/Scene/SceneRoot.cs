@@ -43,12 +43,14 @@ namespace VMUnityLib
         public UnityScene UnityScene { get; private set; }
 
         bool isDebug = false;
+        string sceneNameCache = default;
 
         /// <summary>
         /// 生成時.
         /// </summary>
         protected void Awake()
         {
+            sceneNameCache = gameObject.scene.name;
             // Awake呼ばれるのは初回ロードのアクティブ状態の時なので
             UnityScene = UnitySceneManager.GetActiveScene();
 
@@ -90,7 +92,7 @@ namespace VMUnityLib
 
         public string GetSceneName()
         {
-            return gameObject.scene.name;
+            return sceneNameCache;
         }
 
         /// <summary>

@@ -29,6 +29,7 @@ namespace VMUnityLib
         bool                isDirectBoot;                                    // 直接起動かどうか
         bool                firstDirectBoot = true;                          // 直接起動の初回判定用
         public bool IsDirectBoot => isDirectBoot;
+        SceneSet currentSceneRootSceneSet = null;
 
         // アンロードとロードタスク
         // loadOperationはloadingTaskとunloadingTask全てを解決するタスク
@@ -242,7 +243,7 @@ namespace VMUnityLib
                 loadOperationSet.sceneName = CurrentSceneRoot.GetSceneName();
                 RemoveLoadedScene(loadOperationSet);
                 loadOperationSet.sync = UnitySceneManager.UnloadSceneAsync(CurrentSceneRoot.GetSceneName());
-                CurrentSceneRoot = null;    // アンロード開始したらカレントメインシーンはなし
+                SetCurrentSceneRoot(null);    // アンロード開始したらカレントメインシーンはなし
                 unloading.Add(loadOperationSet);
                 foreach (var item in unloading)
                 {
@@ -260,7 +261,7 @@ namespace VMUnityLib
                 loadOperationSet.sceneName = currentAimLoadScene;
                 yield return LoadInternal(loadOperationSet);
             }
-            CurrentSceneRoot = GetLoadedSceneRoot(currentAimLoadScene);
+            SetCurrentSceneRoot(GetLoadedSceneRoot(currentAimLoadScene));
 
             // サブシーンが最初から設定されていない＝メインシーン初回サブシーンを指定
             var mainSceneRoot = GetLoadedSceneRoot(currentAimLoadScene);
@@ -685,7 +686,7 @@ namespace VMUnityLib
             if(CurrentSceneRoot == null && isDirectBoot && firstDirectBoot)
             {
                 firstDirectBoot = false;
-                CurrentSceneRoot = sceneRoot;
+                SetCurrentSceneRoot(sceneRoot);
                 currentAimLoadScene = sceneRoot.GetSceneName();
                 sceneHistory.Push(CurrentSceneRoot.GetSceneName());
                 if(CurrentSceneRoot.HasSubScene)
@@ -731,6 +732,26 @@ namespace VMUnityLib
         }
 
         /// <summary>
+        /// シーンルート更新
+        /// </summary>
+        void SetCurrentSceneRoot(SceneRoot set)
+        {
+            CurrentSceneRoot = set;
+            currentSceneRootSceneSet = null;
+            if (CurrentSceneRoot != null)
+            {
+                foreach (var scene in loadedScenes)
+                {
+                    if (scene.sceneRoot == CurrentSceneRoot)
+                    {
+                        currentSceneRootSceneSet = scene;
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// ロードが終了しているシーンルートを取得する.
         /// </summary>
         SceneRoot GetLoadedSceneRoot(string sceneName)
@@ -768,12 +789,9 @@ namespace VMUnityLib
         /// </summary>
         public IReadOnlyList<SubSceneRoot> GetCurrentSubSceneRoots()
         {
-            foreach (var scene in loadedScenes)
+            if(currentSceneRootSceneSet != null)
             {
-                if(scene.sceneRoot == CurrentSceneRoot)
-                {
-                    return scene.subSceneRoots;
-                }
+                return currentSceneRootSceneSet.subSceneRoots;
             }
             return null;
         }
