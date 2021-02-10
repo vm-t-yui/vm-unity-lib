@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*!    \brief  シェア機能を統合するユーティリティ.
 *******************************************************************************/
-#if !UNITY_EDITOR
+#if !DISABLE_SHARE_HELP
 using UnityEngine;
 using System.Collections;
 using System.IO;
@@ -63,11 +63,11 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
 
         // インジケーター表示
 #if !DISABLE_SHARE_HELP
-    #if UNITY_IPHONE
+#if UNITY_IPHONE
             Handheld.SetActivityIndicatorStyle(UnityEngine.iOS.ActivityIndicatorStyle.White);
-    #elif UNITY_ANDROID
+#elif UNITY_ANDROID
             Handheld.SetActivityIndicatorStyle(AndroidActivityIndicatorStyle.Small);
-    #endif
+#endif
         Handheld.StartActivityIndicator();
 #endif
         // スクリーンショットが保存されるまで待機
@@ -152,6 +152,6 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
         // 投稿する
         SocialConnector.SocialConnector.Share(shareText, shareURL, captureFilePath);
     }
-#endif    
+#endif
 }
 #endif

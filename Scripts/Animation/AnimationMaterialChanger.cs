@@ -19,7 +19,7 @@ public sealed class AnimationMaterialChanger : MonoBehaviour
     List<ChangeMaterialData> matChangeDataList = default;
 
     [SerializeField]
-    new Renderer renderer = default;
+    Renderer myRenderer = default;
 
     /// <summary>
     /// アニメーションからマテリアルチェンジ.
@@ -27,6 +27,6 @@ public sealed class AnimationMaterialChanger : MonoBehaviour
     public void ChangeMaterialByAnimation(int dataIndex)
     {
         ChangeMaterialData data = matChangeDataList[dataIndex];
-        renderer.material = data.mat;
+        myRenderer.material = data.mat;
     }
 }
