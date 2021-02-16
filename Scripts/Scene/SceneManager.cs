@@ -59,6 +59,7 @@ namespace VMUnityLib
         public SubSceneRoot CurrentSubSceneRoot { get; private set; }
         public string CurrentSceneName { get { return CurrentSceneRoot.GetSceneName(); } }
         public string CurrentSubSceneName { get { return CurrentSubSceneRoot ? CurrentSubSceneRoot.GetSceneName() : null; } }
+        public string CurrentPlayerSubSceneName { get; private set; }
 
         // ロードが完了しているかどうか
         public bool IsLoadDone { get; private set; }
@@ -287,6 +288,10 @@ namespace VMUnityLib
                     CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
                 }
                 CurrentSubSceneRoot = GetLoadedSubSceneRoot(currentAimLoadSubScene);
+                if(CurrentPlayerSubSceneName == null)
+                {
+                    CurrentPlayerSubSceneName = CurrentSubSceneRoot.GetSceneName();
+                }
                 foreach (var item in CurrentSubSceneRoot.RequireSubSceneNames)
                 {
                     // 既にロード済でないもの
@@ -580,6 +585,14 @@ namespace VMUnityLib
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
+        /// <summary>
+        /// プレイヤーのいるシーン名を更新
+        /// </summary>
+        public void OnUpdatePlayerSubScne(string set)
+        {
+            CurrentPlayerSubSceneName = set;
+        }
+
         ///// <summary>
         ///// 現在読まれているシーン以外をすべてアンロード.
         ///// </summary>
@@ -692,6 +705,7 @@ namespace VMUnityLib
                 if(CurrentSceneRoot.HasSubScene)
                 {
                     ActiveAndApplySubScene(CurrentSceneRoot.FirstSubSceneName);
+                    CurrentPlayerSubSceneName = CurrentSceneRoot.FirstSubSceneName;
                 }
             }
         }

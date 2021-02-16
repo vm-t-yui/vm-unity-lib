@@ -77,7 +77,13 @@ namespace VMUnityLib
                     // targetがNext=自分シーン側
                     if (TargetSubSceneRoot == NextSubSceneRoot)
                     {
-                        SceneManager.Instance?.ActiveAndApplySubScene(PrevSubSceneRoot.GetSceneName());
+                        var prevSceneName = PrevSubSceneRoot.GetSceneName();
+                        SceneManager.Instance?.ActiveAndApplySubScene(prevSceneName);
+                        SceneManager.Instance?.OnUpdatePlayerSubScne(prevSceneName);
+                    }
+                    else
+                    {
+                        SceneManager.Instance?.OnUpdatePlayerSubScne(SceneManager.Instance.CurrentSubSceneName);
                     }
                 }
                 --SubSceneActiveChangingCnt;
