@@ -177,15 +177,29 @@ namespace VMUnityLib
         /// <summary>
         /// ロードすべきサブシーンを設定
         /// </summary>
-        public void ActiveAndApplySubScene(string subSceneName)
+        public void ActiveAndApplySubScene(string subSceneName, bool updatePlayerSubscene)
         {
             currentAimLoadSubScene = subSceneName;
+            if(updatePlayerSubscene)
+            {
+                UpdatePlayerSubScne(subSceneName);
+            }
             RecreateLoadOperation(false, false);
         }
 
+        /// <summary>
+        /// プレイヤーのいるサブシーンを更新
+        /// </summary>
+        public void UpdatePlayerSubScne(string subSceneName)
+        {
+            CurrentPlayerSubSceneName = subSceneName;
+        }
+
+        /// <summary>
+        /// ロードオペレーション再生成
+        /// </summary>
         void RecreateLoadOperation(bool loadImmidiate, bool unloadCurrent)
         {
-            // ロードオペレーション再生成
             if(loadOperation != null) StopCoroutine(loadOperation);
             loadOperation = StartCoroutine(LoadOperation(loadImmidiate, unloadCurrent));
         }
@@ -290,7 +304,7 @@ namespace VMUnityLib
                 CurrentSubSceneRoot = GetLoadedSubSceneRoot(currentAimLoadSubScene);
                 if(CurrentPlayerSubSceneName == null)
                 {
-                    CurrentPlayerSubSceneName = CurrentSubSceneRoot.GetSceneName();
+                    UpdatePlayerSubScne(CurrentSubSceneRoot.GetSceneName());
                 }
                 foreach (var item in CurrentSubSceneRoot.RequireSubSceneNames)
                 {
@@ -585,14 +599,6 @@ namespace VMUnityLib
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
 
-        /// <summary>
-        /// プレイヤーのいるシーン名を更新
-        /// </summary>
-        public void OnUpdatePlayerSubScne(string set)
-        {
-            CurrentPlayerSubSceneName = set;
-        }
-
         ///// <summary>
         ///// 現在読まれているシーン以外をすべてアンロード.
         ///// </summary>
@@ -704,8 +710,7 @@ namespace VMUnityLib
                 sceneHistory.Push(CurrentSceneRoot.GetSceneName());
                 if(CurrentSceneRoot.HasSubScene)
                 {
-                    ActiveAndApplySubScene(CurrentSceneRoot.FirstSubSceneName);
-                    CurrentPlayerSubSceneName = CurrentSceneRoot.FirstSubSceneName;
+                    ActiveAndApplySubScene(CurrentSceneRoot.FirstSubSceneName, true);
                 }
             }
         }

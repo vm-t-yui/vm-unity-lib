@@ -57,7 +57,7 @@ namespace VMUnityLib
                 {
                     PrevSubSceneRoot = SceneManager.Instance?.CurrentSubSceneRoot;
                     NextSubSceneRoot = TargetSubSceneRoot;
-                    SceneManager.Instance?.ActiveAndApplySubScene(NextSubSceneRoot.GetSceneName());
+                    SceneManager.Instance?.ActiveAndApplySubScene(NextSubSceneRoot.GetSceneName(), false);
                 }
                 ++SubSceneActiveChangingCnt;
             }
@@ -78,12 +78,12 @@ namespace VMUnityLib
                     if (TargetSubSceneRoot == NextSubSceneRoot)
                     {
                         var prevSceneName = PrevSubSceneRoot.GetSceneName();
-                        SceneManager.Instance?.ActiveAndApplySubScene(prevSceneName);
-                        SceneManager.Instance?.OnUpdatePlayerSubScne(prevSceneName);
+                        SceneManager.Instance?.ActiveAndApplySubScene(prevSceneName, true);
                     }
                     else
                     {
-                        SceneManager.Instance?.OnUpdatePlayerSubScne(SceneManager.Instance.CurrentSubSceneName);
+                        // シーン移動が確定するのでプレイヤーのいるシーンを確定
+                        SceneManager.Instance?.UpdatePlayerSubScne(SceneManager.Instance.CurrentSubSceneName);
                     }
                 }
                 --SubSceneActiveChangingCnt;
