@@ -563,8 +563,7 @@ namespace VMUnityLib
             yield return FadeToShowUi(fadeParam);
 
             // 最初に見つかった同名シーンまでポップ.
-            Stack<string> sceneHistoryCopy = new Stack<string>(sceneHistory);
-            sceneHistoryCopy.Pop(); // 現在のシーンが最初に入っているので削除
+            Stack<string> sceneHistoryCopy = new Stack<string>(sceneHistory.Reverse());
             int popCount = 0;
             while (sceneHistoryCopy.Count > 0)
             {
