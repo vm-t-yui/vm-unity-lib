@@ -302,10 +302,6 @@ namespace VMUnityLib
                     CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(false);
                 }
                 CurrentSubSceneRoot = GetLoadedSubSceneRoot(currentAimLoadSubScene);
-                if(CurrentPlayerSubSceneName == null)
-                {
-                    UpdatePlayerSubScne(CurrentSubSceneRoot.GetSceneName());
-                }
                 foreach (var item in CurrentSubSceneRoot.RequireSubSceneNames)
                 {
                     // 既にロード済でないもの
@@ -364,6 +360,8 @@ namespace VMUnityLib
                 {
                     Debug.Log("active scene fail:" + currentAimLoadSubScene);
                 }
+                // 必要サブシーンが読まれたらプレイヤーサブシーンを更新
+                UpdatePlayerSubScne(CurrentSubSceneRoot.GetSceneName());
             }
 
             // サブシーンのディレクショナルライト設定
