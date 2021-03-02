@@ -1,9 +1,7 @@
 /******************************************************************************/
 /*!    \brief  シーンマネージャ.
 *******************************************************************************/
-
 using UnityEngine;
-using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -179,6 +177,9 @@ namespace VMUnityLib
         /// </summary>
         public void ActiveAndApplySubScene(string subSceneName, bool updatePlayerSubscene)
         {
+#if LOG_SCENE
+            Debug.Log("ActiveAndApplySubScene:" + subSceneName);
+#endif
             currentAimLoadSubScene = subSceneName;
             if(updatePlayerSubscene)
             {
@@ -200,7 +201,19 @@ namespace VMUnityLib
         /// </summary>
         void RecreateLoadOperation(bool loadImmidiate, bool unloadCurrent)
         {
-            if(loadOperation != null) StopCoroutine(loadOperation);
+            if (loadOperationRunning && loadOperation != null)
+            {
+                StopCoroutine(loadOperation);
+#if LOG_SCENE
+                Debug.Log("RecreateLoadOperation while");
+#endif
+            }
+#if LOG_SCENE
+            else
+            {
+                Debug.Log("RecreateLoadOperation");
+            }
+#endif
             loadOperation = StartCoroutine(LoadOperation(loadImmidiate, unloadCurrent));
         }
 
@@ -209,12 +222,18 @@ namespace VMUnityLib
         /// </summary>
         IEnumerator LoadOperation(bool loadImmidiate, bool unloadCurrent)
         {
+#if LOG_SCENE
+            Debug.Log("loadope: start load operation");
+#endif
             loadOperationRunning = true;
             // 既に走っているロード/アンロードがあれば先に待つ
             foreach (var item in unloading)
             {
                 yield return SceneUnloadWait(item);
             }
+#if LOG_SCENE
+            Debug.Log("loadope: wait unload done");
+#endif
             foreach (var item in loading)
             {
                 if (item.sync != null)
@@ -222,6 +241,9 @@ namespace VMUnityLib
                     yield return SceneLoadWait(item);
                 }
             }
+#if LOG_SCENE
+            Debug.Log("loadope: wait sceneloading done");
+#endif
 
             // すべて片付いているのでいったんタスククリア
             loading.Clear();
@@ -232,14 +254,20 @@ namespace VMUnityLib
             {
                 yield return new WaitForSecondsRealtime(LOAD_OPELATION_DELAY);
             }
+#if LOG_SCENE
+            Debug.Log("loadope: wait operation delay done");
+#endif
 
             // カレントアンロード→メインシーン→目標サブシーン→サブシーン必要シーンの順でロードを行う
             LoadOperationSet loadOperationSet;
             // カレントアンロード
             if(unloadCurrent && CurrentSceneRoot != null)
             {
+#if LOG_SCENE
+                Debug.Log("loadope: start current unload");
+#endif
                 // ロード済のサブシーンがあればサブシーンからアンロード
-                if(CurrentSceneRoot.HasSubScene)
+                if (CurrentSceneRoot.HasSubScene)
                 {
                     foreach (var item in CurrentSceneRoot.SubSceneList)
                     {
@@ -268,13 +296,22 @@ namespace VMUnityLib
                     }
                 }
                 unloading.Clear();
+#if LOG_SCENE
+                Debug.Log("loadope: current unload done");
+#endif
             }
             // メインシーンロード
-            if(GetLoadedSceneRoot(currentAimLoadScene) == null)
+            if (GetLoadedSceneRoot(currentAimLoadScene) == null)
             {
                 loadOperationSet = new LoadOperationSet();
                 loadOperationSet.sceneName = currentAimLoadScene;
+#if LOG_SCENE
+                Debug.Log("loadope: main load start : " + loadOperationSet.sceneName);
+#endif
                 yield return LoadInternal(loadOperationSet);
+#if LOG_SCENE
+                Debug.Log("loadope: main load done : " + loadOperationSet.sceneName);
+#endif
             }
             SetCurrentSceneRoot(GetLoadedSceneRoot(currentAimLoadScene));
 
@@ -290,10 +327,16 @@ namespace VMUnityLib
             {
                 if (GetLoadedSubSceneRoot(currentAimLoadSubScene) == null)
                 {
+#if LOG_SCENE
+                    Debug.Log("loadope: start aim load : " + currentAimLoadSubScene);
+#endif
                     loadOperationSet = new LoadOperationSet();
                     loadOperationSet.sceneName = currentAimLoadSubScene;
                     loadOperationSet.isSubScene = true;
                     yield return LoadInternal(loadOperationSet);
+#if LOG_SCENE
+                    Debug.Log("loadope: aim load done : " + currentAimLoadSubScene);
+#endif
                 }
                 // 目標サブシーンまで読み込んだ時点で、
                 // 必要サブシーンをロードリストに追加し、既にロードされている不要サブシーンをすべてアンロード
@@ -333,36 +376,51 @@ namespace VMUnityLib
                 // 一気にアンロードしてから１シーンずつロード
                 foreach (var item in unloading)
                 {
+#if LOG_SCENE
+                    Debug.Log("loadope: start unload subscene : " + item.sceneName);
+#endif
                     RemoveLoadedScene(item);
                     item.sync = UnitySceneManager.UnloadSceneAsync(item.sceneName);
                 }
                 foreach (var item in unloading)
                 {
                     yield return SceneUnloadWait(item);
+#if LOG_SCENE
+                    Debug.Log("loadope: Unload subscene done : " + item.sceneName);
+#endif
                 }
                 foreach (var item in loading)
                 {
+#if LOG_SCENE
+                    Debug.Log("loadope: start load subscene : " + item.sceneName);
+#endif
                     yield return LoadInternal(item);
+#if LOG_SCENE
+                    Debug.Log("loadope: load subscene done : " + item.sceneName);
+#endif
                 }
             }
 
             // サブシーンを持っていなければシーンルートをアクティブにする.
-            if(!CurrentSceneRoot.HasSubScene)
+            if (!CurrentSceneRoot.HasSubScene)
             {
-                if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(currentAimLoadScene)) == false)
+                if (UnitySceneManager.GetActiveScene().name != currentAimLoadScene && UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(currentAimLoadScene)) == false)
                 {
-                    Debug.Log("active scene fail:" + currentAimLoadScene);
+                    Debug.LogError("active scene fail:" + currentAimLoadScene);
                 }
             }
             else
             {
-                if (UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(currentAimLoadSubScene)) == false)
+                if (UnitySceneManager.GetActiveScene().name != currentAimLoadSubScene && UnitySceneManager.SetActiveScene(UnitySceneManager.GetSceneByName(currentAimLoadSubScene)) == false)
                 {
-                    Debug.Log("active scene fail:" + currentAimLoadSubScene);
+                    Debug.LogError("active scene fail:" + currentAimLoadSubScene);
                 }
                 // 必要サブシーンが読まれたらプレイヤーサブシーンを更新
                 UpdatePlayerSubScne(CurrentSubSceneRoot.GetSceneName());
             }
+#if LOG_SCENE
+            Debug.Log("end active scene");
+#endif
 
             // サブシーンのディレクショナルライト設定
             if (CurrentSubSceneRoot && CurrentSubSceneRoot.DirectionalLight != null)
@@ -370,11 +428,17 @@ namespace VMUnityLib
                 CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
             }
             loadOperationRunning = false;
+#if LOG_SCENE
+            Debug.Log("loadope: end load operation");
+#endif
         }
         IEnumerator LoadInternal(LoadOperationSet set)
         {
+#if LOG_SCENE
+            Debug.Log("start load :" + set.sceneName);
+#endif
             // ロード済なら何もしない
-            if((set.isSubScene && GetLoadedSceneRoot(set.sceneName) == null)
+            if ((set.isSubScene && GetLoadedSceneRoot(set.sceneName) == null)
                 ||
                 (!set.isSubScene && loadedScenes.Find(s => s.sceneRoot.GetSceneName() == set.sceneName) == null))
             {
@@ -382,6 +446,9 @@ namespace VMUnityLib
                 set.sync.allowSceneActivation = true;
                 yield return SceneLoadWait(set);
             }
+#if LOG_SCENE
+            Debug.Log("end load :" + set.sceneName);
+#endif
         }
         IEnumerator SceneLoadWait(LoadOperationSet set)
         {
