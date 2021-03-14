@@ -427,6 +427,10 @@ namespace VMUnityLib
             {
                 CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
             }
+
+            // ライトプローブ再計算
+            LightProbes.TetrahedralizeAsync();
+
             loadOperationRunning = false;
 #if LOG_SCENE
             Debug.Log("loadope: end load operation");
