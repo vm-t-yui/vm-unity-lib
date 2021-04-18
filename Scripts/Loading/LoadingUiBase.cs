@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 namespace VMUnityLib
 {
@@ -16,8 +17,19 @@ namespace VMUnityLib
         public bool IsEnd => isEnd;
 
         /// <summary>
-        /// ロード開始
+        /// ロード開始前処理
         /// </summary>
-        public virtual void OnStartLoad() { }
+        public virtual IEnumerator BeforeStartLoadProcess()
+        {
+            yield break;
+        }
+
+        /// <summary>
+        /// ロード開始直後処理
+        /// </summary>
+        public virtual IEnumerator AfterStartLoadWaitProcess()
+        {
+            yield break;
+        }
     }
 }

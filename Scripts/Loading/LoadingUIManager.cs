@@ -45,12 +45,12 @@ namespace VMUnityLib
         {
 #if USE_TWEEN
             loadingUiDict[type].loadingUi.gameObject.SetActive(true);
+            loadingUiDict[type].tweenAlpha.onFinished.RemoveAllListeners();
             loadingUiDict[type].tweenAlpha.Play(PlayDirection.Forward);
             loadingUi = loadingUiDict[type].loadingUi;
 #else
             loadingUi = null;
 #endif
-            loadingUi.OnStartLoad();
         }
 
         /// <summary>

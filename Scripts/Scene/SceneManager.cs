@@ -59,8 +59,8 @@ namespace VMUnityLib
         public string CurrentSubSceneName { get { return CurrentSubSceneRoot ? CurrentSubSceneRoot.GetSceneName() : null; } }
         public string CurrentPlayerSubSceneName { get; private set; }
 
-        // ロードが完了しているかどうか
-        public bool IsLoadDone { get; private set; }
+        public bool IsLoadDone { get; private set; }                    // ロードUI含めロードが完了しているかどうか
+        public bool IsLoadOperationRunning => loadOperationRunning;     // ロード処理が走っているかどうか
 
         // シーンチェンジ時のフェードのパラメータ.
         public struct SceneChangeFadeParam
@@ -148,7 +148,7 @@ namespace VMUnityLib
         /// <summary>
         /// フェードしてロードUIの表示を待つまでのタスク
         /// </summary>
-        IEnumerator FadeToShowUi(SceneChangeFadeParam fadeParam)
+        IEnumerator WaitBeforeLoadForLoadingUi(SceneChangeFadeParam fadeParam)
         {
             isFadeWaiting = true;
             IsLoadDone = false;
@@ -159,7 +159,15 @@ namespace VMUnityLib
             }
 
             LoadingUIManager.Inst.ShowLoadingUI(fadeParam.loadingType, out currentLoadingUi);
+            yield return currentLoadingUi.BeforeStartLoadProcess();
             //yield return null;  // 表示のために１フレ待つ.
+        }
+        /// <summary>
+        /// ロード直後に、ロードUIが何かしらすることがあれば待つタスク
+        /// </summary>
+        IEnumerator WaitAfterLoadForLoadingUi(SceneChangeFadeParam fadeParam)
+        {
+            yield return currentLoadingUi.AfterStartLoadWaitProcess();
         }
 
         /// <summary>
@@ -537,10 +545,13 @@ namespace VMUnityLib
         }
         IEnumerator PushSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
-            yield return FadeToShowUi(fadeParam);
+            yield return WaitBeforeLoadForLoadingUi(fadeParam);
 
             sceneHistory.Push(nextSceneName);
             SetLoadScene(nextSceneName);
+
+            yield return WaitAfterLoadForLoadingUi(fadeParam);
+
             while (loadOperationRunning)
             {
                 yield return null;
@@ -561,17 +572,22 @@ namespace VMUnityLib
         }
         IEnumerator ChangeSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
-            yield return FadeToShowUi(fadeParam);
+            yield return WaitBeforeLoadForLoadingUi(fadeParam);
 
             if (sceneHistory.Count > 0)
             {
                 sceneHistory.Pop();
                 sceneHistory.Push(nextSceneName);
                 SetLoadScene(nextSceneName);
+                yield return WaitAfterLoadForLoadingUi(fadeParam);
                 while (loadOperationRunning)
                 {
                     yield return null;
                 }
+            }
+            else
+            {
+                yield return WaitAfterLoadForLoadingUi(fadeParam);
             }
             yield return WaitEndLoadUi();
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
@@ -588,16 +604,21 @@ namespace VMUnityLib
         }
         IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
-            yield return FadeToShowUi(fadeParam);
+            yield return WaitBeforeLoadForLoadingUi(fadeParam);
             if (sceneHistory.Count > 0)
             {
                 string nextSceneName = sceneHistory.Peek();
                 sceneHistory.Pop();
                 SetLoadScene(nextSceneName);
+                yield return WaitAfterLoadForLoadingUi(fadeParam);
                 while (loadOperationRunning)
                 {
                     yield return null;
                 }
+            }
+            else
+            {
+                yield return WaitAfterLoadForLoadingUi(fadeParam);
             }
             yield return WaitEndLoadUi();
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
@@ -629,7 +650,7 @@ namespace VMUnityLib
         }
         IEnumerator PopSceneToInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
-            yield return FadeToShowUi(fadeParam);
+            yield return WaitBeforeLoadForLoadingUi(fadeParam);
 
             // 最初に見つかった同名シーンまでポップ.
             Stack<string> sceneHistoryCopy = new Stack<string>(sceneHistory.Reverse());
@@ -658,6 +679,7 @@ namespace VMUnityLib
                 }
                 string peekedNextSceneName = sceneHistory.Peek();
                 SetLoadScene(peekedNextSceneName);
+                yield return WaitAfterLoadForLoadingUi(fadeParam);
                 while (loadOperationRunning)
                 {
                     yield return null;
