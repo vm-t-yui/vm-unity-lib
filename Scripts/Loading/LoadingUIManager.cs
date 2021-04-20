@@ -45,8 +45,8 @@ namespace VMUnityLib
         {
 #if USE_TWEEN
             loadingUiDict[type].loadingUi.gameObject.SetActive(true);
-            loadingUiDict[type].tweenAlpha.onFinished.RemoveAllListeners();
             loadingUiDict[type].tweenAlpha.Play(PlayDirection.Forward);
+            Debug.Log("Show and Play:" + type);
             loadingUi = loadingUiDict[type].loadingUi;
 #else
             loadingUi = null;
@@ -60,14 +60,15 @@ namespace VMUnityLib
         {
 #if USE_TWEEN
             // フェードアウト
-            loadingUiDict[type].tweenAlpha.Play(PlayDirection.Reverse);
-            // フェードアウトが終わったら、オブジェクトをオフにする
-            UnityAction onEndFadeout = null;
-            loadingUiDict[type].tweenAlpha.onFinished.AddListener(onEndFadeout = () =>
+            Debug.Log("Bf Fadeout:" + type);
+            loadingUiDict[type].tweenAlpha.onFinished.AddListener(() =>
             {
                 loadingUiDict[type].tweenAlpha.gameObject.SetActive(false);
-                loadingUiDict[type].tweenAlpha.onFinished.RemoveListener(onEndFadeout);
+                loadingUiDict[type].tweenAlpha.onFinished.RemoveAllListeners();
+                Debug.Log("Deactive:" + type);
             });
+            loadingUiDict[type].tweenAlpha.Play(PlayDirection.Reverse);
+            // フェードアウトが終わったら、オブジェクトをオフにする
 #endif
         }
     }

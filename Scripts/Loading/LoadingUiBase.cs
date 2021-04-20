@@ -17,6 +17,14 @@ namespace VMUnityLib
         public bool IsEnd => isEnd;
 
         /// <summary>
+        /// 有効化されたとき
+        /// </summary>
+        virtual protected void OnEnable()
+        {
+            isEnd = false;
+        }
+
+        /// <summary>
         /// ロード開始前処理
         /// </summary>
         public virtual IEnumerator BeforeStartLoadProcess()
