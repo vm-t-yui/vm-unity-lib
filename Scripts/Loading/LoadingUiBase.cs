@@ -37,7 +37,12 @@ namespace VMUnityLib
         /// </summary>
         public virtual IEnumerator AfterStartLoadWaitProcess()
         {
-            yield break;
+            // 全シーンのロードが完了したら、ロードUI終了
+            while (SceneManager.Instance.IsLoadOperationRunning)
+            {
+                yield return null;
+            }
+            isEnd = true;
         }
     }
 }

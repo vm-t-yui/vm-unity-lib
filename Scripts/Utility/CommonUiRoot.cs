@@ -21,7 +21,7 @@ public sealed class CommonUiRoot : MonoBehaviour
     /// <summary>
     /// 自身の生成前に呼ばれる関数。生成するしない関係なしに呼ばれる.
     /// </summary>
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     static void Initialize()
     {
         if (SceneManager.Instance == null)
