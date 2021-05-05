@@ -25,7 +25,7 @@ namespace VMUnityLib
         /// <summary>
         /// 自身の生成前に呼ばれる関数。生成するしない関係なしに呼ばれる.
         /// </summary>
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Initialize()
         {
             if (SceneManager.Instance == null)
