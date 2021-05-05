@@ -25,11 +25,8 @@ namespace VMUnityLib
         /// <summary>
         /// 自身の生成前に呼ばれる関数。生成するしない関係なしに呼ばれる.
         /// </summary>
-        // 実機ではスプラッシュスクリーンの表示が妨げられてしまうので、手動ロード
-#if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-#endif
-        public static void Initialize()
+        static void Initialize()
         {
             if (SceneManager.Instance == null)
             {
