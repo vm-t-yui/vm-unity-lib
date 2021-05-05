@@ -21,12 +21,15 @@ namespace VMUnityLib
 
         // 音声の遅延フレーム数.
         static public int SoundLatency { set; get; }
-        
+
         /// <summary>
         /// 自身の生成前に呼ばれる関数。生成するしない関係なしに呼ばれる.
         /// </summary>
+        // 実機ではスプラッシュスクリーンの表示が妨げられてしまうので、手動ロード
+#if UNITY_EDITOR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void Initialize()
+#endif
+        public static void Initialize()
         {
             if (SceneManager.Instance == null)
             {
