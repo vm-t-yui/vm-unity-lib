@@ -188,6 +188,11 @@ namespace VMUnityLib
 #if LOG_SCENE
             Debug.Log("ActiveAndApplySubScene:" + subSceneName);
 #endif
+            // 同じシーンが指定されたら早期リターン
+            if(currentAimLoadSubScene == subSceneName)
+            {
+                return;
+            }
             currentAimLoadSubScene = subSceneName;
             if(updatePlayerSubscene)
             {
