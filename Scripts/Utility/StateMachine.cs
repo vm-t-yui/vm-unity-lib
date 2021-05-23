@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 namespace VMUnityLib
 {
-    public class StateMachine<T>
+    public class StateMachine<T> where T : Enum
     {
         /// <summary>
         /// ステート.
@@ -69,13 +69,16 @@ namespace VMUnityLib
         /// </summary>
         public void SetState(T key)
         {
-            if (CurrentState != null)
+            if (CurrentState == null || CurrentStateKey.Equals(key) == false)
             {
-                CurrentState.Exit();
+                if (CurrentState != null)
+                {
+                    CurrentState.Exit();
+                }
+                CurrentStateKey = key;
+                CurrentState = StateTable[key];
+                CurrentState.Enter();
             }
-            CurrentStateKey = key;
-            CurrentState = StateTable[key];
-            CurrentState.Enter();
         }
 
         /// <summary>
