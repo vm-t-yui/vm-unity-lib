@@ -62,11 +62,11 @@ namespace VMUnityLib
                 {
                     PrevSubSceneName = SceneManager.Instance?.CurrentPlayerSubSceneName;
                     NextSubSceneName = targetSubSceneName;
-                    Debug.Log("OnTriggerEnter and(next) apply:" + NextSubSceneName, gameObject);
+                    //Debug.Log("OnTriggerEnter and(next) apply:" + NextSubSceneName, gameObject);
                     SceneManager.Instance?.ActiveAndApplySubScene(NextSubSceneName, false);
                 }
                 ++SubSceneActiveChangingCnt;
-                Debug.Log("SubSceneActiveChangingCnt add:" + SubSceneActiveChangingCnt, gameObject);
+                //Debug.Log("SubSceneActiveChangingCnt add:" + SubSceneActiveChangingCnt, gameObject);
             }
         }
 
@@ -85,7 +85,7 @@ namespace VMUnityLib
                     if (targetSubSceneName == NextSubSceneName)
                     {
                         var prevSceneName = PrevSubSceneName;
-                        Debug.Log("OnTriggerExit(cancel) apply:" + prevSceneName, gameObject);
+                        //Debug.Log("OnTriggerExit(cancel) apply:" + prevSceneName, gameObject);
                         SceneManager.Instance?.ActiveAndApplySubScene(prevSceneName, true);
                     }
                     else
@@ -95,7 +95,7 @@ namespace VMUnityLib
                     }
                 }
                 --SubSceneActiveChangingCnt;
-                Debug.Log("SubSceneActiveChangingCnt sub:" + SubSceneActiveChangingCnt, gameObject);
+                //Debug.Log("SubSceneActiveChangingCnt sub:" + SubSceneActiveChangingCnt, gameObject);
             }
         }
     }
