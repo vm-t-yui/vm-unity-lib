@@ -95,15 +95,15 @@ namespace VMUnityLib
             {
                 // 初回のEnterでNextPrevを決定する
                 // サブシーンを切り替えて確定待ちをする
+                Debug.Log("SubSceneActiveChangingCnt" + SubSceneActiveChangingCnt + " in:" + GetHierarchyPath(gameObject), gameObject);
                 if(SubSceneActiveChangingCnt == 0)
                 {
                     PrevSubSceneName = SceneManager.Instance?.CurrentPlayerSubSceneName;
                     NextSubSceneName = targetSubSceneName;
-                    Debug.Log("OnTriggerEnter and(next) apply:" + NextSubSceneName, gameObject);
+                    Debug.Log("★OnTriggerEnter and(next) apply:" + NextSubSceneName, gameObject);
                     SceneManager.Instance?.ActiveAndApplySubScene(NextSubSceneName, false);
                 }
                 ++SubSceneActiveChangingCnt;
-                Debug.Log("SubSceneActiveChangingCnt add:" + SubSceneActiveChangingCnt + " hit:" + (other.gameObject.name) + " in:" + GetHierarchyPath(gameObject), gameObject);
             }
         }
 
@@ -114,25 +114,26 @@ namespace VMUnityLib
         {
             if (other.tag == TagName.MainCamera)
             {
+                Debug.Log("SubSceneActiveChangingCnt" + SubSceneActiveChangingCnt + " out:" + GetHierarchyPath(gameObject), gameObject);
                 // 重なっているものが一つもなくなった時、最初にEnterした箇所からExitしてたらキャンセル
                 // それ以外は最後に抜けたところを適用確定(最初のEnterの時に適用されているから何もしない
-                if(SubSceneActiveChangingCnt == 1)
+                if (SubSceneActiveChangingCnt == 1)
                 {
                     // targetがNext=自分シーン側
                     if (targetSubSceneName == NextSubSceneName)
                     {
                         var prevSceneName = PrevSubSceneName;
-                        Debug.Log("OnTriggerExit(cancel) apply:" + prevSceneName, gameObject);
+                        Debug.Log("★OnTriggerExit(cancel) apply:" + prevSceneName, gameObject);
                         SceneManager.Instance?.ActiveAndApplySubScene(prevSceneName, true);
                     }
                     else
                     {
                         // シーン移動が確定するのでプレイヤーのいるシーンを確定
+                        Debug.Log("★OnTriggerExit(decide) apply:" + NextSubSceneName, gameObject);
                         SceneManager.Instance?.UpdatePlayerSubScne(NextSubSceneName);
                     }
                 }
                 --SubSceneActiveChangingCnt;
-                Debug.Log("SubSceneActiveChangingCnt sub:" + SubSceneActiveChangingCnt + " hit:" + (other.gameObject.name) + " in:" + GetHierarchyPath(gameObject), gameObject);
             }
         }
 
@@ -147,7 +148,7 @@ namespace VMUnityLib
             {
                 // 同じ階層に同名のオブジェクトがある場合があるので、それを回避する
                 int index = current.GetSiblingIndex();
-                path = "/" + current.name + index + path;
+                path = "/" + current.name + "[" + index + "]" + path;
                 current = current.parent;
             }
 
