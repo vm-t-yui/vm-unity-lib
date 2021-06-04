@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+#if DEBUG && UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// 自身が所属するサブシーンをアクティブ化するトリガー
@@ -7,8 +10,42 @@
 namespace VMUnityLib
 {
     [RequireComponent(typeof(BoxCollider))]
+    [RequireComponent(typeof(Rigidbody))]
     public class SubSceneActivateTrigger : MonoBehaviour
     {
+#if DEBUG && UNITY_EDITOR
+        private void OnValidate()
+        {
+            var rigid = GetComponent<Rigidbody>();
+            bool dirty = false;
+            if(rigid == null)
+            {
+                rigid = gameObject.AddComponent<Rigidbody>();
+                dirty = true;
+            }
+            if(!rigid.isKinematic)
+            {
+                rigid.isKinematic = true;
+                dirty = true;
+            }
+            var box = GetComponent<BoxCollider>();
+            if (box == null)
+            {
+                box = gameObject.AddComponent<BoxCollider>();
+                dirty = true;
+            }
+            if (!box.isTrigger)
+            {
+                box.isTrigger = true;
+                dirty = true;
+            }
+            if(dirty)
+            {
+                EditorUtility.SetDirty(this);
+                Undo.RecordObject(this, "SubSceneActivateTrigger set ");
+            }
+        }
+#endif
         // サブシーンのアクティブ状態を切り替え中かどうか
         static int          SubSceneActiveChangingCnt{ get; set; }
         // 切り替えが確定する直前・直後のサブシーンルート
@@ -62,11 +99,11 @@ namespace VMUnityLib
                 {
                     PrevSubSceneName = SceneManager.Instance?.CurrentPlayerSubSceneName;
                     NextSubSceneName = targetSubSceneName;
-                    //Debug.Log("OnTriggerEnter and(next) apply:" + NextSubSceneName, gameObject);
+                    Debug.Log("OnTriggerEnter and(next) apply:" + NextSubSceneName, gameObject);
                     SceneManager.Instance?.ActiveAndApplySubScene(NextSubSceneName, false);
                 }
                 ++SubSceneActiveChangingCnt;
-                //Debug.Log("SubSceneActiveChangingCnt add:" + SubSceneActiveChangingCnt, gameObject);
+                Debug.Log("SubSceneActiveChangingCnt add:" + SubSceneActiveChangingCnt + " hit:" + (other.gameObject.name) + " in:" + GetHierarchyPath(gameObject), gameObject);
             }
         }
 
@@ -85,7 +122,7 @@ namespace VMUnityLib
                     if (targetSubSceneName == NextSubSceneName)
                     {
                         var prevSceneName = PrevSubSceneName;
-                        //Debug.Log("OnTriggerExit(cancel) apply:" + prevSceneName, gameObject);
+                        Debug.Log("OnTriggerExit(cancel) apply:" + prevSceneName, gameObject);
                         SceneManager.Instance?.ActiveAndApplySubScene(prevSceneName, true);
                     }
                     else
@@ -95,8 +132,26 @@ namespace VMUnityLib
                     }
                 }
                 --SubSceneActiveChangingCnt;
-                //Debug.Log("SubSceneActiveChangingCnt sub:" + SubSceneActiveChangingCnt, gameObject);
+                Debug.Log("SubSceneActiveChangingCnt sub:" + SubSceneActiveChangingCnt + " hit:" + (other.gameObject.name) + " in:" + GetHierarchyPath(gameObject), gameObject);
             }
+        }
+
+        /// <summary>
+        /// ヒエラルキーに応じたパスを取得する
+        /// </summary>
+        static string GetHierarchyPath(GameObject target)
+        {
+            string path = "";
+            Transform current = target.transform;
+            while (current != null)
+            {
+                // 同じ階層に同名のオブジェクトがある場合があるので、それを回避する
+                int index = current.GetSiblingIndex();
+                path = "/" + current.name + index + path;
+                current = current.parent;
+            }
+
+            return "/" + target.scene.name + path;
         }
     }
 }
