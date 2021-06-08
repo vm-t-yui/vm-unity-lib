@@ -18,7 +18,7 @@ namespace VMUnityLib
         public const string SCENE_ROOT_NAME_HEADER = "SceneRoot_";
         public const string SUBSCENE_ROOT_NAME_HEADER = "SubSceneRoot_";
         const float LOAD_OPELATION_DELAY = 1.0f;
-        const float SUBSCENE_ROOT_LOAD_DELAY = 5.0f;
+        const float SUBSCENE_ROOT_LOAD_DELAY = 2.0f;
 
         List<SceneSet>      loadedScenes = new List<SceneSet>();             // ロード済みのシーンルートと所属するサブシーンルート.
         Stack<string>       sceneHistory = new Stack<string>();              // シーンの遷移ヒストリ.
