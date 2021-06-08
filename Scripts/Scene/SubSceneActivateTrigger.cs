@@ -47,7 +47,8 @@ namespace VMUnityLib
         }
 #endif
         // サブシーンのアクティブ状態を切り替え中かどうか
-        static int          SubSceneActiveChangingCnt{ get; set; }
+        public static bool IsSubsceneTriggerWorking { get { return SubSceneActiveChangingCnt != 0; } }
+        static int  SubSceneActiveChangingCnt{ get; set; }
         // 切り替えが確定する直前・直後のサブシーンルート
         static string PrevSubSceneName{ get; set; }
         static string NextSubSceneName { get; set; }

@@ -18,6 +18,7 @@ namespace VMUnityLib
         public const string SCENE_ROOT_NAME_HEADER = "SceneRoot_";
         public const string SUBSCENE_ROOT_NAME_HEADER = "SubSceneRoot_";
         const float LOAD_OPELATION_DELAY = 1.0f;
+        const float SUBSCENE_ROOT_LOAD_DELAY = 5.0f;
 
         List<SceneSet>      loadedScenes = new List<SceneSet>();             // ロード済みのシーンルートと所属するサブシーンルート.
         Stack<string>       sceneHistory = new Stack<string>();              // シーンの遷移ヒストリ.
@@ -314,8 +315,11 @@ namespace VMUnityLib
 #endif
             }
             // メインシーンロード
+            // メインシーンがロードされていない場合はサブシーンのロード待ちを無視
+            bool ignoreSubSceneLoadWait = false;
             if (GetLoadedSceneRoot(currentAimLoadScene) == null)
             {
+                ignoreSubSceneLoadWait = true;
                 loadOperationSet = new LoadOperationSet();
                 loadOperationSet.sceneName = currentAimLoadScene;
 #if LOG_SCENE
@@ -336,6 +340,7 @@ namespace VMUnityLib
             }
 
             // サブシーン指定があれば指定サブシーン、なければメインシーンの初回シーン
+            var loadReserve = new List<LoadOperationSet>();
             if(currentAimLoadSubScene != null)
             {
                 if (GetLoadedSubSceneRoot(currentAimLoadSubScene) == null)
@@ -366,7 +371,7 @@ namespace VMUnityLib
                         var newOpe = new LoadOperationSet();
                         newOpe.sceneName = item;
                         newOpe.isSubScene = true;
-                        loading.Add(newOpe);
+                        loadReserve.Add(newOpe);
                     }
                 }
                 foreach (var item in loadedScenes)
@@ -402,16 +407,8 @@ namespace VMUnityLib
                     Debug.Log("loadope: Unload subscene done : " + item.sceneName);
 #endif
                 }
-                foreach (var item in loading)
-                {
-#if LOG_SCENE
-                    Debug.Log("loadope: start load subscene : " + item.sceneName);
-#endif
-                    yield return LoadInternal(item);
-#if LOG_SCENE
-                    Debug.Log("loadope: load subscene done : " + item.sceneName);
-#endif
-                }
+
+                // MEMO:負荷分散のために、ロードは最後行う
             }
 
             // サブシーンを持っていなければシーンルートをアクティブにする.
@@ -443,6 +440,32 @@ namespace VMUnityLib
 
             // ライトプローブ再計算
             LightProbes.TetrahedralizeAsync();
+
+            // ディレイを入れてから、最後に必要サブシーンをロードする
+            if(currentAimLoadSubScene != null)
+            {
+                // ゲーム再開時にサブシーントリガーの上にいた場合に念のため配慮
+                if(!ignoreSubSceneLoadWait)
+                {
+                    // サブシーンのロード処理は、サブシーンアクティブトリガーのやり取りをしているときは負荷分散のために止める
+                    while (SubSceneActivateTrigger.IsSubsceneTriggerWorking)
+                    {
+                        yield return null;
+                    }
+                    yield return new WaitForSecondsRealtime(SUBSCENE_ROOT_LOAD_DELAY);
+                }
+                loading.AddRange(loadReserve);
+                foreach (var item in loading)
+                {
+#if LOG_SCENE
+                    Debug.Log("loadope: start load subscene : " + item.sceneName);
+#endif
+                    yield return LoadInternal(item);
+#if LOG_SCENE
+                    Debug.Log("loadope: load subscene done : " + item.sceneName);
+#endif
+                }
+            }
 
             loadOperationRunning = false;
 #if LOG_SCENE
