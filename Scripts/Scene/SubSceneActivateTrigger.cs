@@ -2,6 +2,7 @@
 #if DEBUG && UNITY_EDITOR
 using UnityEditor;
 #endif
+using Sirenix.OdinInspector;
 
 /// <summary>
 /// 自身が所属するサブシーンをアクティブ化するトリガー
@@ -45,6 +46,8 @@ namespace VMUnityLib
                 Undo.RecordObject(this, "SubSceneActivateTrigger set ");
             }
         }
+
+        public void DebugSetTargetSceneName(string target) { targetSubSceneName = target; }
 #endif
         // サブシーンのアクティブ状態を切り替え中かどうか
         public static bool IsSubsceneTriggerWorking { get { return SubSceneActiveChangingCnt != 0; } }
@@ -53,7 +56,12 @@ namespace VMUnityLib
         static string PrevSubSceneName{ get; set; }
         static string NextSubSceneName { get; set; }
 
-        string targetSubSceneName;
+        [SerializeField, LabelText("Rootシーンに配置")]
+        bool isOnRoot = false;
+        public bool IsOnRoot => isOnRoot;
+
+        [SerializeField, LabelText("対象シーン名"), SceneName, EnableIf("IsOnRoot")]
+        string targetSubSceneName = default;
 
         /// <summary>
         /// 開始前
@@ -68,22 +76,25 @@ namespace VMUnityLib
         /// </summary>
         private void Start()
         {
-            // サブシーンルート取得
-            var rootObjects = gameObject.scene.GetRootGameObjects();
-            SubSceneRoot targetSubSceneRoot = null;
-            foreach (var item in rootObjects)
+            // サブシーンに配置されているものは自分の目標シーン名自動取得
+            if (!IsOnRoot)
             {
-                targetSubSceneRoot = item.GetComponent<SubSceneRoot>();
-                if (targetSubSceneRoot)
-                    break;
-            }
-            if(!targetSubSceneRoot)
-            {
-                Debug.LogError("サブシーンではないシーンにトリガーが存在します (" + gameObject.name + ") in "+ gameObject.scene.name, gameObject);
-            }
-            else
-            {
-                targetSubSceneName = targetSubSceneRoot.GetSceneName();
+                var rootObjects = gameObject.scene.GetRootGameObjects();
+                SubSceneRoot targetSubSceneRoot = null;
+                foreach (var item in rootObjects)
+                {
+                    targetSubSceneRoot = item.GetComponent<SubSceneRoot>();
+                    if (targetSubSceneRoot)
+                        break;
+                }
+                if (!targetSubSceneRoot)
+                {
+                    Debug.LogError("サブシーンではないシーンにトリガーが存在します (" + gameObject.name + ") in " + gameObject.scene.name, gameObject);
+                }
+                else
+                {
+                    targetSubSceneName = targetSubSceneRoot.GetSceneName();
+                }
             }
         }
 

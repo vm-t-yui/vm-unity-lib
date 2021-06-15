@@ -1,12 +1,11 @@
-/******************************************************************************/
-/*!    \brief  シーンのルートオブジェクトのエディタ拡張.
-*******************************************************************************/
-
 using UnityEngine;
 using UnityEditor;
 
 namespace VMUnityLib
 {
+    /// <summary>
+    /// サブシーンルートトリガー
+    /// </summary>
     [CustomEditor(typeof(SubSceneActivateTrigger))]
     public class SubSceneActivateTriggerInspector : Editor
     {
@@ -20,13 +19,16 @@ namespace VMUnityLib
             }
         }
 
-
+        /// <summary>
+        /// 名前自動設定
+        /// </summary>
         void CorrectMyName()
         {
             SubSceneActivateTrigger obj = target as SubSceneActivateTrigger;
             string newName = obj.gameObject.scene.name + "Trigger";
-            if(target.name != newName)
+            if(target.name != newName && !obj.IsOnRoot)
             {
+                obj.DebugSetTargetSceneName(obj.gameObject.scene.name);
                 target.name = newName;
                 Undo.RecordObject(obj, "CorrectMyName");
                 EditorUtility.SetDirty(target);
