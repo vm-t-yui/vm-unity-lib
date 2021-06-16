@@ -18,19 +18,6 @@ namespace VMUnityLib
     public class SubSceneActivateTrigger : MonoBehaviour
     {
 #if DEBUG && UNITY_EDITOR
-        [Button("名前自動設定"), ShowIf("IsOnRoot")]
-        void CorrectMyName()
-        {
-            string newName = gameObject.scene.name + "Trigger";
-            if (name != newName && !IsOnRoot)
-            {
-                DebugSetTargetSceneName(gameObject.scene.name);
-                name = newName;
-                Undo.RecordObject(this, "CorrectMyName");
-                EditorUtility.SetDirty(this);
-            }
-        }
-
         private void OnValidate()
         {
             var rigid = GetComponent<Rigidbody>();
@@ -72,11 +59,7 @@ namespace VMUnityLib
         static string PrevSubSceneName{ get; set; }
         static string NextSubSceneName { get; set; }
 
-        [SerializeField, LabelText("Rootシーンに配置")]
-        bool isOnRoot = false;
-        public bool IsOnRoot => isOnRoot;
-
-        [SerializeField, LabelText("対象シーン名"), SceneName, ShowIf("IsOnRoot")]
+        [SerializeField, LabelText("対象シーン名"), SceneName]
         string targetSubSceneName = default;
 
         /// <summary>
@@ -85,33 +68,6 @@ namespace VMUnityLib
         private void Awake()
         {
             gameObject.layer = LayerName.IgnoreRaycast;
-        }
-
-        /// <summary>
-        /// Start
-        /// </summary>
-        private void Start()
-        {
-            // サブシーンに配置されているものは自分の目標シーン名自動取得
-            if (!IsOnRoot)
-            {
-                var rootObjects = gameObject.scene.GetRootGameObjects();
-                SubSceneRoot targetSubSceneRoot = null;
-                foreach (var item in rootObjects)
-                {
-                    targetSubSceneRoot = item.GetComponent<SubSceneRoot>();
-                    if (targetSubSceneRoot)
-                        break;
-                }
-                if (!targetSubSceneRoot)
-                {
-                    Debug.LogError("サブシーンではないシーンにトリガーが存在します (" + gameObject.name + ") in " + gameObject.scene.name, gameObject);
-                }
-                else
-                {
-                    targetSubSceneName = targetSubSceneRoot.GetSceneName();
-                }
-            }
         }
 
         /// <summary>
