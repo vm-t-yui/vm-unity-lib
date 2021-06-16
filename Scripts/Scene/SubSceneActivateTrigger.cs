@@ -2,6 +2,8 @@
 #if DEBUG && UNITY_EDITOR
 using UnityEditor;
 #endif
+
+// ライブラリなのでほんとはodin使いたくないけど、夕鬼で使用者に見せないといけないので一旦あきらめ。時間無い
 using Sirenix.OdinInspector;
 
 /// <summary>
@@ -12,9 +14,23 @@ namespace VMUnityLib
 {
     [RequireComponent(typeof(BoxCollider))]
     [RequireComponent(typeof(Rigidbody))]
+    [TypeInfoBox("隣のサブシーンとの切り替え用のトリガーは重なっている必要があり、これから読み込む側のトリガーが先にヒットする必要がある")]
     public class SubSceneActivateTrigger : MonoBehaviour
     {
 #if DEBUG && UNITY_EDITOR
+        [Button("名前自動設定"), ShowIf("IsOnRoot")]
+        void CorrectMyName()
+        {
+            string newName = gameObject.scene.name + "Trigger";
+            if (name != newName && !IsOnRoot)
+            {
+                DebugSetTargetSceneName(gameObject.scene.name);
+                name = newName;
+                Undo.RecordObject(this, "CorrectMyName");
+                EditorUtility.SetDirty(this);
+            }
+        }
+
         private void OnValidate()
         {
             var rigid = GetComponent<Rigidbody>();
@@ -60,7 +76,7 @@ namespace VMUnityLib
         bool isOnRoot = false;
         public bool IsOnRoot => isOnRoot;
 
-        [SerializeField, LabelText("対象シーン名"), SceneName, EnableIf("IsOnRoot")]
+        [SerializeField, LabelText("対象シーン名"), SceneName, ShowIf("IsOnRoot")]
         string targetSubSceneName = default;
 
         /// <summary>
