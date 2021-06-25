@@ -659,6 +659,10 @@ namespace VMUnityLib
         /// <param name="fadeTime">フェードパラメータ.</param>
         public void PopSceneTo(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
+#if UNITY_PS5
+            // シーンをポップしたときはインテント無効化（タイトルに戻るときに使うため。ステージ中はインテント無視
+            ActivityManagerPS5.IsIntented = false;
+#endif
             // アンカーが無ければ警告出して無視
             bool bFound = false;
             foreach (var item in sceneHistory)
