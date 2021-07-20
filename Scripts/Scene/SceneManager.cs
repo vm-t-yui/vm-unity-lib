@@ -60,7 +60,7 @@ namespace VMUnityLib
         public string CurrentSubSceneName { get { return CurrentSubSceneRoot ? CurrentSubSceneRoot.GetSceneName() : null; } }
         public string CurrentPlayerSubSceneName { get; private set; }
 
-        public bool IsLoadDone { get; private set; }                    // ロードUI含めロードが完了しているかどうか
+        public bool IsLoadDone { get; private set; } = true;            // ロードUI含めロードが完了しているかどうか
         public bool IsLoadOperationRunning => loadOperationRunning;     // ロード処理が走っているかどうか
 
         // シーンチェンジ時のフェードのパラメータ.
@@ -568,7 +568,7 @@ namespace VMUnityLib
         /// <param name="pushAnchor">シーンまでのアンカー.</param>
         public void PushScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
-            if (sceneOperation != null) StopCoroutine(sceneOperation);
+            CheckCancelSceneOperation();
             sceneOperation = StartCoroutine(PushSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
         }
         IEnumerator PushSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
@@ -595,7 +595,7 @@ namespace VMUnityLib
         /// <param name="fadeTime">フェードパラメータ.</param>
         public void ChangeScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
-            if (sceneOperation != null) StopCoroutine(sceneOperation);
+            CheckCancelSceneOperation();
             sceneOperation = StartCoroutine(ChangeSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
         }
         IEnumerator ChangeSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
@@ -627,7 +627,7 @@ namespace VMUnityLib
         /// <param name="fadeTime">フェードパラメータ.</param>
         public void PopScene(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
-            if (sceneOperation != null) StopCoroutine(sceneOperation);
+            CheckCancelSceneOperation();
             sceneOperation = StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate));
         }
         IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
@@ -665,7 +665,7 @@ namespace VMUnityLib
             {
                 if (item == nextSceneName)
                 {
-                    if (sceneOperation != null) StopCoroutine(sceneOperation);
+                    CheckCancelSceneOperation();
                     sceneOperation = StartCoroutine(PopSceneToInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
                     bFound = true;
                     break;
@@ -716,49 +716,22 @@ namespace VMUnityLib
             yield return WaitEndLoadUi();
             CleaneUpAfterChangeSceneActivation(fadeParam, afterSceneControlDelegate);
         }
-
-        ///// <summary>
-        ///// 現在読まれているシーン以外をすべてアンロード.
-        ///// </summary>
-        //public void UnloadAllOtherScene()
-        //{
-        //    SceneSet lastSceneSet = null;
-        //    foreach (var scene in loadedScenes) 
-        //    {
-        //        if(scene.sceneRoot != CurrentSceneRoot)
-        //        {
-        //            foreach (var item in scene.subSceneRoots)
-        //            {
-        //                UnitySceneManager.UnloadSceneAsync(item.GetSceneName());
-        //            }
-        //            UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
-        //        }
-        //        else
-        //        {
-        //            lastSceneSet = scene;
-        //        }
-        //    }
-
-        //    loadedScenes = new List<SceneSet>();
-        //    loadedScenes.Add (lastSceneSet);
-        //}
-
-        ///// <summary>
-        ///// シーンをすべてアンロード.
-        ///// </summary>
-        //public void DebugUnloadAllScene()
-        //{
-        //    // Sceneがすでにロードされているなら、そのシーンをアクティブにする.
-        //    foreach (var scene in loadedScenes) 
-        //    {
-        //        foreach (var item in scene.subSceneRoots)
-        //        {
-        //            UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
-        //        }
-        //        UnitySceneManager.UnloadSceneAsync(scene.sceneRoot.GetSceneName());
-        //    }
-        //    loadedScenes = new List<SceneSet>();
-        //}
+        
+        /// <summary>
+        /// シーンオペレーションのキャンセルチェック
+        /// </summary>
+        void CheckCancelSceneOperation()
+        {
+            // シーンオペレーションを中止＋ロードUIがあれば強制停止
+            if (sceneOperation != null)
+            {
+                StopCoroutine(sceneOperation);
+                if (currentLoadingUi != null)
+                {
+                    currentLoadingUi.StopForce();
+                }
+            }
+        }
 
         /// <summary>
         /// フェードアウト終了時のコールバック.

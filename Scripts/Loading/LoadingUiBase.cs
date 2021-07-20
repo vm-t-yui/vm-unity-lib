@@ -25,6 +25,14 @@ namespace VMUnityLib
         }
 
         /// <summary>
+        /// 強制停止
+        /// </summary>
+        public virtual void StopForce()
+        {
+            isEnd = true;
+        }
+
+        /// <summary>
         /// ロード開始前処理
         /// </summary>
         public virtual IEnumerator BeforeStartLoadProcess()

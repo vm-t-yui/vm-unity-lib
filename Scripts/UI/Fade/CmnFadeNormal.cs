@@ -45,6 +45,11 @@ namespace VMUnityLib
         /// </summary>
         public override void StartFadeIn(EndFadeCallBack callBack, float time)
         {
+            if(time == 0)
+            {
+                overlay.color = new Color(Color.r, Color.g, Color.b, 0.0f);
+                return;
+            }
             StartFadeInInternal(callBack, time);
             if(coroutine != null) { StopCoroutine(coroutine); }
             coroutine = StartCoroutine(FadeCalcCoroutine());
@@ -56,6 +61,11 @@ namespace VMUnityLib
         /// </summary>
         public override void StartFadeOut(EndFadeCallBack callBack, float time)
         {
+            if (time == 0)
+            {
+                overlay.color = new Color(Color.r, Color.g, Color.b, 1.0f);
+                return;
+            }
             StartFadeOutInternal(callBack, time);
             if(coroutine != null) { StopCoroutine(coroutine); }
             coroutine = StartCoroutine(FadeCalcCoroutine());
