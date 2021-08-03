@@ -567,6 +567,7 @@ namespace VMUnityLib
         public void PushScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
             CheckCancelSceneOperation();
+            SubSceneActivateTrigger.CancelSubsceneTriggerWorkForce();
             sceneOperation = StartCoroutine(PushSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
         }
         IEnumerator PushSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
@@ -594,6 +595,7 @@ namespace VMUnityLib
         public void ChangeScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
             CheckCancelSceneOperation();
+            SubSceneActivateTrigger.CancelSubsceneTriggerWorkForce();
             sceneOperation = StartCoroutine(ChangeSceneInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
         }
         IEnumerator ChangeSceneInternal(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
@@ -626,6 +628,7 @@ namespace VMUnityLib
         public void PopScene(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
             CheckCancelSceneOperation();
+            SubSceneActivateTrigger.CancelSubsceneTriggerWorkForce();
             sceneOperation = StartCoroutine(PopSceneInternal(fadeParam, afterSceneControlDelegate));
         }
         IEnumerator PopSceneInternal(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
@@ -668,6 +671,7 @@ namespace VMUnityLib
                 if (item == nextSceneName)
                 {
                     CheckCancelSceneOperation();
+                    SubSceneActivateTrigger.CancelSubsceneTriggerWorkForce();
                     sceneOperation = StartCoroutine(PopSceneToInternal(nextSceneName, fadeParam, afterSceneControlDelegate));
                     bFound = true;
                     break;

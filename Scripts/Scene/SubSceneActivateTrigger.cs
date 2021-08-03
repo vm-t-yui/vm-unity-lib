@@ -138,5 +138,13 @@ namespace VMUnityLib
 
             return "/" + target.scene.name + path;
         }
+
+        /// <summary>
+        /// 強制的にサブシーントリガーの実行状態をキャンセル。メインシーンの切り替え時（コンテニューなど）に利用
+        /// </summary>
+        public static void CancelSubsceneTriggerWorkForce()
+        {
+            SubSceneActiveChangingCnt = 0;
+        }
     }
 }
