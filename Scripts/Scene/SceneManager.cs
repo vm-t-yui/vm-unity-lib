@@ -25,9 +25,8 @@ namespace VMUnityLib
         bool                isFadeWaiting = false;
         CommonSceneUI       sceneUI = null;
         LoadingUiBase       currentLoadingUi = null;                         // 現在ロード中に表示しているUI
-        bool                isDirectBoot;                                    // 直接起動かどうか
         bool                firstDirectBoot = true;                          // 直接起動の初回判定用
-        public bool IsDirectBoot => isDirectBoot;
+        public bool IsDirectBoot { get; private set; }
         SceneSet currentSceneRootSceneSet = null;
 
         // アンロードとロードタスク
@@ -46,7 +45,6 @@ namespace VMUnityLib
         List<LoadOperationSet> unloading = new List<LoadOperationSet>();
         Coroutine              loadOperation;
         Coroutine              sceneOperation;
-        bool                   loadOperationRunning = false;
 
         [SceneName, SerializeField] string firstSceneName = default;
         [SceneName, SerializeField] string debugFirstSceneName = default;
@@ -60,8 +58,8 @@ namespace VMUnityLib
         public string CurrentSubSceneName { get { return CurrentSubSceneRoot ? CurrentSubSceneRoot.GetSceneName() : null; } }
         public string CurrentPlayerSubSceneName { get; private set; }
 
-        public bool IsLoadDone { get; private set; } = true;            // ロードUI含めロードが完了しているかどうか
-        public bool IsLoadOperationRunning => loadOperationRunning;     // ロード処理が走っているかどうか
+        public bool IsLoadDone { get; private set; } = true;                // ロードUI含めロードが完了しているかどうか
+        public bool IsLoadOperationRunning { get; private set; } = false;   // ロード処理が走っているかどうか
 
         // シーンチェンジ時のフェードのパラメータ.
         public struct SceneChangeFadeParam
@@ -107,7 +105,7 @@ namespace VMUnityLib
             yield return LibBridgeInfo.WaitForEndOfFrame;
 
             // 直接シーン起動でない場合のみデフォルトシーンの読み込みを開始
-            if (!isDirectBoot)
+            if (!IsDirectBoot)
             {
                 if (!isDebug)
                 {
@@ -120,7 +118,7 @@ namespace VMUnityLib
                 }
             }
             // Startまできたら用済みなのでフラグ下げる
-            isDirectBoot = false;
+            IsDirectBoot = false;
         }
 
         /// <summary>
@@ -134,7 +132,7 @@ namespace VMUnityLib
             // アクティブなシーン名が"root"でない場合は直接起動フラグをたてる
             if (UnitySceneManager.GetActiveScene().name != "root")
             {
-                isDirectBoot = true;
+                IsDirectBoot = true;
             }
             if (Instance == null)
             {
@@ -215,7 +213,7 @@ namespace VMUnityLib
         /// </summary>
         void RecreateLoadOperation(bool loadImmidiate, bool unloadCurrent)
         {
-            if (loadOperationRunning && loadOperation != null)
+            if (IsLoadOperationRunning && loadOperation != null)
             {
                 StopCoroutine(loadOperation);
 #if LOG_SCENE
@@ -239,7 +237,7 @@ namespace VMUnityLib
 #if LOG_SCENE
             Debug.Log("loadope: start load operation");
 #endif
-            loadOperationRunning = true;
+            IsLoadOperationRunning = true;
             // 既に走っているロード/アンロードがあれば先に待つ
             foreach (var item in unloading)
             {
@@ -467,7 +465,7 @@ namespace VMUnityLib
                 }
             }
 
-            loadOperationRunning = false;
+            IsLoadOperationRunning = false;
 #if LOG_SCENE
             Debug.Log("loadope: end load operation");
 #endif
@@ -580,7 +578,7 @@ namespace VMUnityLib
 
             yield return WaitAfterLoadForLoadingUi(fadeParam);
 
-            while (loadOperationRunning)
+            while (IsLoadOperationRunning)
             {
                 yield return null;
             }
@@ -608,7 +606,7 @@ namespace VMUnityLib
                 sceneHistory.Push(nextSceneName);
                 SetLoadScene(nextSceneName);
                 yield return WaitAfterLoadForLoadingUi(fadeParam);
-                while (loadOperationRunning)
+                while (IsLoadOperationRunning)
                 {
                     yield return null;
                 }
@@ -639,7 +637,7 @@ namespace VMUnityLib
                 sceneHistory.Pop();
                 SetLoadScene(nextSceneName);
                 yield return WaitAfterLoadForLoadingUi(fadeParam);
-                while (loadOperationRunning)
+                while (IsLoadOperationRunning)
                 {
                     yield return null;
                 }
@@ -712,7 +710,7 @@ namespace VMUnityLib
                 string peekedNextSceneName = sceneHistory.Peek();
                 SetLoadScene(peekedNextSceneName);
                 yield return WaitAfterLoadForLoadingUi(fadeParam);
-                while (loadOperationRunning)
+                while (IsLoadOperationRunning)
                 {
                     yield return null;
                 }
@@ -797,7 +795,7 @@ namespace VMUnityLib
             }
 
             // 直接起動の場合は現在のシーン更新してシーンヒストリーに入れる
-            if(CurrentSceneRoot == null && isDirectBoot && firstDirectBoot)
+            if(CurrentSceneRoot == null && IsDirectBoot && firstDirectBoot)
             {
                 firstDirectBoot = false;
                 SetCurrentSceneRoot(sceneRoot);
@@ -935,7 +933,7 @@ namespace VMUnityLib
             //// サブシーンのロード開始が１フレまっているので、サブシーンのロードがないか確認するために1フレ待つ
             //yield return null;
 
-            while(loadOperationRunning)
+            while(IsLoadOperationRunning)
             {
                 yield return null;
             }
