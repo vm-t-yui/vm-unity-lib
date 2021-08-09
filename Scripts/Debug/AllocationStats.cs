@@ -19,6 +19,11 @@ namespace VMUnityLib
             useGUILayout = false;
         }
 
+        const int fpsCountNum = 5;
+        int fpsCount = 0;
+        float fps = 0;
+        float fpsSum = 0;
+
         // Use this for initialization
         public void OnGUI()
         {
@@ -78,7 +83,7 @@ namespace VMUnityLib
             text.Append("Last collect delta        ");
             text.Append(lastDeltaTime.ToString("0.000"));
             text.Append("s (");
-            text.Append((1F / lastDeltaTime).ToString("0.0"));
+            text.Append((fps).ToString("0.0"));
 
             text.Append(" fps)\n");
 
@@ -122,6 +127,20 @@ namespace VMUnityLib
         int allocMem = 0;
         int collectAlloc = 0;
         int peakAlloc = 0;
-
+        void Update()
+        {
+            ++fpsCount;
+            if (fpsCount <= fpsCountNum)
+            {
+                fpsSum += Time.deltaTime;
+            }
+            else
+            {
+                fps = 1F / (fpsSum / fpsCountNum);
+                fpsCount = 0;
+                fpsSum = 0;
+            }
+        }
     }
+
 }
