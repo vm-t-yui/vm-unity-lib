@@ -436,9 +436,6 @@ namespace VMUnityLib
                 CurrentSubSceneRoot.DirectionalLight.gameObject.SetActive(true);
             }
 
-            // ライトプローブ再計算
-            LightProbes.TetrahedralizeAsync();
-
             // ディレイを入れてから、最後に必要サブシーンをロードする
             if(currentAimLoadSubScene != null)
             {
@@ -464,6 +461,9 @@ namespace VMUnityLib
 #endif
                 }
             }
+
+            // ライトプローブ再計算
+            LightProbes.TetrahedralizeAsync();
 
             IsLoadOperationRunning = false;
 #if LOG_SCENE
