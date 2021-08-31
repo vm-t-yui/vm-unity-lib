@@ -942,8 +942,6 @@ namespace VMUnityLib
                 yield return null;
             }
 
-            IsLoadDone = true;
-
             if (currentLoadingUi != null)
             {
                 while (!currentLoadingUi.IsEnd)
@@ -952,6 +950,7 @@ namespace VMUnityLib
                 }
             }
             currentLoadingUi = null;
+            IsLoadDone = true;
         }
     }
 }
