@@ -53,16 +53,13 @@ namespace VMUnityLib
             gameview = EditorWindow.GetWindow(typeof(EditorWindow).Assembly.GetType("UnityEditor.GameView"));
 #endif
             // 音の遅延の計測を開始する.
-            SoundLatency = PlayerPrefs.GetInt("SoundLatency", -1);
-            if (SoundLatency < 0)
-            {
 #if USE_CRI
-                CriAtomExLatencyEstimator.InitializeModule();
-                StartCoroutine(CheckSoundLatency());
+            SoundLatency = PlayerPrefs.GetInt("SoundLatency", -1);
+            CriAtomExLatencyEstimator.InitializeModule();
+            StartCoroutine(CheckSoundLatency());
 #else
-                SoundLatency = 0;
+            SoundLatency = 0;
 #endif
-            }
         }
 
 #if UNITY_EDITOR
