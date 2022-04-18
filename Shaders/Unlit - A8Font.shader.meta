@@ -1,9 +1,9 @@
 fileFormatVersion: 2
 guid: 4fab630388ecccf4ab0edaa7a8bdfcb1
-timeCreated: 1502761397
-licenseType: Free
 ShaderImporter:
+  externalObjects: {}
   defaultTextures: []
+  nonModifiableTextures: []
   userData: 
-  assetBundleName: 
+  assetBundleName: shader
   assetBundleVariant: 
