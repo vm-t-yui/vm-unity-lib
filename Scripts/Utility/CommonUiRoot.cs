@@ -24,20 +24,17 @@ public sealed class CommonUiRoot : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Initialize()
     {
-        if (SceneManager.Instance == null)
+        Object obj = Resources.Load(prefabName);
+        GameObject prefab = (GameObject)obj;
+        if (prefab == null)
         {
-            Object obj = Resources.Load(prefabName);
-            GameObject prefab = (GameObject)obj;
-            if (prefab == null)
-            {
-                Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj);
+            Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj);
 #if UNITY_EDITOR
-                prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
+            prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
 #endif
-            }
-            var instantiated = Instantiate(prefab);
-            DontDestroyOnLoad(instantiated);
         }
+        var instantiated = Instantiate(prefab);
+        DontDestroyOnLoad(instantiated);
     }
 
 #if DEBUG
