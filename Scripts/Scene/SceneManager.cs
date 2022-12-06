@@ -49,7 +49,7 @@ namespace VMUnityLib
         [SceneName, SerializeField] string firstSceneName = default;
         [SceneName, SerializeField] string debugFirstSceneName = default;
         [SerializeField] bool isDebug = true;
-        public static SceneManager Instance { get; set; }
+        public static SceneManager Instance { get; private set; }
 
         // 現在アクティブなシーンルート.
         public SceneRoot CurrentSceneRoot { get; private set; }
