@@ -25,7 +25,11 @@ namespace VMUnityLib
         {
             while (IsStartedFade)
             {
-                CalcAmount();
+                var isEnd = CalcAmount();
+                if(isEnd)
+                {
+                    endFadeCallBack?.Invoke();
+                }
                 yield return null;
             }
         }

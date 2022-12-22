@@ -29,7 +29,7 @@ namespace VMUnityLib
 
         float fadeTime;                       // フェード所要時間.
         float fadeStartTime;                  // フェード開始時間.
-        EndFadeCallBack endFadeCallBack;                // 終了時のコールバック.
+        protected EndFadeCallBack endFadeCallBack;                // 終了時のコールバック.
 
         public void OnDisable()
         {
@@ -72,8 +72,9 @@ namespace VMUnityLib
         /// <summary>
         /// 進行度計算.
         /// </summary>
-        protected void CalcAmount()
+        protected bool CalcAmount()
         {
+            var isEnd = false;
             if (fadeTime > 0)
             {
                 Amount = (Time.unscaledTime - fadeStartTime) / fadeTime;
@@ -87,18 +88,19 @@ namespace VMUnityLib
             {
                 Amount = 1.0f;
                 IsStartedFade = false;
-                endFadeCallBack();
                 if (IsFadeIn)
                 {
                     gameObject.SetActive(false);
                     transform.GetComponent<Collider>().enabled = false;
                 }
+                isEnd = true;
             }
 
             if (IsFadeIn)
             {
                 Amount = 1.0f - Amount;
             }
+            return isEnd;
         }
     }
 }

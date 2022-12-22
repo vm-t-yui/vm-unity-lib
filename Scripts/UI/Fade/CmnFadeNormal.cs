@@ -34,8 +34,12 @@ namespace VMUnityLib
         {
             while(IsStartedFade)
             {
-                CalcAmount();
+                var isEnd = CalcAmount();
                 overlay.color = new Color(Color.r, Color.g, Color.b, Amount);
+                if(isEnd)
+                {
+                    endFadeCallBack?.Invoke();
+                }
                 yield return null;
             }
         }
