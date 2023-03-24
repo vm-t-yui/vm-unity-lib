@@ -99,10 +99,16 @@ namespace VMUnityLib
         IEnumerator SceneStartColutine()
         {
             sceneUI = CommonSceneUI.Inst;
+            if(CommonSceneUI.Inst == null)
+            {
+                Debug.LogError("何らかの理由でロード順おかしいので無理やりロード");
+                CommonUiRoot.ForceInitialize();
+                yield return null;
+            }
             SceneChangeFadeParam noTimeFade = new SceneChangeFadeParam(0, 0, CmnFadeManager.FadeType.FADE_TIMEONLY, new Color(0, 0, 0, 0), LibBridgeInfo.LoadingType.COMMON);
             //　準備が整うまでシーン開始は遅延.
-            yield return LibBridgeInfo.WaitForEndOfFrame;
-            yield return LibBridgeInfo.WaitForEndOfFrame;
+            yield return null;
+            yield return null;
 
             // 直接シーン起動でない場合のみデフォルトシーンの読み込みを開始
             if (!IsDirectBoot)

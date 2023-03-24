@@ -21,7 +21,7 @@ public sealed class CommonUiRoot : MonoBehaviour
     /// <summary>
     /// 自身の生成前に呼ばれる関数。生成するしない関係なしに呼ばれる.
     /// </summary>
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Initialize()
     {
         if (SceneManager.Instance == null)
@@ -38,6 +38,17 @@ public sealed class CommonUiRoot : MonoBehaviour
             var instantiated = Instantiate(prefab);
             DontDestroyOnLoad(instantiated);
         }
+    }
+    public static void ForceInitialize()
+    {
+        Object obj = Resources.Load(prefabName);
+        GameObject prefab = (GameObject)obj;
+        if (prefab == null)
+        {
+            Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj);
+        }
+        var instantiated = Instantiate(prefab);
+        DontDestroyOnLoad(instantiated);
     }
 
 #if DEBUG
