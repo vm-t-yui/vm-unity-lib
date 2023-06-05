@@ -30,13 +30,13 @@
 // 　admobが2018年3月に今のネイティブ広告を廃止。
 //　 それに伴い新規広告枠の作成が不可能になっている
 
-using System.Collections;
-using UnityEngine;
-using GoogleMobileAds.Api;
-using VMUnityLib;
 using System;
-using UnityEngine.Purchasing;
+using System.Collections;
+using GoogleMobileAds.Api;
+using UnityEngine;
 using UnityEngine.Advertisements;
+using UnityEngine.Purchasing;
+using VMUnityLib;
 
 
 public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
@@ -74,9 +74,9 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     bool isTest = default;
 
     InterstitialAd interstitial;
-    BannerView[]   banner = new BannerView[(int)BANNER.MAX];
-    bool[]         beforeBanner = new bool[(int)BANNER.MAX];
-    AdRequest          request;
+    BannerView[] banner = new BannerView[(int)BANNER.MAX];
+    bool[] beforeBanner = new bool[(int)BANNER.MAX];
+    AdRequest request;
     RewardBasedVideoAd rewardBasedVideo;
 
     bool is_close_interstitial = false;
@@ -177,7 +177,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
 
         rewardBasedVideo = RewardBasedVideoAd.Instance;
         rewardBasedVideo.OnAdRewarded += OnAdRewarded;
-        rewardBasedVideo.OnAdClosed   += OnAdClosed;
+        rewardBasedVideo.OnAdClosed += OnAdClosed;
 
         AdRequest request = new AdRequest.Builder().Build();
         rewardBasedVideo.LoadAd(request, adUnitId);
@@ -200,14 +200,14 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
             id[i] = ios_Banner[i];
         }
 #else
-        for(int i = 0; i < (int)BANNER.MAX; i++)
+        for (int i = 0; i < (int)BANNER.MAX; i++)
         {
             id[i] = "unexpected_platform";
         }
 #endif
         // バナー設定
         // Create a 320x50 banner at the top of the screen.
-        banner[(int)BANNER.TOP]    = new BannerView(id[(int)BANNER.TOP], AdSize.Banner, AdPosition.Top);
+        banner[(int)BANNER.TOP] = new BannerView(id[(int)BANNER.TOP], AdSize.Banner, AdPosition.Top);
         banner[(int)BANNER.BOTTOM] = new BannerView(id[(int)BANNER.BOTTOM], AdSize.Banner, AdPosition.Bottom);
 
         // Create an empty ad request.
@@ -223,7 +223,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     }
     public void RequestNativeExpress()
     {
-        request  = new AdRequest.Builder().Build();
+        request = new AdRequest.Builder().Build();
     }
 
     public void RequestInterstitial()
@@ -314,7 +314,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowBanner(BANNER inBanner, bool inIsShow)
     {
-        if(inIsShow && isShowAd)
+        if (inIsShow && isShowAd)
         {
             banner[(int)inBanner].Show();
             beforeBanner[(int)inBanner] = true;
@@ -360,7 +360,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
 #endif
         for (int i = 0; i < (int)BANNER.MAX; i++)
         {
-            if(i == (int)BANNER.TOP)
+            if (i == (int)BANNER.TOP)
             {
                 ShowBanner((BANNER)i, true);
             }
@@ -492,7 +492,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
         if (inReward != null)
         {
             isMovieReward = true;
-            Debug.Log("AdRewardedRewardType["   + inReward.Type + "]");
+            Debug.Log("AdRewardedRewardType[" + inReward.Type + "]");
             Debug.Log("AdRewardedRewardAmount[" + inReward.Amount.ToString() + "]");
         }
     }
@@ -502,7 +502,7 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     void OnAdClosed(object inObject, System.EventArgs inArgs)
     {
         Debug.Log("AdClosed");
-        if(isMovieReward)
+        if (isMovieReward)
         {
             CommonGameData.Inst.OnCompleteReward();
             RewardAction rewardAction = FindObjectOfType<RewardAction>();
@@ -533,10 +533,10 @@ public sealed class AdMobManager : SingletonMonoBehaviour<AdMobManager>
     /// </summary>
     public void ShowMovieAd()
     {
-        if (Advertisement.IsReady() && isShowAd)
-        {
-            Advertisement.Show();
-        }
+        // if (Advertisement.IsReady() && isShowAd)
+        // {
+        //     Advertisement.Show();
+        // }
     }
 }
 #endif

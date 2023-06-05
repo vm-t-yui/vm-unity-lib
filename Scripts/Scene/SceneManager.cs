@@ -104,21 +104,21 @@ namespace VMUnityLib
 
         /*
          * TODO
-         * 
+         *
         ・特定のシーンをソフトリセット
     　    （StartとInitを呼ぶ。Awakeも呼びたい）
-    
+
         ・特定のシーンをハードリセット
     　    （Static以外の値や座標を強制リセット。ソフトより安定するが少し遅い）
-    
+
         ・LoadLevelを呼び出してシーンを綺麗にしてもらう
     　    （これで管理するのが一番楽）
-    
+
         ・特定のシーンを破棄してメモリを確保
-    
+
         ・メモリ不足した時に通知（ios/Androidのみ）
     　    （この時、アクティブでないキャッシュ済シーンを全て破棄してメモリを確保）
-    
+
         ・ゲームをポーズした時にアクティブでないキャッシュ済シーンを破棄してメモリを確保
     　    （バックグラウンドに回った時に落とされる対策）
          */
@@ -421,7 +421,7 @@ namespace VMUnityLib
         /// </summary>
         void EndFadeInCallBack()
         {
-            EventManager.Inst.InvokeEvent(SubjectType.EndFadeIn);
+            // EventManager.Inst.InvokeEvent(SubjectType.EndFadeIn);
             // フェード終了メッセージを流す.
             if (currentSceneRoot)
             {
@@ -603,10 +603,10 @@ namespace VMUnityLib
         /// </summary>
         public void SubscribeSceneUnloadEvent()
         {
-            if(!isSubscribeUnloadEvent)
+            if (!isSubscribeUnloadEvent)
             {
                 isSubscribeUnloadEvent = true;
-            EventManager.Inst.Subscribe(SubjectType.EndFadeIn,Unit => UnloadSceneBack());
+                // EventManager.Inst.Subscribe(SubjectType.EndFadeIn, Unit => UnloadSceneBack());
             }
         }
 
