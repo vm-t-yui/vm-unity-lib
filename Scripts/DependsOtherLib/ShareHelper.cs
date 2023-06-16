@@ -9,7 +9,7 @@ using System.IO;
 using VMUnityLib;
 using SocialConnector;
 
-public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper> 
+public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
 {
     const string fileName = "screenshot.png";
 
