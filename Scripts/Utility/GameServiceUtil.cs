@@ -31,10 +31,12 @@ public class GameServiceUtil
     public static void Auth()
     {
 #if UNITY_ANDROID
-        PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
-       .Build();
+        // 現在のバージョンだとPlayGamesClientConfigurationはないらしいのでエラー解消のためのコメントアウト
+        // 認証トークンはPlayGamesPlatform.Instance.requestServerSideAccess()になったらしい
+        //     PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
+        //    .Build();
 
-        PlayGamesPlatform.InitializeInstance(config);
+        //     PlayGamesPlatform.InitializeInstance(config);
         PlayGamesPlatform.DebugLogEnabled = true;
         PlayGamesPlatform.Activate();
 #endif
@@ -79,7 +81,7 @@ public class GameServiceUtil
     public static void ReportScore(long score, int leaderboardNum)
     {
 #if !UNITY_EDITOR
-        Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success => 
+        Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success =>
         {
             if(!success)
             {
