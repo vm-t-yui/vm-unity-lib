@@ -2,11 +2,11 @@
 /*!    \brief  デモシーンのコントローラー.
 *******************************************************************************/
 
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 using VMUnityLib;
 
-public sealed class SceneDemoController : MonoBehaviour 
+public sealed class SceneDemoController : MonoBehaviour
 {
     /// <summary>
     /// 指定時間待ってからシーンチェンジ.
