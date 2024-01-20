@@ -28,20 +28,21 @@ namespace VMUnityLib
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Initialize()
         {
-            if (SceneManager.Instance == null)
+            Object obj = Resources.Load(prefabName);
+            GameObject prefab = (GameObject)obj;
+            if (prefab == null)
             {
-                Object obj = Resources.Load(prefabName);
-                GameObject prefab = (GameObject)obj;
-                if (prefab == null)
-                {
-                    Debug.LogError(prefabName + "のロードに失敗 obj:" + obj);
+                Debug.LogError(prefabName + "のロードに失敗 obj:" + obj);
 #if UNITY_EDITOR
-                    prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
+                prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
 #endif
-                }
-                var instantiated = Instantiate(prefab);
-                DontDestroyOnLoad(instantiated);
             }
+            else
+            {
+                Debug.Log("CommonProgramObj loaded.");
+            }
+            var instantiated = Instantiate(prefab);
+            DontDestroyOnLoad(instantiated);
         }
 
         /// <summary>

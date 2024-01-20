@@ -23,7 +23,6 @@ namespace VMUnityLib
         List<SceneSet>      loadedScenes = new List<SceneSet>();             // ロード済みのシーンルートと所属するサブシーンルート.
         Stack<string>       sceneHistory = new Stack<string>();              // シーンの遷移ヒストリ.
         bool                isFadeWaiting = false;
-        CommonSceneUI       sceneUI = null;
         LoadingUiBase       currentLoadingUi = null;                         // 現在ロード中に表示しているUI
         bool                firstDirectBoot = true;                          // 直接起動の初回判定用
         public bool IsDirectBoot { get; private set; }
@@ -98,8 +97,8 @@ namespace VMUnityLib
         }
         IEnumerator SceneStartColutine()
         {
-            sceneUI = CommonSceneUI.Inst;
-            if(CommonSceneUI.Inst == null)
+            var commonUi = CommonUiRoot.Inst;
+            if(CommonUiRoot.Inst == null)
             {
                 Debug.LogError("何らかの理由でロード順おかしいので無理やりロード");
                 CommonUiRoot.ForceInitialize();
@@ -848,8 +847,6 @@ namespace VMUnityLib
         {
             LoadingUIManager.Inst.HideLoadingUI(fadeParam.loadingType);
             CmnFadeManager.Inst.StartFadeIn(EndFadeInCallBack, fadeParam.fadeInTime, fadeParam.fadeType, fadeParam.fadeColor);
-            sceneUI.ChangeCommonSceneUI(CurrentSceneRoot.SceneUiParam, CurrentSceneRoot.SceneBgKind);
-            sceneUI.ChangeSceneTitleLabel(CurrentSceneRoot.SceneNameLocalizeID);
             afterSceneControlDelegate?.Invoke();
         }
 
