@@ -1,27 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using I2.Loc;
+ï»¿using I2.Loc;
 using TMPro;
 
 /// <summary>
-/// ƒ[ƒJƒ‰ƒCƒY‚Ì•Ö—˜‹@”\
+/// ãƒ­ãƒ¼ã‚«ãƒ©ã‚¤ã‚ºã®ä¾¿åˆ©æ©Ÿèƒ½
 /// </summary>
 public static class LocalizeUtility
 {
     /// <summary>
-    /// –¢ƒ[ƒJƒ‰ƒCƒY‚ÌTerm’¼Ú“ü—Í‚É‘Î‰‚µ‚½SetTerm
+    /// æœªãƒ­ãƒ¼ã‚«ãƒ©ã‚¤ã‚ºã®Termç›´æ¥å…¥åŠ›ã«å¯¾å¿œã—ãŸSetTerm
     /// </summary>
-    public static void SetTerm(TextMeshProUGUI ugui, Localize localize, string term, string debugText)
+    public static void SetTerm(TextMeshProUGUI ugui, Localize localize, string term, string debugText, bool allowSpaceEmpty = true)
     {
-        // Term‚ª‚È‚©‚Á‚½‚ç’¼Ú•¶š—ñİ’è
+        // TermãŒãªã‹ã£ãŸã‚‰ç›´æ¥æ–‡å­—åˆ—è¨­å®š
         if (LocalizationManager.GetTermsList().Contains(term) == false)
         {
-#if UNITY_EDITOR // ƒGƒfƒBƒ^‚Å‚ÍƒGƒfƒBƒ^—p‚ÌƒfƒoƒbƒOƒeƒLƒXƒg‚Â‚¯‚é
-            ugui.text = debugText + term;
+            // allowSpaceãŒãƒ•ãƒ©ã‚°çµŒã£ã¦ã„ãŸã‚‰ç©ºç™½æ–‡å­—ã‚’è¨±å®¹ã™ã‚‹
+            if (allowSpaceEmpty && (string.IsNullOrWhiteSpace(term) || string.IsNullOrEmpty(term)))
+            {
+                ugui.text = term;
+            }
+            else
+            {
+#if UNITY_EDITOR // ã‚¨ãƒ‡ã‚£ã‚¿ã§ã¯ã‚¨ãƒ‡ã‚£ã‚¿ç”¨ã®ãƒ‡ãƒãƒƒã‚°ãƒ†ã‚­ã‚¹ãƒˆã¤ã‘ã‚‹
+                ugui.text = debugText + term;
 #else
-            ugui.text = player.TargetInteractArea.InteractUITerm;
+                ugui.text = player.TargetInteractArea.InteractUITerm;
 #endif
+            }
         }
         else
         {
