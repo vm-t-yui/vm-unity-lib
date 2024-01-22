@@ -10,7 +10,9 @@ namespace VMUnityLib
     public static class ScreenShotTaker
     {
         const string ITEM_NAME  = "Tools/Game画面解像度でScreenShotを撮る";    // コマンド名
+#if  UNITY_EDITOR
         [MenuItem(ITEM_NAME)]
+#endif
         public static void TakeScreenShot()
         {
             string desktopDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
