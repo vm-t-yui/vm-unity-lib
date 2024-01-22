@@ -24,7 +24,7 @@ public static class LocalizeUtility
 #if UNITY_EDITOR // エディタではエディタ用のデバッグテキストつける
                 ugui.text = debugText + term;
 #else
-                ugui.text = player.TargetInteractArea.InteractUITerm;
+                ugui.text = term;
 #endif
             }
         }
