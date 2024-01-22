@@ -14,18 +14,15 @@ public static class LocalizeUtility
         // Termがなかったら直接文字列設定
         if (LocalizationManager.GetTermsList().Contains(term) == false)
         {
+            // デバッグテキストがなしなら直接設定許可と判定
             // allowSpaceがフラグ経っていたら空白文字を許容する
-            if (allowSpaceEmpty && (string.IsNullOrWhiteSpace(term) || string.IsNullOrEmpty(term)))
+            if (string.IsNullOrEmpty(debugText) || (allowSpaceEmpty && (string.IsNullOrWhiteSpace(term)) || string.IsNullOrEmpty(term)))
             {
                 ugui.text = term;
             }
             else
             {
-#if UNITY_EDITOR // エディタではエディタ用のデバッグテキストつける
                 ugui.text = debugText + term;
-#else
-                ugui.text = term;
-#endif
             }
         }
         else
