@@ -11,20 +11,20 @@ public class GameServiceUtil
 {
     // NOTE: m.tanaka 下の各IDはLibBridgeファイル内にスクリプトを作成しています。
     // 各実績ID
-    static string[] ACHIEVEMENT_IDs =
-    {
-        GameServiceID.ACHIEVEMENT_1,
-        GameServiceID.ACHIEVEMENT_2,
-        GameServiceID.ACHIEVEMENT_3,
-        GameServiceID.ACHIEVEMENT_4
-    };
+    //static string[] ACHIEVEMENT_IDs =
+    //{
+    //    GameServiceID.ACHIEVEMENT_1,
+    //    GameServiceID.ACHIEVEMENT_2,
+    //    GameServiceID.ACHIEVEMENT_3,
+    //    GameServiceID.ACHIEVEMENT_4
+    //};
 
     // 各リーダーボードID
-    static string[] LEADERBOARD_IDs =
-    {
-        GameServiceID.LEADERBOARD_1,
-        GameServiceID.LEADERBOARD_2
-    };
+    //static string[] LEADERBOARD_IDs =
+    //{
+    //    GameServiceID.LEADERBOARD_1,
+    //    GameServiceID.LEADERBOARD_2
+    //};
 
     /// <summary>
     /// ユーザー認証.
