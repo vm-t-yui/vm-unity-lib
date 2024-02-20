@@ -34,15 +34,15 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
         capturing = true;
 #if ENABLE_ADMOB
         // キャプチャのために広告を非表示.
-        AdMobManager.Inst.AllHide();
+        //AdMobManager.Inst.AllHide();
 #endif
 #if USE_NEND
-        bool isShowTopBanner = NendAdController.Inst.IsShowTopBanner;
-        bool isShowBottomBanner = NendAdController.Inst.IsShowBottomBanner;
-        if(isShowTopBanner)
-            NendAdController.Inst.ShowTopBanner(false);
-        if(isShowBottomBanner)
-            NendAdController.Inst.ShowBottomBanner(false);
+        //bool isShowTopBanner = NendAdController.Inst.IsShowTopBanner;
+        //bool isShowBottomBanner = NendAdController.Inst.IsShowBottomBanner;
+        //if(isShowTopBanner)
+        //    NendAdController.Inst.ShowTopBanner(false);
+        //if(isShowBottomBanner)
+        //    NendAdController.Inst.ShowBottomBanner(false);
 #endif
         // レイアウト設定のために1フレーム待つ
         yield return LibBridgeInfo.WaitForEndOfFrame;
@@ -111,13 +111,13 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
         Handheld.StopActivityIndicator();
 #endif
 #if ENABLE_ADMOB
-        AdMobManager.Inst.RevertFromAllHide();
+        //AdMobManager.Inst.RevertFromAllHide();
 #endif
 #if USE_NEND
-        if(isShowTopBanner)
-            NendAdController.Inst.ShowTopBanner(isShowTopBanner);
-        if(isShowBottomBanner)
-            NendAdController.Inst.ShowBottomBanner(isShowBottomBanner);
+        //if(isShowTopBanner)
+        //    NendAdController.Inst.ShowTopBanner(isShowTopBanner);
+        //if(isShowBottomBanner)
+        //    NendAdController.Inst.ShowBottomBanner(isShowBottomBanner);
 #endif
     }
 
