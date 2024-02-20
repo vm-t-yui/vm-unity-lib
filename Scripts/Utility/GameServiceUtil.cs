@@ -31,13 +31,14 @@ public class GameServiceUtil
     /// </summary>
     public static void Auth()
     {
+        // FIXME : 後ほど修正する
 #if UNITY_ANDROID
-        PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
-       .Build();
+       // PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder()
+       //.Build();
 
-        PlayGamesPlatform.InitializeInstance(config);
-        PlayGamesPlatform.DebugLogEnabled = true;
-        PlayGamesPlatform.Activate();
+        //PlayGamesPlatform.InitializeInstance(config);
+        //PlayGamesPlatform.DebugLogEnabled = true;
+        //PlayGamesPlatform.Activate();
 #endif
 
         // 認証のため ProcessAuthenticationをコールバックとして登録
@@ -79,15 +80,15 @@ public class GameServiceUtil
     /// </summary>
     public static void ReportScore(long score, int leaderboardNum)
     {
-#if !UNITY_EDITOR
-        Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success => 
-        {
-            if(!success)
-            {
-                Debug.LogWarning("スコア報告に失敗しました。id:" + LEADERBOARD_IDs[leaderboardNum]);
-            }
-        });
-#endif
+//#if !UNITY_EDITOR
+//        Social.ReportScore(score, LEADERBOARD_IDs[leaderboardNum], success => 
+//        {
+//            if(!success)
+//            {
+//                Debug.LogWarning("スコア報告に失敗しました。id:" + LEADERBOARD_IDs[leaderboardNum]);
+//            }
+//        });
+//#endif
     }
 
     /// <summary>
@@ -95,19 +96,19 @@ public class GameServiceUtil
     /// </summary>
     public static void ReportProgress(int achievementNum)
     {
-#if !UNITY_EDITOR
-        Social.ReportProgress(ACHIEVEMENT_IDs[achievementNum], 100, (bool success) =>
-        {
-            if (!success)
-            {
-                Debug.LogWarning("実績解除に失敗しました。id:" + ACHIEVEMENT_IDs[achievementNum]);
-            }
-            else
-            {
-                // UI用の新規実績解除フラグをオン
-                GameDataManager.Inst.PlayData.IsNewReleasedAchieve = true;
-            }
-        });
-#endif
+//#if !UNITY_EDITOR
+//        Social.ReportProgress(ACHIEVEMENT_IDs[achievementNum], 100, (bool success) =>
+//        {
+//            if (!success)
+//            {
+//                Debug.LogWarning("実績解除に失敗しました。id:" + ACHIEVEMENT_IDs[achievementNum]);
+//            }
+//            else
+//            {
+//                // UI用の新規実績解除フラグをオン
+//                GameDataManager.Inst.PlayData.IsNewReleasedAchieve = true;
+//            }
+//        });
+//#endif
     }
 }

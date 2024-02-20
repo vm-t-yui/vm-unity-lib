@@ -6,7 +6,6 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using VMUnityLib;
-using SocialConnector;
 
 public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper> 
 {
@@ -145,7 +144,7 @@ public sealed class ShareHelper : SingletonMonoBehaviour<ShareHelper>
         }
 
         // 投稿する
-        SocialConnector.SocialConnector.Share(shareText, shareURL, captureFilePath);
+        //SocialConnector.SocialConnector.Share(shareText, shareURL, captureFilePath);
     }
 }
 #endif
