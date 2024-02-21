@@ -12,11 +12,11 @@ namespace VMUnityLib
         {
             get
             {
-                if (instance == null)
+                if (!HasInstance())
                 {
                     instance = (T)FindObjectOfType(typeof(T));
 
-                    if (instance == null)
+                    if (!HasInstance())
                     {
                         Logger.Error(typeof(T) + "is nothing");
                     }
@@ -24,6 +24,11 @@ namespace VMUnityLib
 
                 return instance;
             }
+        }
+
+        public static bool HasInstance()
+        {
+            return instance != null;
         }
     }
 }
