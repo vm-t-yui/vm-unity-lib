@@ -8,6 +8,9 @@ using VMUnityLib;
 
 public sealed class SceneDemoController : MonoBehaviour 
 {
+    [SerializeField]
+    private Color fadeColor = default;
+
     /// <summary>
     /// 指定時間待ってからシーンチェンジ.
     /// </summary>
@@ -18,7 +21,9 @@ public sealed class SceneDemoController : MonoBehaviour
     IEnumerator ChangeSceneCoroutine(float time)
     {
         yield return new WaitForSeconds(time);
-        SceneManager.Instance.PushScene(SceneName.title, LibBridgeInfo.DefaultSceneChangeFadeParam);
-
+        var param = LibBridgeInfo.DefaultSceneChangeFadeParam;
+        param.fadeColor = fadeColor;
+        param.fadeType = CmnFadeManager.FadeType.FADE_COLOR;
+        SceneManager.Instance.PushScene(SceneName.title, param);
     }
 }
