@@ -8,7 +8,7 @@ namespace VMUnityLib
     /// NOTE : t-mitsumaru ロードUIのオブジェクトには、このクラスを必ずアタッチしてください。
     ///                    特定のロードUIで固有の処理が必要な場合はこのクラスを継承してください。
     /// </summary>
-    public class LoadingUiBase : MonoBehaviour
+    public abstract class LoadingUiBase : MonoBehaviour
     {
         [SerializeField]
         [Tooltip("ロードUIの処理で次のシーンへ移行できるタイミングになったときにisEndをtrueにしてください。\n" +
@@ -37,6 +37,7 @@ namespace VMUnityLib
         /// </summary>
         public virtual IEnumerator BeforeStartLoadProcess()
         {
+            SceneManager.EnableLoadBoost(true);
             yield break;
         }
 
@@ -50,6 +51,7 @@ namespace VMUnityLib
             {
                 yield return null;
             }
+            SceneManager.DisableLoadBoost(true);
             isEnd = true;
         }
     }

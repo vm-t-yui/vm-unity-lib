@@ -955,5 +955,37 @@ namespace VMUnityLib
             currentLoadingUi = null;
             IsLoadDone = true;
         }
+
+        /// <summary>
+        /// ロードブーストの有効無効
+        /// </summary>
+        public static void EnableLoadBoost(bool controlCamera)
+        {
+            // ロード高速化のためにCPUブースト
+#if !UNITY_EDITOR && UNITY_SWITCH && !UNITY_STANDALONE_WIN
+            UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.FastLoad);
+#endif
+            Application.backgroundLoadingPriority = ThreadPriority.High;
+            Application.targetFrameRate = GameInitializer.LoadBoostingFrameRate;
+            Time.fixedDeltaTime = 1.0f / GameInitializer.LoadBoostingFrameRate;
+            if(Camera.main != null && controlCamera)
+            {
+                Camera.main.enabled = false;
+            }
+        }
+        public static void DisableLoadBoost(bool controlCamera)
+        {
+            // ロード高速化のためにCPUブースト戻す
+#if !UNITY_EDITOR && UNITY_SWITCH && !UNITY_STANDALONE_WIN
+            UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.Normal);
+#endif
+            Application.backgroundLoadingPriority = ThreadPriority.Low;
+            Application.targetFrameRate = GameInitializer.TargetFrameRate;
+            Time.fixedDeltaTime = GameInitializer.FixedDeltaTime;
+            if(Camera.main != null && controlCamera)
+            {
+                Camera.main.enabled = true;
+            }
+        }
     }
 }
