@@ -1,10 +1,9 @@
-/******************************************************************************/
-/*!    \brief  シーンチェンジ用コンポーネント.
-*******************************************************************************/
-
 using UnityEngine;
 namespace VMUnityLib
 {
+    /// <summary>
+    /// シーン変更用コンポーネント
+    /// </summary>
     public class SceneChanger : MonoBehaviour
     {
         [SceneName]
@@ -12,6 +11,20 @@ namespace VMUnityLib
 
         public CmnFadeManager.FadeType  FadeType;
         public Color                    FadeColor = Color.white;
+        public bool                     ChangeSceneOnEnable = false;    // オブジェクト有効化時にシーンチェンジするか
+        public float                    OverrideFadeOutTime = -1.0f;    // 上書きするフェードアウト時間（-1で無効）
+        public float                    OverrideFadeInTime = -1.0f;     // 上書きするフェードイン時間（-1で無効）
+
+        /// <summary>
+        /// 有効化時
+        /// </summary>
+        void OnEnable()
+        {
+            if(ChangeSceneOnEnable)
+            {
+                ChangeScene();
+            }
+        }
 
         /// <summary>
         /// Changes the scene.
@@ -21,6 +34,8 @@ namespace VMUnityLib
             SceneManager.SceneChangeFadeParam param = LibBridgeInfo.DefaultSceneChangeFadeParam;
             param.fadeType = FadeType;
             param.fadeColor = FadeColor;
+            if(OverrideFadeOutTime >= 0) param.fadeInTime = OverrideFadeOutTime;
+            if(OverrideFadeInTime >= 0) param.fadeInTime = OverrideFadeInTime;
             SceneManager.Instance.ChangeScene(SceneName, param);
         }
 
@@ -32,6 +47,8 @@ namespace VMUnityLib
             SceneManager.SceneChangeFadeParam param = LibBridgeInfo.DefaultSceneChangeFadeParam;
             param.fadeType = FadeType;
             param.fadeColor = FadeColor;
+            if (OverrideFadeOutTime >= 0) param.fadeInTime = OverrideFadeOutTime;
+            if (OverrideFadeInTime >= 0) param.fadeInTime = OverrideFadeInTime;
             SceneManager.Instance.PushScene(SceneName, param);
         }
 
@@ -43,6 +60,8 @@ namespace VMUnityLib
             SceneManager.SceneChangeFadeParam param = LibBridgeInfo.DefaultSceneChangeFadeParam;
             param.fadeType = FadeType;
             param.fadeColor = FadeColor;
+            if (OverrideFadeOutTime >= 0) param.fadeInTime = OverrideFadeOutTime;
+            if (OverrideFadeInTime >= 0) param.fadeInTime = OverrideFadeInTime;
             SceneManager.Instance.PopScene(param);
         }
     }
