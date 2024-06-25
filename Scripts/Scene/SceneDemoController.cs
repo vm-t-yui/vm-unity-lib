@@ -22,8 +22,9 @@ public sealed class SceneDemoController : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
         var param = LibBridgeInfo.DefaultSceneChangeFadeParam;
-        param.fadeColor = fadeColor;
         param.fadeType = CmnFadeManager.FadeType.FADE_COLOR;
-        SceneManager.Instance.PushScene(SceneName.title, param);
+        param.fadeColor = fadeColor;
+        param.fadeInTime = 0.1f;
+        SceneManager.Instance.PushScene(SceneName.privacy, param);
     }
 }
