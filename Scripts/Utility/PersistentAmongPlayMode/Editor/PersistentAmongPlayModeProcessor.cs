@@ -10,6 +10,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 /// <summary>
@@ -69,7 +70,7 @@ public class PersistentAmongPlayModeProcessor
     //全MonoBehaviourを取得し、指定した処理を実行する
     private static void ExecuteProcessToAllMonoBehaviour(Action<MonoBehaviour> action)
     {
-        Object.FindObjectsOfType(typeof(MonoBehaviour)).ToList().ForEach(o => action((MonoBehaviour)o));
+        Object.FindObjectsOfType(typeof(MonoBehaviour), true).ToList().ForEach(o => action((MonoBehaviour)o));
     }
 
     //=================================================================================
@@ -145,7 +146,7 @@ public class PersistentAmongPlayModeProcessor
             return;
         }
 
-        var sceneObjects = GameObject.FindObjectsOfType<Transform>();
+        var sceneObjects = GameObject.FindObjectsOfType<Transform>(true);
         var sceneObjectIds = new GlobalObjectId[sceneObjects.Length];
         GlobalObjectId.GetGlobalObjectIdsSlow(sceneObjects, sceneObjectIds);
 
@@ -183,7 +184,7 @@ public class PersistentAmongPlayModeProcessor
         var valueDict = _valueDictDict[component.GetInstanceID()];
 
         //PersistentAmongPlayModeの属性が付いた値だけ反映
-        var isChangedValue = false; //値に変更があったか
+        List<Scene> scenes = new List<Scene>();
 
         ExecuteProcessToAllPersistentAmongPlayModeField(component, fieldInfo => {
                 var fieldName = fieldInfo.Name;
@@ -201,16 +202,17 @@ public class PersistentAmongPlayModeProcessor
                         if(changed)
                         {
                             fieldInfo.SetValue(component, valueDict[fieldName]);
-                            isChangedValue = true;
+                            if(scenes.Contains(component.gameObject.scene) == false)
+                                scenes.Add(component.gameObject.scene);
                         }
                     }
                 }
         });
 
         //値の変更があったら保存出来るようにするため、シーンに変更があったこと(米印)を設定
-        if (isChangedValue)
+        foreach (var item in scenes)
         {
-            EditorSceneManager.MarkAllScenesDirty();
+            EditorSceneManager.MarkSceneDirty(item);
         }
     }
 
@@ -225,9 +227,9 @@ public class PersistentAmongPlayModeProcessor
         }
 
         //PersistentAmongPlayModeの属性が付いた値だけ反映
-        var isChangedValue = false; //値に変更があったか
+        List<Scene> scenes = new List<Scene>();
 
-        var sceneObjects = GameObject.FindObjectsOfType<Transform>();
+        var sceneObjects = GameObject.FindObjectsOfType<Transform>(true);
         var sceneObjectIds = new GlobalObjectId[sceneObjects.Length];
         GlobalObjectId.GetGlobalObjectIdsSlow(sceneObjects, sceneObjectIds);
 
@@ -246,15 +248,16 @@ public class PersistentAmongPlayModeProcessor
                     target.position = value.pos;
                     target.localScale = value.scale;
                     target.rotation = value.rot;
-                    isChangedValue = true;
+                    if (scenes.Contains(target.gameObject.scene) == false)
+                        scenes.Add(target.gameObject.scene);
                 }
             }
         }
 
         //値の変更があったら保存出来るようにするため、シーンに変更があったこと(米印)を設定
-        if (isChangedValue)
+        foreach (var item in scenes)
         {
-            EditorSceneManager.MarkAllScenesDirty();
+            EditorSceneManager.MarkSceneDirty(item);
         }
     }
 }
