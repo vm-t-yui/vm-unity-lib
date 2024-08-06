@@ -72,7 +72,7 @@ namespace VMUnityLib
         public void Start()
         {
             // デバッグ起動（シーン直接開始）なら初期化イベント等を呼ぶ.
-            if(isDebug)
+            if(isDebug || SceneManager.Instance.IsDirectBoot)
             {
                 StartCoroutine(DebugInitCoroutine());
             }

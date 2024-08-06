@@ -36,6 +36,10 @@ namespace VMUnityLib
         /// </summary>
         protected void Awake()
         {
+            if(parentSceneName == SceneName.root)
+            {
+                Debug.LogError("SubSceneRootの親シーンにrootが設定されています。正しい親シーンを設定してください。", gameObject);
+            }
             sceneNameCache = gameObject.scene.name;
             if (SceneManager.Instance != null)
             {
