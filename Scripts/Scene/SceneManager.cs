@@ -641,8 +641,8 @@ namespace VMUnityLib
             yield return WaitBeforeLoadForLoadingUi(fadeParam);
             if (sceneHistory.Count > 0)
             {
-                string nextSceneName = sceneHistory.Peek();
                 sceneHistory.Pop();
+                string nextSceneName = sceneHistory.Peek();
                 SetLoadScene(nextSceneName);
                 yield return WaitAfterLoadForLoadingUi(fadeParam);
                 while (IsLoadOperationRunning)
