@@ -135,6 +135,9 @@ namespace VMUnityLib
             if (UnitySceneManager.GetActiveScene().name != "root")
             {
                 IsDirectBoot = true;
+
+                // 直接起動の場合は、rootを読み込む
+                UnitySceneManager.LoadScene("root", UnityEngine.SceneManagement.LoadSceneMode.Additive);
             }
             if (Instance == null)
             {
