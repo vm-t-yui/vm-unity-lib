@@ -131,9 +131,6 @@ namespace VMUnityLib
         /// </summary>
         void Awake()
         {
-            // まずダミーシーンを非アクティブでロードしておく
-            UnitySceneManager.LoadScene("dummy", UnityEngine.SceneManagement.LoadSceneMode.Additive);
-
             // アクティブなシーン名が"root"でない場合は直接起動フラグをたてる
             if (UnitySceneManager.GetActiveScene().name != "root")
             {

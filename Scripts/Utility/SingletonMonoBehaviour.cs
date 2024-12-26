@@ -4,6 +4,7 @@
 
 using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 namespace VMUnityLib
 {
     public class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
@@ -23,12 +24,27 @@ namespace VMUnityLib
             }
             else if (this != instance)
             {
-                Destroy(gameObject);
+                string myPath = GetHierarchyPath(gameObject);
+                string originPath = GetHierarchyPath(instance.gameObject);
                 Debug.LogError(
                     typeof(T) +
-                    " は既に他のGameObjectにアタッチされているため、コンポーネントを破棄しました." +
-                    " アタッチされているGameObjectは " + instance.gameObject.name + " です.");
+                    "は既に他のGameObjectにアタッチされているため、自身を破棄しました。" +
+                    "\nmyPath:" + myPath +
+                    "\noriginPath:" + originPath);
+                Destroy(gameObject);
             }
+        }
+        static string GetHierarchyPath(GameObject targetObj)
+        {
+            List<GameObject> objPath = new List<GameObject>();
+            objPath.Add(targetObj);
+            for (int i = 0; objPath[i].transform.parent != null; i++)
+                objPath.Add(objPath[i].transform.parent.gameObject);
+            string path = objPath[objPath.Count - 1].gameObject.name;
+            for (int i = objPath.Count - 2; i >= 0; i--)
+                path += "/" + objPath[i].gameObject.name;
+
+            return path;
         }
 
         /// <summary>
