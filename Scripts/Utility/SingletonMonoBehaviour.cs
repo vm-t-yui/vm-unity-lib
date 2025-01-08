@@ -66,8 +66,8 @@ namespace VMUnityLib
                     // 警告は再生中のみ
                     if (EditorApplication.isPlaying)
                     {
-                        Debug.LogWarning("Awakeが呼ばれる前にInstにアクセスしようとしました。" +
-                        "^\nScriptExecutionOrderを確認してください");
+                        Debug.LogWarning("Awakeが呼ばれる前にInstにアクセスしようとしました。\n"
+                        + typeof(T).ToString() + "のScriptExecutionOrderを確認してください.\n");
                     }
 #endif
                     // 全検索
