@@ -27,9 +27,13 @@ namespace VMUnityLib
         /// </summary>
         public void StartFadeIn(EndFadeCallBack callBack, float time, FadeType type)
         {
-            StartFadeIn(callBack, time, type, Color.white);
+            StartFadeIn(callBack, time, type, Color.white, Color.white, 0);
         }
         public void StartFadeIn(EndFadeCallBack callBack, float time, FadeType type, Color color)
+        {
+            StartFadeIn(callBack, time, type, color, color, 0);
+        }
+        public void StartFadeIn(EndFadeCallBack callBack, float time, FadeType type, Color fadeInColor, Color fadeOutColor, float colorChangeTime)
         {
             switch (type)
             {
@@ -37,11 +41,15 @@ namespace VMUnityLib
                     timeFade.StartFadeIn(callBack, time);
                     break;
                 case FadeType.FADE_NORMAL:
-                    normalFade.Color = color;
+                    normalFade.FadeOutColor = fadeOutColor;
+                    normalFade.FadeInColor = fadeInColor;
+                    normalFade.ColorChangeTime = colorChangeTime;
                     normalFade.StartFadeIn(callBack, time);
                     break;
                 case FadeType.FADE_COLOR:
-                    colorFade.Color = color;
+                    normalFade.FadeOutColor = fadeOutColor;
+                    normalFade.FadeInColor = fadeInColor;
+                    normalFade.ColorChangeTime = colorChangeTime;
                     colorFade.StartFadeIn(callBack, time);
                     break;
             }

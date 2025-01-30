@@ -65,17 +65,33 @@ namespace VMUnityLib
         {
             public float                            fadeOutTime;
             public float                            fadeInTime;
+            public float                            fadeColorChangeTime;
             public CmnFadeManager.FadeType          fadeType;
-            public Color                            fadeColor;
+            public Color                            fadeInColor;
+            public Color                            fadeOutColor;
             public LibBridgeInfo.LoadingType        loadingType;
 
-            public SceneChangeFadeParam(float inFadeOutTime, float inFadeInTime, CmnFadeManager.FadeType inFadeType, Color inFadeColor, LibBridgeInfo.LoadingType inLoadingType)
+            public Color fadeColor { set { fadeInColor = fadeOutColor = value; } }
+
+            public SceneChangeFadeParam(float fadeOutTime, float fadeInTime, float fadeColorChangeTime, CmnFadeManager.FadeType fadeType, Color fadeInColor, Color fadeOutColor, LibBridgeInfo.LoadingType loadingType)
             {
-                fadeOutTime = inFadeOutTime;
-                fadeInTime = inFadeInTime;
-                fadeType = inFadeType;
-                fadeColor = inFadeColor;
-                loadingType = inLoadingType;
+                this.fadeOutTime = fadeOutTime;
+                this.fadeInTime = fadeInTime;
+                this.fadeColorChangeTime = fadeColorChangeTime;
+                this.fadeType = fadeType;
+                this.fadeInColor = fadeInColor;
+                this.fadeOutColor = fadeOutColor;
+                this.loadingType = loadingType;
+            }
+            public SceneChangeFadeParam(float fadeOutTime, float fadeInTime, float fadeColorChangeTime, CmnFadeManager.FadeType fadeType, Color fadeColor, LibBridgeInfo.LoadingType loadingType)
+            {
+                this.fadeOutTime = fadeOutTime;
+                this.fadeInTime = fadeInTime;
+                this.fadeColorChangeTime = fadeColorChangeTime;
+                this.fadeType = fadeType;
+                this.fadeInColor = fadeColor;
+                this.fadeOutColor = fadeColor;
+                this.loadingType = loadingType;
             }
         }
 
@@ -104,7 +120,7 @@ namespace VMUnityLib
                 CommonUiRoot.ForceInitialize();
                 yield return null;
             }
-            SceneChangeFadeParam noTimeFade = new SceneChangeFadeParam(0, 0, CmnFadeManager.FadeType.FADE_TIMEONLY, new Color(0, 0, 0, 0), LibBridgeInfo.LoadingType.COMMON);
+            SceneChangeFadeParam noTimeFade = new SceneChangeFadeParam(0, 0, 0, CmnFadeManager.FadeType.FADE_TIMEONLY, new Color(0, 0, 0, 0), new Color(0, 0, 0, 0), LibBridgeInfo.LoadingType.COMMON);
             //　準備が整うまでシーン開始は遅延.
             yield return null;
             yield return null;
@@ -156,7 +172,7 @@ namespace VMUnityLib
         {
             isFadeWaiting = true;
             IsLoadDone = false;
-            CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeColor);
+            CmnFadeManager.Inst.StartFadeOut(EndFadeOutCallBack, fadeParam.fadeOutTime, fadeParam.fadeType, fadeParam.fadeOutColor);
             while (isFadeWaiting)
             {
                 yield return null;
@@ -846,7 +862,7 @@ namespace VMUnityLib
         void CleaneUpAfterChangeSceneActivation(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate)
         {
             LoadingUIManager.Inst.HideLoadingUI(fadeParam.loadingType);
-            CmnFadeManager.Inst.StartFadeIn(EndFadeInCallBack, fadeParam.fadeInTime, fadeParam.fadeType, fadeParam.fadeColor);
+            CmnFadeManager.Inst.StartFadeIn(EndFadeInCallBack, fadeParam.fadeInTime, fadeParam.fadeType, fadeParam.fadeInColor, fadeParam.fadeOutColor, fadeParam.fadeColorChangeTime);
             afterSceneControlDelegate?.Invoke();
         }
 
