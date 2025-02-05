@@ -982,8 +982,10 @@ namespace VMUnityLib
             UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.FastLoad);
 #endif
             Application.backgroundLoadingPriority = ThreadPriority.High;
+#if !UNITY_STANDALONE_WIN
             Application.targetFrameRate = GameInitializer.LoadBoostingFrameRate;
             Time.fixedDeltaTime = 1.0f / GameInitializer.LoadBoostingFrameRate;
+#endif
             if(Camera.main != null && controlCamera)
             {
                 Camera.main.enabled = false;
@@ -996,8 +998,10 @@ namespace VMUnityLib
             UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.Normal);
 #endif
             Application.backgroundLoadingPriority = ThreadPriority.Low;
+#if !UNITY_STANDALONE_WIN
             Application.targetFrameRate = GameInitializer.TargetFrameRate;
             Time.fixedDeltaTime = GameInitializer.FixedDeltaTime;
+#endif
             if(Camera.main != null && controlCamera)
             {
                 Camera.main.enabled = true;
