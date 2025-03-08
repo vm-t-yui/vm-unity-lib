@@ -985,8 +985,16 @@ namespace VMUnityLib
         }
         public static void DisableLoadBoost(bool controlCamera)
         {
-            GraphicSettingsApplyer.ApplyFrameRateFromSaveData();
-            if(Camera.main != null && controlCamera)
+            if(SaveDataManager.Data != null)
+            {
+                GraphicSettingsApplyer.ApplyFrameRateFromSaveData();
+            }
+            else
+            {
+                // セーブなかったらフレームレートをデフォルトに
+                GraphicSettingsApplyer.ApplyFrameRate(1);
+            }
+            if (Camera.main != null && controlCamera)
             {
                 Camera.main.enabled = true;
             }
