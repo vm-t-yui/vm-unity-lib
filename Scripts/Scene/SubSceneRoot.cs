@@ -40,6 +40,13 @@ namespace VMUnityLib
             {
                 Debug.LogError("SubSceneRootの親シーンにrootが設定されています。正しい親シーンを設定してください。", gameObject);
             }
+            foreach (var item in requireSubSceneNames)
+            {
+                if(item == parentSceneName)
+                {
+                    Debug.LogError("requireSubSceneNamesに親シーンが設定されています。SubSceneの名前を設定してください", gameObject);
+                }
+            }
             sceneNameCache = gameObject.scene.name;
             if (SceneManager.Instance != null)
             {

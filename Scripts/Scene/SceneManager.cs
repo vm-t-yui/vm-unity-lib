@@ -320,6 +320,9 @@ namespace VMUnityLib
                 RemoveLoadedScene(loadOperationSet);
                 loadOperationSet.sync = UnitySceneManager.UnloadSceneAsync(CurrentSceneRoot.GetSceneName());
                 SetCurrentSceneRoot(null);    // アンロード開始したらカレントメインシーンはなし
+                CurrentSubSceneRoot = null;   // サブシーンも破棄
+                CurrentPlayerSubSceneName = null;   // プレイヤーのいるサブシーンは破棄
+
                 unloading.Add(loadOperationSet);
                 foreach (var item in unloading)
                 {
@@ -582,9 +585,9 @@ namespace VMUnityLib
         /// <summary>
         /// シーンプッシュ.
         /// </summary>
-        /// <param name="nextSceneName">シーン名.</param>
-        /// <param name="fadeTime">フェードパラメータ.</param>
-        /// <param name="pushAnchor">シーンまでのアンカー.</param>
+        /// <param name="nextSceneName">シーン名</param>
+        /// <param name="fadeTime">フェードパラメータ</param>
+        /// <param name="pushAnchor">シーンまでのアンカー</param>
         public void PushScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
             CheckCancelSceneOperation();
@@ -611,8 +614,8 @@ namespace VMUnityLib
         /// <summary>
         /// シーン変更.
         /// </summary>
-        /// <param name="nextSceneName">シーン名.</param>
-        /// <param name="fadeTime">フェードパラメータ.</param>
+        /// <param name="nextSceneName">シーン名</param>
+        /// <param name="fadeTime">フェードパラメータ</param>
         public void ChangeScene(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
             CheckCancelSceneOperation();
@@ -645,7 +648,7 @@ namespace VMUnityLib
         /// <summary>
         /// シーンポップ.
         /// </summary>
-        /// <param name="fadeTime">フェードパラメータ.</param>
+        /// <param name="fadeTime">フェードパラメータ</param>
         public void PopScene(SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
             CheckCancelSceneOperation();
@@ -677,8 +680,8 @@ namespace VMUnityLib
         /// <summary>
         /// 指定シーンまでシーンポップ.
         /// </summary>
-        /// <param name="nextSceneName">ポップ先のシーン名.</param>
-        /// <param name="fadeTime">フェードパラメータ.</param>
+        /// <param name="nextSceneName">ポップ先のシーン名</param>
+        /// <param name="fadeTime">フェードパラメータ</param>
         public void PopSceneTo(string nextSceneName, SceneChangeFadeParam fadeParam, AfterSceneControlDelegate afterSceneControlDelegate = null)
         {
 #if UNITY_PS5
