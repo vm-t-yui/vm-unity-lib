@@ -1,13 +1,12 @@
-/******************************************************************************/
-/*!    \brief  共通UIのルート.
-*******************************************************************************/
-
 using UnityEngine;
 using VMUnityLib;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
+/// <summary>
+/// 共通UIのルート。ENABLE_AB_LOADでAssetBundleからロードする場合、該当ファイルをExcludeResources.jsonでビルド時除外することを推奨
+/// </summary>
 public sealed class CommonUiRoot : SingletonMonoBehaviour<CommonUiRoot>
 {
     const string prefabName = "CommonUiRoot";
@@ -25,7 +24,7 @@ public sealed class CommonUiRoot : SingletonMonoBehaviour<CommonUiRoot>
     static void Initialize()
     {
         GameObject prefab = null;
-#if ENABLE_AB_LOAD
+#if ENABLE_AB_LOAD && !UNITY_EDITOR
         // アセットバンドルからプレハブをロード
         var ab = AssetBundleLoader.LoadedAssetBundlesByName["commonprefab"];
         prefab = ab.LoadAsset<GameObject>(prefabName);

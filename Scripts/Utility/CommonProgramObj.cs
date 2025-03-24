@@ -1,7 +1,3 @@
-/******************************************************************************/
-/*!    \brief  全プログラムの共通処理.
-*******************************************************************************/
-
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -9,6 +5,9 @@ using UnityEditor;
 
 namespace VMUnityLib
 {
+    /// <summary>
+    /// プログラム用プレハブ。ENABLE_AB_LOADでAssetBundleからロードする場合、該当ファイルをExcludeResources.jsonでビルド時除外することを推奨
+    /// </summary>
     public sealed class CommonProgramObj : MonoBehaviour
     {
         const string prefabName = "CommonProgramObj";
@@ -29,7 +28,7 @@ namespace VMUnityLib
         static void Initialize()
         {
             GameObject prefab = null;
-#if ENABLE_AB_LOAD
+#if ENABLE_AB_LOAD && !UNITY_EDITOR
             // アセットバンドルからプレハブをロード
             var ab = AssetBundleLoader.LoadedAssetBundlesByName["commonprefab"];
             prefab = ab.LoadAsset<GameObject>(prefabName);

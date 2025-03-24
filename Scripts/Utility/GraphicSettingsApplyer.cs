@@ -91,8 +91,11 @@ public class GraphicSettingsApplyer
     /// </summary>
     public static void ApplyFrameRateFromSaveData()
     {
+#if UNITY_STANDALONE_WIN
         ApplyFrameRate(SaveDataManager.Data.VSyncCount);
-
+#else
+        ApplyFrameRate(0);
+#endif
         // ロード高速化のためにCPUブースト戻す
 #if !UNITY_EDITOR && !UNITY_SWITCH && !UNITY_STANDALONE_WIN
         UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.Normal);
@@ -109,11 +112,11 @@ public class GraphicSettingsApplyer
         // プラットフォームにあわせて同期画面設定を変える
         // コンソールは固定する
 #if !UNITY_STANDALONE_WIN
-    #if UNITY_GAMECORE_XBOXONE || UNITY_SWITCH || YUONI_SWITCH || UNITY_PS4
+#if UNITY_GAMECORE_XBOXONE || UNITY_SWITCH || YUONI_SWITCH || UNITY_PS4
         QualitySettings.vSyncCount = 2;
-    #else
+#else
         QualitySettings.vSyncCount = 1;
-    #endif
+#endif
 #else
         QualitySettings.vSyncCount = vSyncCount;
 #endif
