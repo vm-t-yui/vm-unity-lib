@@ -15,7 +15,7 @@ public sealed class CommonUiRoot : SingletonMonoBehaviour<CommonUiRoot>
     [SerializeField]
     GameObject debugMenu = default;
 #if UNITY_EDITOR
-    const string prefabPath = "Assets/MyGameAssets/LibBridge/Resources/"+ prefabName+ ".prefab";
+    const string prefabPath = "Assets/MyGameAssets/LibBridge/Prefabs/CommonUiRoot.prefab";
 #endif
 #endif
     /// <summary>
@@ -24,11 +24,20 @@ public sealed class CommonUiRoot : SingletonMonoBehaviour<CommonUiRoot>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Initialize()
     {
+        GameObject prefab = null;
+#if ENABLE_AB_LOAD
+        // アセットバンドルからプレハブをロード
+        var ab = AssetBundleLoader.LoadedAssetBundlesByName["commonprefab"];
+        prefab = ab.LoadAsset<GameObject>(prefabName);
+#else
+        // Resourcesからロードする
         Object obj = Resources.Load(prefabName);
-        GameObject prefab = (GameObject)obj;
+        prefab = (GameObject)obj;
+#endif
+
         if (prefab == null)
         {
-            Debug.LogAssertion(prefabName + "のロードに失敗 obj:" + obj);
+            Debug.LogAssertion(prefabName + "のロードに失敗 prefab:" + prefab);
 #if UNITY_EDITOR
             prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
 #endif
