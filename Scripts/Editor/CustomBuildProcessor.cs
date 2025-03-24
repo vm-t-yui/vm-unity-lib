@@ -17,25 +17,6 @@ public class CustomBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuil
     private static string settingsPath = "ProjectSettings/ExcludeResources.json"; // 設定ファイルのパス
     private static string backupFolder = "Assets/Editor/ExcludeResourcesBackup/"; // バックアップフォルダ
 
-    /// <summary>
-    /// JSON 形式の設定ファイルを読み込む
-    /// </summary>
-    private static List<string> LoadExcludeFileList()
-    {
-        if (!File.Exists(settingsPath))
-        {
-            Debug.LogWarning($"Exclude file list not found: {settingsPath}");
-            return new List<string>();
-        }
-
-        string json = File.ReadAllText(settingsPath);
-        ExcludeResourcesData data = JsonUtility.FromJson<ExcludeResourcesData>(json);
-        return data?.excludeFiles ?? new List<string>();
-    }
-
-    /// <summary>
-    /// ビルド前に `Resources` フォルダ内の特定ファイルをバックアップフォルダへ移動
-    /// </summary>
     public void OnPreprocessBuild(BuildReport report)
     {
         Debug.Log("Excluding Resources files before build...");
@@ -54,20 +35,48 @@ public class CustomBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuil
         AssetDatabase.Refresh();
     }
 
-    /// <summary>
-    /// ビルド後に `Resources` フォルダ内の特定ファイルを元に戻す
-    /// </summary>
     public void OnPostprocessBuild(BuildReport report)
     {
         Debug.Log("Restoring Resources files after build...");
 
+        RestoreFiles();
+
+        // バックアップフォルダを削除
+        if (Directory.Exists(backupFolder))
+        {
+            Directory.Delete(backupFolder, true);
+            Debug.Log("Deleted Backup folder: " + backupFolder);
+        }
+
+        AssetDatabase.Refresh();
+    }
+
+    /// <summary>
+    /// ビルド後、またはエラー時に `Backup` フォルダ内のファイルを元の場所へ復元
+    /// </summary>
+    private static void RestoreFiles()
+    {
         List<string> excludeFiles = LoadExcludeFileList();
         foreach (string file in excludeFiles)
         {
             RestoreFileFromBackup(file);
         }
+    }
 
-        AssetDatabase.Refresh();
+    /// <summary>
+    /// JSON 形式の設定ファイルを読み込む
+    /// </summary>
+    private static List<string> LoadExcludeFileList()
+    {
+        if (!File.Exists(settingsPath))
+        {
+            Debug.LogWarning($"Exclude file list not found: {settingsPath}");
+            return new List<string>();
+        }
+
+        string json = File.ReadAllText(settingsPath);
+        ExcludeResourcesData data = JsonUtility.FromJson<ExcludeResourcesData>(json);
+        return data?.excludeFiles ?? new List<string>();
     }
 
     /// <summary>
@@ -114,9 +123,6 @@ public class CustomBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuil
         }
     }
 
-    /// <summary>
-    /// JSON のデータクラス
-    /// </summary>
     [System.Serializable]
     private class ExcludeResourcesData
     {
