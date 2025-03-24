@@ -28,7 +28,7 @@ namespace VMUnityLib
         static void Initialize()
         {
             GameObject prefab = null;
-#if ENABLE_AB_LOAD && !UNITY_EDITOR
+#if ENABLE_AB_LOAD && !UNITY_EDITOR     // エディタ時もアセットバンドルからロードしたい場合はif内を修正してください
             // アセットバンドルからプレハブをロード
             var ab = AssetBundleLoader.LoadedAssetBundlesByName["commonprefab"];
             prefab = ab.LoadAsset<GameObject>(prefabName);
