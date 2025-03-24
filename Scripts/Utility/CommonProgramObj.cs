@@ -16,7 +16,6 @@ namespace VMUnityLib
         int prevScreenW;
         int prevScreenH;
         EditorWindow gameview;
-        const string prefabPath = "Assets/MyGameAssets/LibBridge/Resources/"+ prefabName+ ".prefab";
 #endif
 
         // 音声の遅延フレーム数.
@@ -28,14 +27,13 @@ namespace VMUnityLib
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Initialize()
         {
-            Object obj = Resources.Load(prefabName);
-            GameObject prefab = (GameObject)obj;
+            // アセットバンドルからプレハブをロード
+            var ab = AssetBundleLoader.LoadedAssetBundlesByName["commonprefab"];
+            GameObject prefab = ab.LoadAsset<GameObject>(prefabName);
+
             if (prefab == null)
             {
-                Debug.LogError(prefabName + "のロードに失敗 obj:" + obj);
-#if UNITY_EDITOR
-                prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
-#endif
+                Debug.LogError(prefabName + "のロードに失敗 prefab:" + prefab);
             }
             else
             {
