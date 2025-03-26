@@ -146,6 +146,12 @@ public class GraphicSettingsApplyer
     {
         // SetResolutionでUnityがフレームレート設定吹き飛ばすのでVsync状態を保存しておいて計算しなおし
         int prevVSyncCount = QualitySettings.vSyncCount;
+
+#if UNITY_SWITCH
+        // スイッチは問答無用で落とす
+        qualityLevel = 0;
+#endif
+
         QualitySettings.SetQualityLevel(qualityLevel);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
