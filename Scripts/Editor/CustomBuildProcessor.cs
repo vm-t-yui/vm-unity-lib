@@ -70,7 +70,7 @@ public class CustomBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuil
     {
         if (!File.Exists(settingsPath))
         {
-            Debug.LogWarning($"Exclude file list not found: {settingsPath}");
+            Debug.LogError($"Exclude file list not found: {settingsPath}");
             return new List<string>();
         }
 
