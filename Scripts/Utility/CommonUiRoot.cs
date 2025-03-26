@@ -17,6 +17,10 @@ public sealed class CommonUiRoot : SingletonMonoBehaviour<CommonUiRoot>
     const string prefabPath = "Assets/MyGameAssets/LibBridge/Prefabs/CommonUiRoot.prefab";
 #endif
 #endif
+
+    [SerializeField] Camera uiCamera = default;
+    public Camera UiCamera { get { return uiCamera; } }
+
     /// <summary>
     /// 自身の生成前に呼ばれる関数。生成するしない関係なしに呼ばれる.
     /// </summary>
