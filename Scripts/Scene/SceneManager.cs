@@ -264,6 +264,15 @@ namespace VMUnityLib
             {
                 yield return SceneUnloadWait(item);
             }
+
+            // アンロードされたシーンがあるか？
+            var hasUnloadedScene = unloading?.Any() ?? false;
+            if (hasUnloadedScene)
+            {
+                // 未使用アセットのアンロード
+                yield return UnloadUnusedAssets();
+            }
+
 #if LOG_SCENE
             Debug.Log("loadope: wait unload done");
 #endif
@@ -331,7 +340,17 @@ namespace VMUnityLib
                         yield return SceneUnloadWait(item);
                     }
                 }
+
+                // アンロードされたシーンがあるか？
+                hasUnloadedScene = unloading?.Any() ?? false;
+                if (hasUnloadedScene)
+                {
+                    // 未使用アセットのアンロード
+                    yield return UnloadUnusedAssets();
+                }
+
                 unloading.Clear();
+
 #if LOG_SCENE
                 Debug.Log("loadope: current unload done");
 #endif
@@ -428,6 +447,14 @@ namespace VMUnityLib
 #if LOG_SCENE
                     Debug.Log("loadope: Unload subscene done : " + item.sceneName);
 #endif
+                }
+
+                // アンロードされたシーンがあるか？
+                hasUnloadedScene = unloading?.Any() ?? false;
+                if (hasUnloadedScene)
+                {
+                    // 未使用アセットのアンロード
+                    yield return UnloadUnusedAssets();
                 }
 
                 // MEMO:負荷分散のために、ロードは最後行う
@@ -529,6 +556,18 @@ namespace VMUnityLib
         IEnumerator SceneUnloadWait(LoadOperationSet set)
         {
             while (set.sync.isDone == false)
+            {
+                yield return null;
+            }
+        }
+
+        /// <summary>
+        /// 未使用アセットのアンロード
+        /// </summary>
+        IEnumerator UnloadUnusedAssets()
+        {
+            var unusedAssetsUnloadOp = Resources.UnloadUnusedAssets();
+            while (!unusedAssetsUnloadOp.isDone)
             {
                 yield return null;
             }
