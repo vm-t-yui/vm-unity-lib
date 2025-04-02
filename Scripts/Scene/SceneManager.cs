@@ -265,8 +265,13 @@ namespace VMUnityLib
                 yield return SceneUnloadWait(item);
             }
 
-            // 未使用アセットのアンロード
-            yield return UnloadUnusedAssets();
+            // アンロードされたシーンがあるか？
+            var hasUnloadedScene = unloading?.Any() ?? false;
+            if (hasUnloadedScene)
+            {
+                // 未使用アセットのアンロード
+                yield return UnloadUnusedAssets();
+            }
 
 #if LOG_SCENE
             Debug.Log("loadope: wait unload done");
@@ -335,10 +340,16 @@ namespace VMUnityLib
                         yield return SceneUnloadWait(item);
                     }
                 }
-                unloading.Clear();
 
-                // 未使用アセットのアンロード
-                yield return UnloadUnusedAssets();
+                // アンロードされたシーンがあるか？
+                hasUnloadedScene = unloading?.Any() ?? false;
+                if (hasUnloadedScene)
+                {
+                    // 未使用アセットのアンロード
+                    yield return UnloadUnusedAssets();
+                }
+
+                unloading.Clear();
 
 #if LOG_SCENE
                 Debug.Log("loadope: current unload done");
@@ -438,8 +449,13 @@ namespace VMUnityLib
 #endif
                 }
 
-                // 未使用アセットのアンロード
-                yield return UnloadUnusedAssets();
+                // アンロードされたシーンがあるか？
+                hasUnloadedScene = unloading?.Any() ?? false;
+                if (hasUnloadedScene)
+                {
+                    // 未使用アセットのアンロード
+                    yield return UnloadUnusedAssets();
+                }
 
                 // MEMO:負荷分散のために、ロードは最後行う
             }
