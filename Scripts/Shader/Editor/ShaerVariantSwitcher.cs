@@ -24,8 +24,8 @@ public class ShaderVariantSwitcher : IPreprocessBuildWithReport
         }
         else if(target == BuildTarget.Switch2)
         {
-            // FIXME: y.saitu Switch2用のShaderVariantCollectionを追加する(ビルド優先のため暫定対応)
-            variantCollection = AssetDatabase.LoadAssetAtPath<ShaderVariantCollection>("Assets/MyGameAssets/LibBridge/AutoShaderVariantsSwitch.shadervariants");
+            // FIXME: y.saitu Switch1のファイルをコピーして使用(ビルド優先のため暫定対応)
+            variantCollection = AssetDatabase.LoadAssetAtPath<ShaderVariantCollection>("Assets/MyGameAssets/LibBridge/AutoShaderVariantsSwitch2.shadervariants");
         }
 
         if (variantCollection == null)
