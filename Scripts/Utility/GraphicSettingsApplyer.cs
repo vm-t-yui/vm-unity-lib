@@ -98,7 +98,7 @@ public class GraphicSettingsApplyer
 #endif
         // ロード高速化のためにCPUブースト戻す
 #if (UNITY_SWITCH || UNITY_SWITCH2) && !UNITY_EDITOR  && !UNITY_STANDALONE_WIN
-        UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.Normal);
+        SwitchApis.SetCpuBoostMode(SwitchApis.CpuBoostMode.Normal);
 #endif
         Application.backgroundLoadingPriority = ThreadPriority.Low;
     }
@@ -217,7 +217,7 @@ public class GraphicSettingsApplyer
 
         // ロード高速化のためにCPUブースト
 #if (UNITY_SWITCH || UNITY_SWITCH2) && !UNITY_EDITOR  && !UNITY_STANDALONE_WIN
-        UnityEngine.Switch.Performance.SetCpuBoostMode(UnityEngine.Switch.Performance.CpuBoostMode.FastLoad);
+        SwitchApis.SetCpuBoostMode(SwitchApis.CpuBoostMode.FastLoad);
 #endif
         Application.backgroundLoadingPriority = ThreadPriority.High;
     }
