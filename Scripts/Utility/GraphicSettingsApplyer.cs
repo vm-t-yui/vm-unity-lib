@@ -93,6 +93,9 @@ public class GraphicSettingsApplyer
     {
 #if UNITY_STANDALONE_WIN
         ApplyFrameRate(SaveDataManager.Data.VSyncCount);
+#elif UNITY_SWITCH2
+        // Switch2は60固定
+        ApplyFrameRate(0, 60);
 #else
         ApplyFrameRate(0);
 #endif
@@ -114,6 +117,8 @@ public class GraphicSettingsApplyer
 #if !UNITY_STANDALONE_WIN
 #if UNITY_GAMECORE_XBOXONE || UNITY_SWITCH || YUONI_SWITCH || UNITY_PS4
         QualitySettings.vSyncCount = 2;
+#elif UNITY_SWITCH2
+        QualitySettings.vSyncCount = 0;
 #else
         QualitySettings.vSyncCount = 1;
 #endif
