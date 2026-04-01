@@ -1,4 +1,9 @@
-﻿using System.Collections;
+﻿#if YUONI_SWITCH
+#define UNITY_SWITCH
+#undef UNITY_STANDALONE_WIN
+#endif
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -114,16 +119,18 @@ public class GraphicSettingsApplyer
     {
         // プラットフォームにあわせて同期画面設定を変える
         // コンソールは固定する
-#if !UNITY_STANDALONE_WIN
-#if UNITY_GAMECORE_XBOXONE || UNITY_SWITCH || YUONI_SWITCH || UNITY_PS4
+#if UNITY_STANDALONE_WIN
+        QualitySettings.vSyncCount = vSyncCount;
+#elif YUONI_SWITCH
+        // 60FPS固定
+        QualitySettings.vSyncCount = 1;
+        targetFrameRate = 60;
+#elif UNITY_GAMECORE_XBOXONE || UNITY_SWITCH || UNITY_PS4
         QualitySettings.vSyncCount = 2;
 #elif UNITY_SWITCH2
         QualitySettings.vSyncCount = 0;
 #else
         QualitySettings.vSyncCount = 1;
-#endif
-#else
-        QualitySettings.vSyncCount = vSyncCount;
 #endif
         Application.targetFrameRate = targetFrameRate;
 
