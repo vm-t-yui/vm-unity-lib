@@ -156,6 +156,12 @@ public class GraphicSettingsApplyer
     /// </summary>
     public static void ApplyQuallitySetting(int qualityLevel, bool keepFrameRate)
     {
+        // NOTE: 
+        // Switch2はドックの抜き差しによってクオリティを更新する
+        // ・TVモード：4K、Switch本体設定側の解像度に関わらず、クオリティはLow固定
+        // ・携帯モード：FullHD、クオリティはMiddle固定
+        // 抜き差し検知は「QualityLevelAdjusterSwitch2」クラスで行う
+
         // SetResolutionでUnityがフレームレート設定吹き飛ばすのでVsync状態を保存しておいて計算しなおし
         int prevVSyncCount = QualitySettings.vSyncCount;
 
