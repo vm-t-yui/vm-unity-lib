@@ -53,7 +53,7 @@ public class SceneNameDrawer : PropertyDrawer
 
     string[] GetEnabledSceneNames()
     {
-        List<EditorBuildSettingsScene> scenes = (sceneNameAttribute.enableOnly ? EditorBuildSettings.scenes.Where(scene => scene.enabled) : EditorBuildSettings.scenes).ToList();
+        List<EditorBuildSettingsScene> scenes = (sceneNameAttribute.enableOnly ? EditorBuildSettings.globalScenes.Where(scene => scene.enabled) : EditorBuildSettings.scenes).ToList();
         HashSet<string> sceneNames = new HashSet<string>();
         scenes.ForEach(scene =>
         {
